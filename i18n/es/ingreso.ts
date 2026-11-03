@@ -8,6 +8,7 @@ export const ingreso = {
   errorGenerico: "Email o contraseña incorrectos",
   expirado: "Tu sesión expiró. Ingresá de nuevo.",
   inactiva: "Esta cuenta está desactivada. Pedile a tu socio que la active.",
+  creada: "Cuenta creada. Ingresá con tu email y la contraseña que elegiste.",
   olvido: "¿Te olvidaste la contraseña? Pedile a tu socio una contraseña inicial nueva desde Usuarios.",
   codigoTitulo: "Código de seguridad",
   codigoBajada: "Abrí la app de códigos de tu celular y escribí los 6 números de este portal.",
@@ -28,6 +29,19 @@ export const ingreso = {
     { icono: "abrir", texto: "Un click y se abre en una pestaña nueva." },
     { icono: "archivar", texto: "Lo que ya no se usa se archiva: ningún link se pierde." },
   ],
+} as const
+
+export const primeraCuenta = {
+  titulo: "Crear la primera cuenta",
+  bajada: "Todavía no hay ninguna cuenta. La que crees ahora es la de administrador; las siguientes se crean desde Usuarios.",
+  nombre: "Nombre y apellido",
+  email: "Email",
+  clave: "Contraseña",
+  claveAyuda: "Al menos 8 caracteres. Una frase larga es más fácil de recordar.",
+  repetir: "Repetí la contraseña",
+  crear: "Crear cuenta",
+  creando: "Creando…",
+  yaExiste: "Ya hay una cuenta creada. Ingresá con tu email y tu contraseña.",
 } as const
 
 export const primerIngreso = {

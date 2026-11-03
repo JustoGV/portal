@@ -5,6 +5,7 @@ import { db } from "@/db"
 import { limitesEscritura } from "@/db/schema"
 import { AuthError } from "@/lib/auth-error"
 import { type Permiso, tienePermiso } from "@/lib/permisos"
+import { hayCuentas } from "./cuentas"
 import { sesion, usuarioPorAuthId } from "./sesion"
 
 /**
@@ -21,6 +22,14 @@ export const exigir = async (permiso: Permiso) => {
   if (u.debeCambiarClave) throw new AuthError("primer-ingreso-pendiente")
   if (!tienePermiso(u, permiso)) throw new AuthError("sin-permiso")
   return { usuario: u, sesion: s }
+}
+
+/**
+ * El guard de /configurar (D-015): pasa solo mientras la base no tiene ninguna cuenta. Es el primer
+ * filtro; el que decide es el candado de crearPrimeraCuenta, que vuelve a contar dentro de la transacción.
+ */
+export const exigirSinCuentas = async () => {
+  if (await hayCuentas()) throw new AuthError("sin-permiso")
 }
 
 const ESCRITURAS_POR_MINUTO = 120

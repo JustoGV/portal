@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 
 // Toda función async exportada desde un archivo "use server" es una acción pública: tiene que empezar
 // por el guard (docs/reglas/10 §3). Este test lee los archivos y lo comprueba.
-const GUARDAS = /await (exigir|exigirEscritura)\(|await sesion\(\)/
+const GUARDAS = /await (exigir|exigirEscritura|exigirSinCuentas)\(|await sesion\(\)/
 const archivos = readdirSync("acciones").filter((f) => f.endsWith(".ts"))
 
 describe("acciones del servidor", () => {

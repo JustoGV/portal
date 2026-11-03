@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server"
 
-const PUBLICAS = ["/ingresar", "/primer-ingreso", "/api/auth"]
+const PUBLICAS = ["/ingresar", "/primer-ingreso", "/configurar", "/api/auth"]
 const COOKIES_SESION = ["portal.session_token", "__Secure-portal.session_token"]
 
 /**

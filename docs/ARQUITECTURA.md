@@ -49,7 +49,7 @@ lib/                             reglas puras: permisos, destino, url, nombre, c
 i18n/es/                         textos por módulo, sin índice
 styles/tokens.css                todos los tokens
 public/fonts/  public/lordicon/  fuentes e íconos en el repo
-scripts/crear-admin.ts           crea la primera cuenta (lo corre el dueño, nunca Claude)
+scripts/crear-admin.ts           crea una cuenta desde la terminal (lo corre el dueño, nunca Claude); la primera también sale de /configurar (D-015)
 tests/
 .github/workflows/ci.yml
 proxy.ts                         CSP con nonce por pedido y redirección optimista sin cookie (D-009)
