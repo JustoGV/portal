@@ -72,3 +72,10 @@ Dos secciones. **§1 ESTADO** se sobrescribe completa cada vez que se cierra una
 - **Archivos:** nuevos `app/(publico)/configurar/page.tsx`, `app/(publico)/configurar/FormPrimeraCuenta.tsx`, `acciones/primera-cuenta.ts`, `tests/primera-cuenta.test.ts`; cambiados `dal/cuentas.ts`, `lib/cuenta.ts`, `i18n/es/ingreso.ts`, `app/(publico)/ingresar/page.tsx`, `proxy.ts`, `docs/MEMORY.md`, `docs/PUESTA-EN-MARCHA.md`, `docs/ARQUITECTURA.md`.
 - **Verificado:** `typecheck`, `lint` y tests en verde; build de producción OK. Con una base local vacía y `next start`: `/` → `/ingresar` → `/configurar`; contraseñas distintas marcan el error; crear lleva a `/ingresar?motivo=creada`; la fila queda con rol `admin`, `debe_cambiar_clave = false` y su línea en auditoría; `/configurar` pasa a redirigir al login; el ingreso con esa cuenta llega a Proyectos con la consola limpia. Solo a 1440; no se miró a 375 ni 1920 (usa la misma tarjeta que `/primer-ingreso`).
 - **Sigue:** el socio crea su cuenta en `/configurar` apenas termina el primer deploy en Vercel. Rotar la contraseña de `neondb_owner` (pasó por el chat).
+
+### 2026-11-03 · Nombre del portal · socio
+- **Pedido:** "quiero que lo llames Portal Consultora". Antes en el mismo chat: PR #1 (primera cuenta desde la web) mergeado y desplegado en `portal-nine-olive.vercel.app`; el sitio daba 500 porque `portal_app` no tenía contraseña en Neon (ya habilitado con `pnpm clave-rol-app`; faltaba cargar `DATABASE_URL` completa en Vercel).
+- **Hecho:** `NOMBRE_VISIBLE` = "Portal Consultora" (D-016, contesta OQ-006).
+- **Archivos:** `lib/marca.ts`, `docs/MEMORY.md`, `docs/DISENO.md`, `docs/BRIEF.md`.
+- **Verificado:** `typecheck`, `lint` y tests en verde; el nombre en el login visto en el navegador.
+- **Sigue:** que el sitio publicado responda (variables de Vercel con la URL completa y Redeploy); crear la primera cuenta en `/configurar`; rotar la contraseña de `neondb_owner` una última vez (pasó por el chat).

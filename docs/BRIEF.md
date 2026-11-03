@@ -49,5 +49,5 @@ Es **solo interno**: no hay registro abierto ni usuarios de afuera. Un solo rol 
 | Dominio, o seguir con `.vercel.app` | Socio | `OQ-003` |
 | Marca: colores, logo, tipografía | Socio | `OQ-004`, `{{CONFIRMAR}}` en `docs/DISENO.md` |
 | Prioridad y fecha | Socio | `OQ-005` |
-| El nombre que se muestra en la pantalla y qué significan "CESS" y "GVG" | Socio | `OQ-006`, `{{CONFIRMAR}}` en el login y en la barra |
+| El nombre que se muestra en la pantalla y qué significan "CESS" y "GVG" | Socio | Nombre: Portal Consultora (`D-016`). CESS y GVG: sin decir |
 | Dónde y cómo se mira el portal (escritorio, teléfono, luz) | Socio | `OQ-007`, párrafo de `docs/DISENO.md` |

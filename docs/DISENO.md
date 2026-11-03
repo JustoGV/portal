@@ -15,7 +15,7 @@ Lo que sale de ahí:
 
 | Pieza | Valor |
 |---|---|
-| Nombre visible | `{{CONFIRMAR}}` (`OQ-006`) |
+| Nombre visible | Portal Consultora (`D-016`) |
 | Logo | `{{CONFIRMAR}}` (`OQ-004`) |
 | Colores | Azul índigo, tono OKLCH 264 (`D-014`): marca `#2253cf` (claro) / `#3061d8` (oscuro). Barra lateral y panel del login en azul noche `#101d38` / `#0c1220` en los dos temas |
 | Tipografía | Provisoria: **Manrope** variable, en `app/fuentes/` (`D-007`). Se cambia cuando haya marca (`OQ-004`) |
