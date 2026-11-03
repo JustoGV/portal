@@ -23,7 +23,9 @@ Lo que hay que hacer **una vez** para que el portal corra en internet. Lo hace e
 
 ## 4. La primera cuenta
 
-Con `DATABASE_URL` cargada en la terminal: `pnpm crear-admin "Nombre Apellido" persona@dominio.com`. Muestra la contraseña inicial **una vez**. Esa persona entra, cambia la contraseña, escanea el QR con la app de códigos del celular y guarda los 10 códigos de respaldo. La cuenta del otro socio se crea desde **Usuarios → Nueva cuenta**.
+**Desde la web (D-015):** con la base sin ninguna cuenta, el login manda a `/configurar`: nombre, email y una contraseña propia. Apenas existe una cuenta, esa página deja de existir. Hacelo **apenas termina el primer deploy**: mientras no hay cuentas, cualquiera que llegue a la URL podría crear la primera.
+
+**O desde la terminal:** con `DATABASE_URL` cargada: `pnpm crear-admin "Nombre Apellido" persona@dominio.com`. Muestra la contraseña inicial **una vez**. Esa persona entra, cambia la contraseña, escanea el QR con la app de códigos del celular y guarda los 10 códigos de respaldo. La cuenta del otro socio se crea desde **Usuarios → Nueva cuenta**.
 
 ## 5. Antes de usarlo de verdad
 

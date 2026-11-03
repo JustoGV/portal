@@ -31,6 +31,14 @@ export const esquemaClaveNueva = z
   .refine((d) => d.nueva === d.repetida, { message: MENSAJES_CUENTA.claveDistinta, path: ["repetida"] })
   .refine((d) => d.nueva !== d.actual, { message: MENSAJES_CUENTA.claveIgual, path: ["nueva"] })
 
+/** La primera cuenta, creada desde la web mientras la base no tiene ninguna (D-015). */
+export const esquemaPrimeraCuenta = esquemaCuenta
+  .extend({
+    clave: z.string().min(CONTRASENA_MIN, MENSAJES_CUENTA.claveCorta).max(CONTRASENA_MAX, MENSAJES_CUENTA.claveLarga),
+    repetida: z.string(),
+  })
+  .refine((d) => d.clave === d.repetida, { message: MENSAJES_CUENTA.claveDistinta, path: ["repetida"] })
+
 export const OPCIONES_INACTIVIDAD = [
   { id: "nunca", texto: "Nunca", minutos: null },
   { id: "30", texto: "30 minutos", minutos: 30 },

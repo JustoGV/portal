@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { Icono } from "@/components/iconos/Icono"
 import { Llegada } from "@/components/ui/Llegada"
+import { hayCuentas } from "@/dal/cuentas"
 import { sesion, usuarioPorAuthId } from "@/dal/sesion"
 import { ingreso as t } from "@/i18n/es/ingreso"
 import { destinoSeguro } from "@/lib/destino"
@@ -14,7 +15,10 @@ export const metadata: Metadata = { title: t.titulo }
 export default async function PaginaIngresar({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const p = await searchParams
   const volver = destinoSeguro(typeof p.volver === "string" ? p.volver : null)
-  const motivo = p.motivo === "expirado" ? "expirado" : p.motivo === "inactiva" ? "inactiva" : null
+  const motivo = p.motivo === "expirado" ? "expirado" : p.motivo === "inactiva" ? "inactiva" : p.motivo === "creada" ? "creada" : null
+
+  // Sin ninguna cuenta todavía, primero se crea la primera (D-015).
+  if (!(await hayCuentas())) redirect("/configurar")
 
   // Con sesión completa no tiene sentido ver el login.
   const s = await sesion()
@@ -55,8 +59,8 @@ export default async function PaginaIngresar({ searchParams }: { searchParams: P
             </div>
             {motivo && (
               <div className="ui-aviso in-aviso" data-tono={motivo === "inactiva" ? "warn" : "info"} role="status">
-                <Icono nombre={motivo === "inactiva" ? "alerta" : "reloj"} />
-                {motivo === "inactiva" ? t.inactiva : t.expirado}
+                <Icono nombre={motivo === "inactiva" ? "alerta" : motivo === "creada" ? "tilde" : "reloj"} />
+                {motivo === "inactiva" ? t.inactiva : motivo === "creada" ? t.creada : t.expirado}
               </div>
             )}
             <FormIngreso volver={volver} />
