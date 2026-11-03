@@ -1,0 +1,30 @@
+export const grupos = {
+  titulo: "Grupos",
+  bajada: "Ordenan los proyectos. Se crean también desde el formulario de un proyecto.",
+  nuevo: "Nuevo grupo",
+  estado: "Estado",
+  activos: "Activos",
+  archivados: "Archivados",
+  tabla: "Lista de grupos",
+  colNombre: "Nombre",
+  colProyectos: "Proyectos",
+  colAcciones: "Acciones",
+  renombrar: "Renombrar",
+  archivar: "Archivar",
+  restaurar: "Restaurar",
+  vacioTitulo: "Todavía no hay grupos",
+  vacioTexto: "Un grupo junta proyectos parecidos, por ejemplo «Clientes» o «Internos».",
+  sinArchivados: "No hay grupos archivados",
+  tituloNuevo: "Nuevo grupo",
+  tituloRenombrar: "Renombrar grupo",
+  nombre: "Nombre del grupo",
+  guardar: "Guardar grupo",
+  guardado: "Grupo guardado",
+  archivarTitulo: (n: string) => `¿Archivar «${n}»?`,
+  archivarTexto: (cuantos: number) =>
+    cuantos > 0
+      ? `Deja de ofrecerse al cargar un proyecto. Sus ${cuantos === 1 ? "proyecto sigue" : `${cuantos} proyectos siguen`} mostrándolo. Lo podés restaurar cuando quieras.`
+      : "Deja de ofrecerse al cargar un proyecto. Lo podés restaurar cuando quieras.",
+  archivado: "Grupo archivado",
+  restaurado: "Grupo restaurado",
+} as const

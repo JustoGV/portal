@@ -1,0 +1,999 @@
+/* Componentes comunes (docs/reglas/05). Prefijo ui- para no chocar con nada (docs/reglas/03 §7).
+   El hover vive bajo (hover: hover) and (pointer: fine); el apretado, afuera. */
+@layer componentes {
+  /* ---------- Íconos ---------- */
+  .ui-icono {
+    flex: none;
+    display: block;
+  }
+
+  /* ---------- Botón (05 §1) ---------- */
+  .ui-boton {
+    --fondo: transparent;
+    --borde: var(--sys-borde-control);
+    --txt: var(--sys-texto-1);
+    --txt-lleno: var(--sys-marca-texto);
+    --relleno: var(--sys-marca);
+    --linea: var(--sys-marca);
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--sys-toque);
+    padding: 0 var(--sys-esp-5);
+    border: 1px solid var(--borde);
+    border-radius: var(--sys-radio-s);
+    background: var(--fondo);
+    font: inherit;
+    font-size: var(--sys-tipo-l);
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
+  }
+  .ui-boton--primaria {
+    --fondo: var(--sys-marca);
+    --borde: var(--sys-marca);
+    --txt: var(--sys-marca-texto);
+    --relleno: var(--sys-marca-hover);
+    --linea: var(--sys-marca-texto);
+  }
+  .ui-boton--peligro {
+    --borde: var(--sys-danger);
+    --txt: var(--sys-danger);
+    --txt-lleno: var(--sys-danger-solido-texto);
+    --relleno: var(--sys-danger-solido);
+    --linea: var(--sys-danger-solido);
+  }
+  .ui-boton--sutil {
+    --borde: transparent;
+    padding: 0 var(--sys-esp-3);
+  }
+  .ui-boton__relleno,
+  .ui-boton__linea {
+    position: absolute;
+    left: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+  .ui-boton__relleno {
+    inset: 0;
+    background: var(--relleno);
+    transform: scaleY(0);
+    transform-origin: 50% 100%;
+  }
+  .ui-boton__linea {
+    bottom: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--linea);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+  }
+  .ui-boton__contenido {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sys-esp-2);
+    color: var(--txt);
+    transition: color var(--sys-dur-1) var(--sys-ease);
+  }
+  .ui-boton[data-lleno] .ui-boton__contenido {
+    color: var(--txt-lleno);
+  }
+  .ui-boton--primaria[data-lleno] .ui-boton__contenido {
+    color: var(--sys-marca-texto);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .ui-boton--sutil[data-hovered] {
+      background: var(--sys-capa-2);
+    }
+  }
+  .ui-boton--sutil[data-pressed] {
+    background: var(--sys-capa-3);
+  }
+  .ui-boton[data-disabled] {
+    --fondo: transparent;
+    --borde: var(--sys-borde);
+    --txt: var(--sys-texto-3);
+    cursor: not-allowed;
+  }
+  .ui-boton--primaria[data-disabled] {
+    --fondo: var(--sys-capa-3);
+  }
+  .ui-boton[data-cargando] {
+    cursor: progress;
+  }
+  .ui-boton[data-cargando] .ui-boton__contenido {
+    opacity: 0.8;
+  }
+
+  /* ---------- Botón de solo ícono ---------- */
+  .ui-boton-icono {
+    display: inline-grid;
+    place-items: center;
+    width: var(--sys-toque);
+    height: var(--sys-toque);
+    flex: none;
+    border: 1px solid transparent;
+    border-radius: var(--sys-radio-s);
+    background: transparent;
+    color: var(--sys-texto-2);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color var(--sys-dur-1) var(--sys-ease), color var(--sys-dur-1) var(--sys-ease);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .ui-boton-icono[data-hovered] {
+      background: var(--sys-capa-3);
+      color: var(--sys-texto-1);
+    }
+    .ui-boton-icono--peligro[data-hovered] {
+      color: var(--sys-danger);
+    }
+  }
+  .ui-boton-icono[data-pressed] {
+    background: var(--sys-capa-3);
+  }
+  .ui-boton-icono[data-disabled] {
+    color: var(--sys-texto-3);
+    cursor: not-allowed;
+  }
+
+  /* ---------- Tooltip (05 §6) ---------- */
+  .ui-pista {
+    max-width: 16rem;
+    padding: var(--sys-esp-2) var(--sys-esp-3);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-texto-1);
+    color: var(--sys-capa);
+    font-size: var(--sys-tipo-s);
+    font-weight: 600;
+    line-height: 1.3;
+    transform-origin: var(--trigger-anchor-point, 50% 100%);
+  }
+  .ui-pista[data-entering] {
+    animation: ui-pista-entra 150ms var(--sys-ease);
+  }
+  .ui-pista[data-exiting] {
+    animation: ui-pista-entra 100ms var(--sys-ease) reverse;
+  }
+  .ui-pista__flecha svg {
+    display: block;
+    fill: var(--sys-texto-1);
+  }
+  .ui-pista[data-placement="bottom"] .ui-pista__flecha svg {
+    transform: rotate(180deg);
+  }
+  .ui-pista[data-placement="left"] .ui-pista__flecha svg {
+    transform: rotate(-90deg);
+  }
+  .ui-pista[data-placement="right"] .ui-pista__flecha svg {
+    transform: rotate(90deg);
+  }
+  @keyframes ui-pista-entra {
+    from {
+      opacity: 0;
+      transform: translateY(var(--pista-desde, 8px)) scale(0.95);
+      filter: blur(4px);
+    }
+  }
+  .ui-pista[data-placement="bottom"] {
+    --pista-desde: -8px;
+  }
+
+  /* ---------- Campo con etiqueta flotante (05 §2, 06) ---------- */
+  .ui-campo {
+    display: grid;
+    min-inline-size: 0;
+  }
+  .ui-campo__control {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 3.5rem;
+    border: 1px solid var(--sys-borde-control);
+    border-radius: var(--sys-radio-s);
+    background: var(--sys-capa-2);
+    overflow: hidden;
+    transition: border-color var(--sys-dur-1) var(--sys-ease);
+  }
+  .ui-campo__control:focus-within {
+    border-color: var(--sys-marca-borde);
+    background: var(--sys-capa);
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+  }
+  .ui-campo[data-error] .ui-campo__control {
+    border-color: var(--sys-danger);
+  }
+  .ui-campo__icono {
+    position: absolute;
+    left: var(--sys-esp-3);
+    color: var(--sys-texto-2);
+    pointer-events: none;
+  }
+  .ui-campo__entrada {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    min-height: 3.5rem;
+    padding: 1.4rem var(--sys-esp-3) 0.35rem;
+    border: 0;
+    background: transparent;
+    color: var(--sys-texto-1);
+    font: inherit;
+    font-size: var(--sys-tipo-l); /* 16 px: en iPhone, menos hace zoom */
+  }
+  .ui-campo__entrada:focus-visible {
+    outline: 0 solid transparent; /* el anillo lo dibuja el control entero */
+  }
+  .ui-campo[data-con-icono] .ui-campo__entrada,
+  .ui-campo[data-con-icono] .ui-campo__etiqueta {
+    padding-left: 2.75rem;
+  }
+  textarea.ui-campo__entrada {
+    resize: vertical;
+    min-height: 6rem;
+    padding-top: 1.6rem;
+    line-height: 1.5;
+  }
+  .ui-campo__etiqueta {
+    position: absolute;
+    left: 0;
+    right: 3rem;
+    top: 1.05rem;
+    padding-left: var(--sys-esp-3);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-l);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+    transform-origin: 0 0;
+    transition: transform var(--sys-dur-3) var(--sys-ease);
+  }
+  .ui-campo__entrada:focus ~ .ui-campo__etiqueta,
+  .ui-campo__entrada:not(:placeholder-shown) ~ .ui-campo__etiqueta,
+  .ui-campo[data-arriba] .ui-campo__etiqueta {
+    transform: translateY(-0.6rem) scale(0.8);
+  }
+  .ui-campo__obligatorio {
+    color: var(--sys-danger);
+  }
+  .ui-campo__tilde {
+    position: absolute;
+    right: var(--sys-esp-3);
+    color: var(--sys-ok);
+    pointer-events: none;
+  }
+  .ui-campo__linea {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: var(--sys-texto-3);
+    transform: scaleX(var(--progreso, 0));
+    transform-origin: 0 50%;
+    transition: transform var(--sys-dur-2) var(--sys-ease);
+  }
+  .ui-campo[data-ok] .ui-campo__linea {
+    background: var(--sys-marca);
+  }
+  .ui-campo[data-error] .ui-campo__linea {
+    background: var(--sys-danger);
+  }
+  .ui-campo__pie {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--sys-esp-3);
+    min-height: 1.75rem; /* la línea de error está siempre reservada */
+    padding: var(--sys-esp-1) var(--sys-esp-1) 0;
+    font-size: var(--sys-tipo-s);
+    line-height: 1.35;
+  }
+  .ui-campo__ayuda {
+    color: var(--sys-texto-2);
+  }
+  .ui-campo__error {
+    color: var(--sys-danger);
+    font-weight: 600;
+  }
+  .ui-campo__contador {
+    flex: none;
+    margin-left: auto;
+    color: var(--sys-texto-2);
+  }
+
+  /* ---------- Combobox, select, lista (05 §3) ---------- */
+  .ui-combo__boton {
+    position: absolute;
+    right: var(--sys-esp-1);
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 0;
+    border-radius: var(--sys-radio-s);
+    background: transparent;
+    color: var(--sys-texto-2);
+    cursor: pointer;
+  }
+  .ui-select__boton {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sys-esp-3);
+    width: 100%;
+    min-height: 3.5rem;
+    padding: 1.4rem var(--sys-esp-3) 0.35rem;
+    border: 0;
+    background: transparent;
+    color: var(--sys-texto-1);
+    font: inherit;
+    font-size: var(--sys-tipo-l);
+    text-align: left;
+    cursor: pointer;
+  }
+  .ui-campo[data-con-icono] .ui-select__boton {
+    padding-left: 2.75rem;
+  }
+  .ui-select__boton:focus-visible {
+    outline: 0 solid transparent;
+  }
+  .ui-popover {
+    min-width: var(--trigger-width);
+    max-width: 92vw;
+    overflow: auto;
+    border: 1px solid var(--sys-borde-2);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa-2);
+  }
+  .ui-popover[data-entering] {
+    animation: ui-popover-entra var(--sys-dur-2) var(--sys-ease);
+  }
+  @keyframes ui-popover-entra {
+    from {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.98);
+    }
+  }
+  .ui-lista {
+    padding: var(--sys-esp-1);
+    outline: 0 solid transparent;
+  }
+  .ui-lista__opcion {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-2);
+    min-height: var(--sys-toque);
+    padding: 0 var(--sys-esp-3);
+    border-radius: var(--sys-radio-s);
+    color: var(--sys-texto-1);
+    cursor: pointer;
+    outline: 0 solid transparent;
+  }
+  .ui-lista__opcion[data-focused] {
+    background: var(--sys-marca-suave);
+  }
+  .ui-lista__opcion[data-selected] {
+    font-weight: 600;
+  }
+  .ui-lista__opcion .ui-lista__tilde {
+    margin-left: auto;
+    color: var(--sys-marca-tinta);
+    visibility: hidden;
+  }
+  .ui-lista__opcion[data-selected] .ui-lista__tilde {
+    visibility: visible;
+  }
+  .ui-lista__crear {
+    color: var(--sys-marca-tinta);
+    font-weight: 600;
+  }
+  .ui-lista__vacia {
+    padding: var(--sys-esp-3);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+  }
+
+  /* ---------- Diálogo en tarjeta (05 §4) ---------- */
+  .ui-velo {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: grid;
+    place-items: center;
+    padding: var(--sys-esp-4);
+    background: var(--sys-velo);
+    overflow-y: auto;
+  }
+  .ui-dialogo {
+    width: min(100%, var(--ancho, 34rem));
+    max-height: calc(100dvh - 2rem);
+    overflow: auto;
+    border-radius: var(--sys-radio-xl);
+    background: var(--sys-capa);
+    box-shadow: var(--sys-sombra);
+    outline: 0 solid transparent;
+    container-type: inline-size;
+  }
+  .ui-dialogo__interior {
+    padding: var(--sys-esp-6);
+    outline: 0 solid transparent;
+  }
+  .ui-dialogo__cabecera {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--sys-esp-4);
+    margin-bottom: var(--sys-esp-5);
+  }
+  .ui-dialogo__titulo {
+    font-size: var(--sys-tipo-xl);
+    font-weight: 700;
+  }
+  .ui-dialogo__bajada {
+    margin-top: var(--sys-esp-1);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+  }
+  .ui-dialogo__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--sys-esp-3);
+    margin-top: var(--sys-esp-5);
+  }
+  .ui-dialogo__campos {
+    display: grid;
+    gap: var(--sys-esp-2);
+  }
+  @container (min-width: 40rem) {
+    .ui-dialogo__campos--dos {
+      grid-template-columns: 1fr 1fr;
+      column-gap: var(--sys-esp-4);
+    }
+    .ui-dialogo__campos--dos > .ui-campo--ancho {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* ---------- Tarjeta de resultado (05 §5) ---------- */
+  .ui-resultado-velo {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    background: var(--sys-velo);
+  }
+  .ui-resultado {
+    position: fixed;
+    z-index: 71;
+    top: 50%;
+    left: 50%;
+    width: min(calc(100vw - 2rem), 24rem);
+    translate: -50% -50%;
+    padding: var(--sys-esp-7) var(--sys-esp-6) var(--sys-esp-6);
+    overflow: hidden;
+    border-radius: var(--sys-radio-xl);
+    background: var(--sys-capa);
+    box-shadow: var(--sys-sombra);
+    text-align: center;
+    outline: 0 solid transparent;
+  }
+  .ui-resultado__icono {
+    display: grid;
+    place-items: center;
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto var(--sys-esp-4);
+    border-radius: var(--sys-radio-full);
+    border: 2px solid currentColor;
+  }
+  .ui-resultado[data-tipo="guardado"] .ui-resultado__icono {
+    color: var(--sys-ok);
+    background: var(--sys-ok-bg);
+  }
+  .ui-resultado[data-tipo="error"] .ui-resultado__icono {
+    color: var(--sys-danger);
+    background: var(--sys-danger-bg);
+  }
+  .ui-resultado[data-tipo="dato-mal"] .ui-resultado__icono {
+    color: var(--sys-warn);
+    background: var(--sys-warn-bg);
+  }
+  .ui-resultado__titulo {
+    font-size: var(--sys-tipo-xl);
+    font-weight: 700;
+  }
+  .ui-resultado__texto {
+    margin-top: var(--sys-esp-2);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+  }
+  .ui-resultado__acciones {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--sys-esp-5);
+  }
+  .ui-resultado__tiempo {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--sys-marca);
+    transform-origin: 0 50%;
+  }
+
+  /* ---------- Etiqueta de estado (05 §8) ---------- */
+  .ui-etiqueta {
+    --tono: var(--sys-texto-2);
+    --punto: var(--sys-texto-3);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sys-esp-2);
+    padding: 0.125rem 0.625rem;
+    border: 1px solid var(--sys-borde-2);
+    border-radius: var(--sys-radio-full);
+    color: var(--tono);
+    font-size: var(--sys-tipo-s);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .ui-etiqueta[data-tono="ok"] {
+    --tono: var(--sys-ok);
+    --punto: var(--sys-ok-solido);
+    border-color: var(--sys-ok-borde);
+  }
+  .ui-etiqueta[data-tono="warn"] {
+    --tono: var(--sys-warn);
+    --punto: var(--sys-warn-solido);
+    border-color: var(--sys-warn-borde);
+  }
+  .ui-etiqueta[data-tono="danger"] {
+    --tono: var(--sys-danger);
+    --punto: var(--sys-danger-solido);
+    border-color: var(--sys-danger-borde);
+  }
+  .ui-etiqueta__punto {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: var(--sys-radio-full);
+    background: var(--punto);
+  }
+  /* El punto late una vez al entrar su fila y cada vez que el mouse entra en la fila. Nunca en bucle. */
+  .llega .ui-etiqueta__punto {
+    animation: ui-latido 900ms var(--sys-ease) 600ms 1 backwards;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    tr:hover .ui-etiqueta__punto {
+      animation: ui-latido 900ms var(--sys-ease) 1;
+    }
+  }
+  @keyframes ui-latido {
+    0% {
+      box-shadow: 0 0 0 0 var(--punto);
+    }
+    100% {
+      box-shadow: 0 0 0 6px transparent;
+    }
+  }
+
+  /* ---------- Página ---------- */
+  .ui-pagina {
+    width: 100%;
+    max-width: 96rem;
+    margin: 0 auto;
+    padding: var(--sys-esp-7) var(--sys-esp-6) var(--sys-esp-9);
+    container-type: inline-size;
+  }
+  .ui-pagina__cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--sys-esp-4);
+    margin-bottom: var(--sys-esp-6);
+    padding-bottom: var(--sys-esp-5);
+    border-bottom: 1px solid var(--sys-borde);
+  }
+  .ui-pagina__titulo {
+    font-size: var(--sys-tipo-3xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .ui-pagina__bajada {
+    margin-top: var(--sys-esp-1);
+    color: var(--sys-texto-2);
+  }
+  .ui-seccion {
+    margin-top: var(--sys-esp-8);
+  }
+  .ui-seccion__titulo {
+    font-size: var(--sys-tipo-xl);
+    font-weight: 700;
+  }
+  .ui-seccion__bajada {
+    margin: var(--sys-esp-1) 0 var(--sys-esp-4);
+    color: var(--sys-texto-2);
+  }
+  .ui-tarjeta {
+    padding: var(--sys-esp-6);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-l);
+    background: var(--sys-capa);
+  }
+  @container (max-width: 40rem) {
+    .ui-pagina {
+      padding: var(--sys-esp-6) var(--sys-esp-4) var(--sys-esp-9);
+    }
+    .ui-pagina__titulo {
+      font-size: var(--sys-tipo-2xl);
+    }
+  }
+
+  /* ---------- Entrada de una pantalla (08 §2.2): una vez, en CSS, desde el primer cuadro ---------- */
+  .llega [data-llega] {
+    animation: ui-llegar 500ms var(--sys-ease) backwards;
+    animation-delay: calc(var(--llega-i, 0) * 80ms);
+  }
+  @keyframes ui-llegar {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+  }
+
+  /* ---------- Barra de herramientas sobre la tabla ---------- */
+  .ui-herramientas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--sys-esp-3) var(--sys-esp-4);
+    margin-bottom: var(--sys-esp-4);
+  }
+  .ui-herramientas__busqueda {
+    flex: 1 1 18rem;
+    max-width: 32rem;
+  }
+  .ui-herramientas__filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sys-esp-3);
+    padding-top: 0.375rem;
+  }
+
+  /* ---------- Segmentos (filtros, 05 §11, 07 §4) ---------- */
+  .ui-segmentos {
+    position: relative;
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: 0.25rem;
+    border-radius: calc(var(--sys-radio-s) + 0.25rem);
+    background: var(--sys-capa-3);
+  }
+  .ui-segmentos__relleno {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: var(--sys-radio-s);
+    background: var(--sys-marca);
+    pointer-events: none;
+  }
+  .ui-segmentos__opcion {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sys-esp-2);
+    min-height: 2.25rem;
+    padding: 0 var(--sys-esp-3);
+    border-radius: var(--sys-radio-s);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color var(--sys-dur-1) var(--sys-ease);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .ui-segmentos__opcion:hover {
+      color: var(--sys-texto-1);
+    }
+  }
+  .ui-segmentos__opcion[aria-current="true"],
+  .ui-segmentos__opcion[aria-current="page"] {
+    color: var(--sys-marca-texto);
+  }
+  .ui-segmentos__cuenta {
+    min-width: 1.5rem;
+    padding: 0 0.375rem;
+    border: 1px solid currentColor;
+    border-radius: var(--sys-radio-full);
+    font-size: var(--sys-tipo-xs);
+    line-height: 1.35;
+    text-align: center;
+  }
+
+  /* ---------- Tabla (07 §1) ---------- */
+  .ui-tabla-caja {
+    position: relative;
+    overflow-x: auto;
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-l);
+    background: var(--sys-capa);
+    container-type: inline-size;
+    transition: opacity var(--sys-dur-1) var(--sys-ease);
+  }
+  .ui-tabla-caja[aria-busy="true"] {
+    opacity: 0.8;
+  }
+  .ui-tabla {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  .ui-tabla th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: var(--sys-esp-3) var(--sys-esp-4);
+    border-bottom: 1px solid var(--sys-borde-2);
+    background: var(--sys-capa-2);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .ui-tabla td {
+    padding: var(--sys-esp-2) var(--sys-esp-4);
+    border-bottom: 1px solid var(--sys-borde);
+    text-align: center;
+    vertical-align: middle;
+  }
+  /* Todas las filas del mismo alto, tengan o no acciones. */
+  .ui-tabla tbody tr {
+    height: 3.75rem;
+  }
+  .ui-tabla tbody tr:last-child td {
+    border-bottom: 0;
+  }
+  .ui-tabla td.ui-tabla__acciones {
+    text-align: right;
+    white-space: nowrap;
+    width: 1%;
+  }
+  .ui-tabla__fila-acciones {
+    display: inline-flex;
+    gap: var(--sys-esp-1);
+  }
+  .ui-tabla__secundario {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .ui-tabla tbody tr:hover td {
+      background: var(--sys-marca-suave);
+    }
+  }
+  @container (max-width: 60rem) {
+    .ui-tabla [data-prioridad="3"] {
+      display: none;
+    }
+  }
+  @container (max-width: 38rem) {
+    .ui-tabla [data-prioridad="2"] {
+      display: none;
+    }
+    .ui-tabla th,
+    .ui-tabla td {
+      padding-left: var(--sys-esp-3);
+      padding-right: var(--sys-esp-3);
+    }
+    .ui-tabla th {
+      white-space: normal;
+    }
+  }
+  /* Entrada en cascada (07 §2): una vez por tabla montada. */
+  .llega.ui-tabla-caja {
+    animation: ui-tabla-entra 400ms var(--sys-ease) backwards;
+  }
+  .llega .ui-tabla tbody tr {
+    animation: ui-fila-entra 500ms var(--sys-ease) backwards;
+    animation-delay: calc(min(var(--i, 0), 14) * var(--paso, 60ms));
+  }
+  @keyframes ui-tabla-entra {
+    from {
+      opacity: 0;
+      transform: scale(0.98);
+    }
+  }
+  @keyframes ui-fila-entra {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+  }
+
+  /* ---------- Paginación (07 §3) ---------- */
+  .ui-paginacion {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sys-esp-3) var(--sys-esp-4);
+    margin-top: var(--sys-esp-4);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+  }
+  .ui-paginacion__paginas {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-1);
+  }
+  .ui-paginacion__pagina {
+    display: inline-grid;
+    place-items: center;
+    min-width: var(--sys-toque);
+    height: var(--sys-toque);
+    padding: 0 var(--sys-esp-2);
+    border: 1px solid transparent;
+    border-radius: var(--sys-radio-s);
+    color: var(--sys-texto-1);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .ui-paginacion__pagina:hover {
+      background: var(--sys-capa-3);
+    }
+  }
+  .ui-paginacion__pagina[aria-current="page"] {
+    border-color: var(--sys-marca);
+    background: var(--sys-marca);
+    color: var(--sys-marca-texto);
+  }
+  .ui-paginacion__pagina[aria-disabled="true"] {
+    color: var(--sys-texto-3);
+    pointer-events: none;
+  }
+
+  /* ---------- Vacío, skeleton, aviso ---------- */
+  .ui-vacio {
+    display: grid;
+    justify-items: center;
+    gap: var(--sys-esp-2);
+    padding: var(--sys-esp-9) var(--sys-esp-4);
+    color: var(--sys-texto-2);
+    text-align: center;
+  }
+  .ui-vacio__icono {
+    color: var(--sys-marca-tinta);
+    margin-bottom: var(--sys-esp-2);
+  }
+  .ui-vacio__titulo {
+    color: var(--sys-texto-1);
+    font-size: var(--sys-tipo-l);
+    font-weight: 700;
+  }
+  .ui-vacio__accion {
+    margin-top: var(--sys-esp-3);
+  }
+  .ui-skeleton {
+    display: block;
+    border-radius: var(--sys-radio-s);
+    background: var(--sys-capa-3);
+  }
+  .ui-aviso {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sys-esp-3);
+    padding: var(--sys-esp-3) var(--sys-esp-4);
+    border: 1px solid var(--sys-info-borde);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-info-bg);
+    color: var(--sys-texto-1);
+    font-size: var(--sys-tipo-m);
+  }
+  .ui-aviso[data-tono="warn"] {
+    border-color: var(--sys-warn-borde);
+    background: var(--sys-warn-bg);
+  }
+  .ui-aviso[data-tono="danger"] {
+    border-color: var(--sys-danger-borde);
+    background: var(--sys-danger-bg);
+  }
+  .ui-aviso[data-tono="ok"] {
+    border-color: var(--sys-ok-borde);
+    background: var(--sys-ok-bg);
+  }
+  .ui-aviso .ui-icono {
+    margin-top: 1px;
+  }
+  .ui-mono {
+    font-family: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace;
+    letter-spacing: 0.04em;
+  }
+
+  /* ---------- Enlace con forma de texto (acciones secundarias dentro de un texto) ---------- */
+  .ui-enlace {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--sys-toque);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--sys-marca-tinta);
+    font: inherit;
+    font-size: var(--sys-tipo-m);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  /* ---------- Cargador de ruta (05 §13): solo CSS ---------- */
+  .ui-cargando {
+    display: grid;
+    place-items: center;
+    gap: var(--sys-esp-3);
+    min-height: 50vh;
+    color: var(--sys-texto-2);
+  }
+  .ui-cargando__barra {
+    position: relative;
+    width: 8rem;
+    height: 3px;
+    overflow: hidden;
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-capa-3);
+  }
+  .ui-cargando__barra::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 40%;
+    border-radius: inherit;
+    background: var(--sys-marca);
+    animation: ui-cargando 1.1s var(--sys-ease) infinite;
+  }
+  @keyframes ui-cargando {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(250%);
+    }
+  }
+
+  /* ---------- Movimiento reducido: estados finales, sin movimiento ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    .llega [data-llega],
+    .llega.ui-tabla-caja,
+    .llega .ui-tabla tbody tr,
+    .llega .ui-etiqueta__punto,
+    .ui-pista[data-entering],
+    .ui-pista[data-exiting],
+    .ui-popover[data-entering] {
+      animation: none;
+    }
+    .ui-cargando__barra::after {
+      animation-duration: 3s;
+    }
+  }
+}
+
+@layer modulos {
+  .gr-nombre {
+    font-weight: 700;
+  }
+}

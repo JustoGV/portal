@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791904398759,
+      "tag": "0000_extensiones_roles",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791904399676,
+      "tag": "0001_tablas",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791904400488,
+      "tag": "0002_permisos_triggers",
+      "breakpoints": true
+    }
+  ]
+}

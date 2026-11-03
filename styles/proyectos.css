@@ -1,0 +1,34 @@
+@layer modulos {
+  .pr-abrir {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sys-esp-2);
+    min-height: var(--sys-toque);
+    color: var(--sys-texto-1);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .pr-abrir .ui-icono {
+    color: var(--sys-texto-2);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .pr-abrir:hover .pr-abrir__nombre {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .pr-abrir:hover,
+    .pr-abrir:hover .ui-icono {
+      color: var(--sys-marca-tinta);
+    }
+  }
+  .pr-celda-corta {
+    max-width: 18rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pr-filtros-esqueleto {
+    display: flex;
+    gap: var(--sys-esp-3);
+  }
+}

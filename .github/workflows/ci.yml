@@ -1,0 +1,60 @@
+# typecheck, lint y test en cada PR, con una rama temporal de Neon creada desde una rama vacía
+# (sin personas ni cuentas) y borrada al terminar (docs/reglas/11 §6). Secretos: NEON_API_KEY.
+# Variables: NEON_PROJECT_ID, NEON_RAMA_VACIA (la rama vacía de la que se copia, por defecto "ci-vacia").
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Auditoría de dependencias de producción
+        run: pnpm audit --prod --audit-level high
+      - run: pnpm typecheck
+      - run: pnpm lint
+
+      - name: Crear la rama temporal de Neon
+        id: rama
+        uses: neondatabase/create-branch-action@v6
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          parent_branch: ${{ vars.NEON_RAMA_VACIA || 'ci-vacia' }}
+          branch_name: ci-${{ github.run_id }}-${{ github.run_attempt }}
+          api_key: ${{ secrets.NEON_API_KEY }}
+
+      - name: Migrar y testear contra la rama temporal
+        env:
+          DATABASE_URL_DIRECT: ${{ steps.rama.outputs.db_url }}
+        run: |
+          echo "::add-mask::$DATABASE_URL_DIRECT"
+          pnpm db:migrate
+          pnpm test
+
+      - name: Borrar la rama temporal
+        if: always() && steps.rama.outputs.branch_id
+        uses: neondatabase/delete-branch-action@v3
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch: ${{ steps.rama.outputs.branch_id }}
+          api_key: ${{ secrets.NEON_API_KEY }}

@@ -1,0 +1,25 @@
+@layer modulos {
+  .us-clave {
+    margin-top: var(--sys-esp-4);
+    padding: var(--sys-esp-4);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa-3);
+    font-size: var(--sys-tipo-xl);
+    text-align: center;
+    word-break: break-all;
+  }
+  .us-inactividad {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--sys-esp-4);
+    max-width: 36rem;
+  }
+  .us-inactividad .ui-campo {
+    flex: 1 1 16rem;
+  }
+  /* El botón al lado de un campo queda a la altura del control, no del bloque (05 §1). */
+  .us-inactividad .ui-boton {
+    min-height: 3.5rem;
+  }
+}

@@ -1,0 +1,359 @@
+/* Barra lateral (docs/reglas/02 B2, 05 §12). La única @media estructural: en pantalla chica se abre encima. */
+@layer componentes {
+  .bl-marco {
+    --ancho-barra: var(--sys-barra);
+    min-height: 100dvh;
+  }
+  .bl-marco[data-cerrada] {
+    --ancho-barra: var(--sys-barra-cerrada);
+  }
+  .bl {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sys-esp-2);
+    width: var(--ancho-barra);
+    padding: var(--sys-esp-4) var(--sys-esp-3);
+    border-right: 1px solid var(--sys-barra-borde);
+    background: var(--sys-barra-fondo);
+    color: var(--sys-barra-texto-1);
+    /* Adentro de la barra el anillo de foco es el claro: el oscuro no se ve sobre azul noche. */
+    --sys-foco: var(--sys-barra-foco);
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  .bl-contenido {
+    margin-left: var(--ancho-barra);
+    min-width: 0;
+  }
+  .bl__marca {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    min-height: var(--sys-toque);
+    padding: 0 var(--sys-esp-2) var(--sys-esp-3);
+    margin-bottom: var(--sys-esp-2);
+    border-bottom: 1px solid var(--sys-barra-borde);
+  }
+  .bl__logo {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--sys-radio-s);
+    background: var(--sys-marca);
+    color: var(--sys-marca-texto);
+  }
+  .bl__nombre {
+    color: var(--sys-barra-texto-1);
+    letter-spacing: -0.01em;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 700;
+  }
+  .bl__buscar {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    min-height: var(--sys-toque);
+    padding: 0 var(--sys-esp-3);
+    border: 1px solid var(--sys-barra-borde-control);
+    border-radius: var(--sys-radio-s);
+    background: var(--sys-barra-capa);
+    color: var(--sys-barra-texto-2);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--sys-dur-1) var(--sys-ease);
+  }
+  .bl__buscar .bl__texto {
+    flex: 1;
+  }
+  .bl__tecla {
+    padding: 0 var(--sys-esp-2);
+    border: 1px solid var(--sys-barra-borde-control);
+    border-radius: 6px;
+    color: var(--sys-barra-texto-2);
+    font: inherit;
+    font-size: var(--sys-tipo-xs);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .bl__nav {
+    flex: 1;
+    margin-top: var(--sys-esp-2);
+  }
+  .bl__lista,
+  .bl__grupo-cuerpo {
+    display: grid;
+    gap: 2px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .bl__grupo-cuerpo {
+    overflow: hidden;
+    padding-left: var(--sys-esp-4);
+  }
+  .bl__item {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    width: 100%;
+    min-height: var(--sys-toque);
+    padding: 0 var(--sys-esp-3);
+    border: 0;
+    border-radius: var(--sys-radio-s);
+    background: transparent;
+    color: var(--sys-barra-texto-2);
+    font: inherit;
+    font-weight: 600;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color var(--sys-dur-1) var(--sys-ease), color var(--sys-dur-1) var(--sys-ease);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .bl__item:hover,
+    .bl__buscar:hover {
+      background: var(--sys-barra-capa);
+      color: var(--sys-barra-texto-1);
+    }
+  }
+  .bl__item:active {
+    background: var(--sys-barra-capa);
+  }
+  .bl__item[aria-current="page"] {
+    background: var(--sys-barra-activo);
+    color: var(--sys-barra-texto-1);
+  }
+  .bl__item[aria-current="page"] .ui-icono {
+    color: var(--sys-barra-acento);
+  }
+  .bl__item:disabled {
+    color: var(--sys-barra-texto-2);
+    cursor: progress;
+  }
+  .bl__texto {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .bl__pie {
+    display: grid;
+    gap: 2px;
+    padding-top: var(--sys-esp-3);
+    border-top: 1px solid var(--sys-barra-borde);
+  }
+  .bl__usuario {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    min-height: var(--sys-toque);
+    padding: 0 var(--sys-esp-3);
+    color: var(--sys-barra-texto-1);
+    font-weight: 600;
+  }
+  .bl__usuario .ui-icono {
+    color: var(--sys-barra-acento);
+  }
+  .bl__tapa {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  .bl-marco[data-cerrada] .bl__texto,
+  .bl-marco[data-cerrada] .bl__tecla,
+  .bl-marco[data-cerrada] .bl__nombre {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .bl-marco[data-cerrada] .bl__grupo-cuerpo {
+    padding-left: 0;
+  }
+  .bl-abrir,
+  .bl__cerrar-movil {
+    display: none;
+  }
+
+  @media (max-width: 63.99rem) {
+    .bl {
+      width: min(var(--sys-barra), 85vw);
+      transform: translateX(-100%);
+      visibility: hidden;
+      transition: transform var(--sys-dur-2) var(--sys-ease), visibility 0s linear var(--sys-dur-2);
+    }
+    .bl-marco[data-movil] .bl {
+      transform: none;
+      visibility: visible;
+      transition: transform var(--sys-dur-2) var(--sys-ease), visibility 0s;
+    }
+    .bl-contenido {
+      margin-left: 0;
+      padding-top: var(--sys-esp-9);
+    }
+    .bl-velo {
+      position: fixed;
+      inset: 0;
+      z-index: 39;
+      background: var(--sys-velo);
+    }
+    .bl-abrir {
+      position: fixed;
+      top: var(--sys-esp-3);
+      left: var(--sys-esp-3);
+      z-index: 30;
+      display: grid;
+      place-items: center;
+      width: var(--sys-toque);
+      height: var(--sys-toque);
+      border: 1px solid var(--sys-borde-control);
+      border-radius: var(--sys-radio-s);
+      background: var(--sys-capa);
+      color: var(--sys-texto-1);
+      cursor: pointer;
+    }
+    .bl__cerrar-movil {
+      display: grid;
+      place-items: center;
+      width: var(--sys-toque);
+      height: var(--sys-toque);
+      margin-left: auto;
+      border: 0;
+      border-radius: var(--sys-radio-s);
+      background: transparent;
+      color: var(--sys-barra-texto-2);
+      cursor: pointer;
+    }
+    .bl__achicar,
+    .bl__tapa {
+      display: none;
+    }
+    /* En el teléfono no hay "barra achicada": se abre encima entera. */
+    .bl-marco[data-cerrada] .bl__texto,
+    .bl-marco[data-cerrada] .bl__tecla,
+    .bl-marco[data-cerrada] .bl__nombre {
+      position: static;
+      width: auto;
+      height: auto;
+      clip-path: none;
+    }
+  }
+
+  /* ---------- Búsqueda rápida (Ctrl+K): abre y cierra al instante, sin animación (05 §14) ---------- */
+  .bq-velo {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 12vh var(--sys-esp-4) var(--sys-esp-4);
+    background: var(--sys-velo);
+  }
+  .bq {
+    width: min(100%, 40rem);
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--sys-radio-xl);
+    background: var(--sys-capa);
+    box-shadow: var(--sys-sombra);
+    outline: 0 solid transparent;
+    overflow: hidden;
+  }
+  .bq__dialogo {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    outline: 0 solid transparent;
+  }
+  .bq__campo {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    padding: 0 var(--sys-esp-5);
+    border-bottom: 1px solid var(--sys-borde);
+    color: var(--sys-texto-2);
+  }
+  .bq__entrada {
+    flex: 1;
+    min-width: 0;
+    min-height: 3.75rem;
+    border: 0;
+    background: transparent;
+    color: var(--sys-texto-1);
+    font: inherit;
+    font-size: var(--sys-tipo-xl);
+  }
+  .bq__entrada:focus-visible {
+    outline: 0 solid transparent;
+  }
+  .bq__lista {
+    overflow-y: auto;
+    padding: var(--sys-esp-2);
+    list-style: none;
+    margin: 0;
+  }
+  .bq__opcion {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    min-height: 3.25rem;
+    padding: var(--sys-esp-2) var(--sys-esp-3);
+    border-radius: var(--sys-radio-s);
+    cursor: pointer;
+  }
+  .bq__opcion[aria-selected="true"] {
+    background: var(--sys-marca-suave);
+  }
+  .bq__opcion[aria-selected="true"] .ui-icono {
+    color: var(--sys-marca-tinta);
+  }
+  .bq__opcion-texto {
+    display: grid;
+    min-width: 0;
+    flex: 1;
+  }
+  .bq__nombre {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .bq__sitio {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .bq__pie,
+  .bq__vacio {
+    padding: var(--sys-esp-3) var(--sys-esp-5);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+  .bq__pie {
+    border-top: 1px solid var(--sys-borde);
+  }
+  .bq__grupo {
+    padding: var(--sys-esp-2) var(--sys-esp-3) var(--sys-esp-1);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}

@@ -1,0 +1,162 @@
+/* Todos los valores del sistema (docs/reglas/03 §1). Un valor que no está acá no existe.
+   Los colores salen de scripts/tokens.ts (OKLCH → hex, contraste medido sobre estos hex).
+   Marca azul índigo, tono 264 (D-014); los neutrales se tiñen hacia ella. */
+@layer tokens {
+  :root {
+    color-scheme: light dark;
+    --sys-lienzo: #f2f4fa;
+    --sys-capa: #fefeff;
+    --sys-capa-2: #f6f8fc;
+    --sys-capa-3: #eceff6;
+    --sys-borde: #dde1ea;
+    --sys-borde-2: #c8ced9;
+    --sys-borde-control: #7a808d;
+    --sys-texto-1: #181f2e;
+    --sys-texto-2: #4c5361;
+    --sys-texto-3: #606673;
+    --sys-marca: #2253cf;
+    --sys-marca-hover: #1844b9;
+    --sys-marca-activo: #143ca1;
+    --sys-marca-texto: #fdfdff;
+    --sys-marca-suave: #e9f0ff;
+    --sys-marca-suave-2: #d6e3ff;
+    --sys-marca-borde: #5d83d4;
+    --sys-marca-tinta: #204ec3;
+    --sys-foco: #2a5cda;
+    --sys-ok: #146d34;
+    --sys-ok-bg: #e4f8e7;
+    --sys-ok-borde: #93c69d;
+    --sys-ok-solido: #1d7d3e;
+    --sys-warn: #81520a;
+    --sys-warn-bg: #fff2d9;
+    --sys-warn-borde: #e0b771;
+    --sys-warn-solido: #e9ab2b;
+    --sys-danger: #b02b27;
+    --sys-danger-bg: #ffefef;
+    --sys-danger-borde: #edaaa7;
+    --sys-danger-solido: #c9302d;
+    --sys-info: #006495;
+    --sys-info-bg: #e9f5ff;
+    --sys-info-borde: #95c4e7;
+    --sys-info-solido: #0070a6;
+    --sys-barra-fondo: #101d38;
+    --sys-barra-capa: #1b2948;
+    --sys-barra-activo: #223869;
+    --sys-barra-borde: #273552;
+    --sys-barra-borde-control: #637498;
+    --sys-barra-texto-1: #f4f7fc;
+    --sys-barra-texto-2: #b9c4dc;
+    --sys-barra-acento: #9dbdff;
+    --sys-barra-foco: #93b7ff;
+    --sys-ok-solido-texto: var(--sys-capa);
+    --sys-warn-solido-texto: var(--sys-texto-1);
+    --sys-danger-solido-texto: var(--sys-capa);
+    --sys-info-solido-texto: var(--sys-capa);
+    --sys-sombra: 0 12px 32px -12px rgb(17 24 58 / 0.28), 0 2px 6px -2px rgb(17 24 58 / 0.12);
+    --sys-velo: rgb(12 17 38 / 0.45);
+
+    /* Tipografía: una familia, cifras tabulares */
+    --sys-fuente: var(--fuente-manrope), ui-sans-serif, system-ui, sans-serif;
+    --sys-tipo-xs: 0.75rem;
+    --sys-tipo-s: 0.8125rem;
+    --sys-tipo-m: 0.875rem;
+    --sys-tipo-l: 1rem;
+    --sys-tipo-xl: 1.25rem;
+    --sys-tipo-2xl: 1.5rem;
+    --sys-tipo-3xl: 2rem;
+    --sys-tipo-4xl: 2.75rem;
+
+    /* Espacio */
+    --sys-esp-1: 0.25rem;
+    --sys-esp-2: 0.5rem;
+    --sys-esp-3: 0.75rem;
+    --sys-esp-4: 1rem;
+    --sys-esp-5: 1.25rem;
+    --sys-esp-6: 1.5rem;
+    --sys-esp-7: 2rem;
+    --sys-esp-8: 2.5rem;
+    --sys-esp-9: 3.5rem;
+
+    /* Radio */
+    --sys-radio-s: 8px;
+    --sys-radio-m: 12px;
+    --sys-radio-l: 16px;
+    --sys-radio-xl: 20px;
+    --sys-radio-full: 999px;
+
+    /* Toque mínimo */
+    --sys-toque: 2.75rem;
+
+    /* Movimiento (docs/reglas/08 §3) */
+    --sys-dur-1: 150ms;
+    --sys-dur-2: 220ms;
+    --sys-dur-3: 320ms;
+    --sys-ease: cubic-bezier(0.25, 1, 0.5, 1);
+
+    /* Anchos */
+    --sys-barra: 16rem;
+    --sys-barra-cerrada: 4.5rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --sys-lienzo: #0c0e14;
+      --sys-capa: #13161d;
+      --sys-capa-2: #1b1f28;
+      --sys-capa-3: #242932;
+      --sys-borde: #2d323c;
+      --sys-borde-2: #3d424e;
+      --sys-borde-control: #6d7583;
+      --sys-texto-1: #eff2f7;
+      --sys-texto-2: #b8bec8;
+      --sys-texto-3: #a2a8b3;
+      --sys-marca: #3061d8;
+      --sys-marca-hover: #2a58cb;
+      --sys-marca-activo: #244eb5;
+      --sys-marca-texto: #fdfdff;
+      --sys-marca-suave: #1a2438;
+      --sys-marca-suave-2: #212f4f;
+      --sys-marca-borde: #587dce;
+      --sys-marca-tinta: #93b7ff;
+      --sys-foco: #85acfe;
+      --sys-ok: #7cd591;
+      --sys-ok-bg: #15291a;
+      --sys-ok-borde: #31623d;
+      --sys-ok-solido: #53be70;
+      --sys-warn: #f4c26a;
+      --sys-warn-bg: #302412;
+      --sys-warn-borde: #785724;
+      --sys-warn-solido: #f0b135;
+      --sys-danger: #fb9890;
+      --sys-danger-bg: #3a1d1b;
+      --sys-danger-borde: #8d4540;
+      --sys-danger-solido: #ef6661;
+      --sys-info: #80c7f8;
+      --sys-info-bg: #132938;
+      --sys-info-borde: #2e6386;
+      --sys-info-solido: #55aee8;
+      --sys-barra-fondo: #0c1220;
+      --sys-barra-capa: #141e31;
+      --sys-barra-activo: #1a2c53;
+      --sys-barra-borde: #20293a;
+      --sys-barra-borde-control: #606f8c;
+      --sys-barra-texto-1: #f4f7fc;
+      --sys-barra-texto-2: #b4bed2;
+      --sys-barra-acento: #9dbdff;
+      --sys-barra-foco: #93b7ff;
+      --sys-ok-solido-texto: var(--sys-lienzo);
+      --sys-warn-solido-texto: var(--sys-lienzo);
+      --sys-danger-solido-texto: var(--sys-lienzo);
+      --sys-info-solido-texto: var(--sys-lienzo);
+      --sys-sombra: 0 16px 40px -12px rgb(0 0 0 / 0.6), 0 2px 6px -2px rgb(0 0 0 / 0.4);
+      --sys-velo: rgb(0 0 0 / 0.55);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --sys-dur-2: 0ms;
+      --sys-dur-3: 0ms;
+    }
+  }
+}

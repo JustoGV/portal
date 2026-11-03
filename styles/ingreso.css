@@ -1,0 +1,206 @@
+@layer modulos {
+  .in-pagina {
+    display: grid;
+    place-items: center;
+    min-height: 100dvh;
+    padding: var(--sys-esp-6) var(--sys-esp-4);
+  }
+  .in-tarjeta {
+    width: min(100%, 28rem);
+    padding: var(--sys-esp-8) var(--sys-esp-7);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-xl);
+    background: var(--sys-capa);
+  }
+
+  /* Ingreso en dos paneles: la marca en azul noche a la izquierda, el formulario a la derecha.
+     En pantalla angosta queda solo el formulario (se decide por el ancho de la página, con @container). */
+  .in-pagina--partida {
+    display: block;
+    padding: 0;
+    container-type: inline-size;
+  }
+  .in-partida {
+    display: grid;
+    min-height: 100dvh;
+  }
+  .in-partida__form {
+    display: grid;
+    place-items: center;
+    padding: var(--sys-esp-6) var(--sys-esp-4);
+  }
+  .in-lado {
+    display: none;
+  }
+  @container (min-width: 60rem) {
+    .in-partida {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    }
+    .in-lado {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: var(--sys-esp-6);
+      padding: var(--sys-esp-9);
+      background: var(--sys-barra-fondo);
+      color: var(--sys-barra-texto-1);
+      --sys-foco: var(--sys-barra-foco);
+    }
+    .in-partida .in-tarjeta .in-marca {
+      display: none;
+    }
+  }
+  .in-lado__marca {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    font-weight: 700;
+  }
+  .in-lado__lema {
+    max-width: 22ch;
+    font-size: var(--sys-tipo-4xl);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .in-lado__ventajas {
+    display: grid;
+    gap: var(--sys-esp-4);
+    max-width: 30rem;
+    margin: 0;
+    padding: var(--sys-esp-6) 0 0;
+    border-top: 1px solid var(--sys-barra-borde);
+    list-style: none;
+    color: var(--sys-barra-texto-2);
+  }
+  .in-lado__ventajas li {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-3);
+  }
+  .in-lado__icono {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--sys-radio-s);
+    background: var(--sys-barra-capa);
+    color: var(--sys-barra-acento);
+  }
+  .in-tarjeta--ancha {
+    width: min(100%, 36rem);
+  }
+  .in-marca {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    margin-bottom: var(--sys-esp-7);
+    font-weight: 700;
+  }
+  .in-marca__logo {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--sys-radio-s);
+    background: var(--sys-marca);
+    color: var(--sys-marca-texto);
+  }
+  .in-titulo {
+    font-size: var(--sys-tipo-2xl);
+    font-weight: 700;
+  }
+  .in-bajada {
+    margin: var(--sys-esp-1) 0 var(--sys-esp-6);
+    color: var(--sys-texto-2);
+  }
+  .in-form {
+    display: grid;
+    gap: var(--sys-esp-2);
+  }
+  .in-form .ui-boton {
+    width: 100%;
+    margin-top: var(--sys-esp-2);
+  }
+  .in-aviso {
+    margin-bottom: var(--sys-esp-5);
+  }
+  .in-pie {
+    margin-top: var(--sys-esp-5);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+  .in-paso + .in-paso {
+    margin-top: var(--sys-esp-7);
+    padding-top: var(--sys-esp-6);
+    border-top: 1px solid var(--sys-borde);
+  }
+  .in-paso__titulo {
+    font-size: var(--sys-tipo-l);
+    font-weight: 700;
+  }
+  .in-paso__bajada {
+    margin: var(--sys-esp-1) 0 var(--sys-esp-4);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+  }
+  .in-paso[data-hecho] .in-paso__titulo::after {
+    content: " ✓";
+    color: var(--sys-ok);
+  }
+  /* El QR va oscuro sobre claro en los dos temas: la cámara lo necesita así. */
+  .in-qr {
+    display: grid;
+    place-items: center;
+    width: fit-content;
+    margin: 0 auto var(--sys-esp-4);
+    padding: var(--sys-esp-3);
+    border-radius: var(--sys-radio-m);
+    background: #ffffff;
+  }
+  .in-qr svg {
+    display: block;
+    width: 12.5rem;
+    height: 12.5rem;
+  }
+  .in-clave-manual {
+    margin-bottom: var(--sys-esp-4);
+  }
+  .in-clave-manual summary {
+    min-height: var(--sys-toque);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: var(--sys-texto-1);
+    font-size: var(--sys-tipo-m);
+    font-weight: 600;
+  }
+  .in-clave-manual code {
+    display: block;
+    padding: var(--sys-esp-3);
+    border-radius: var(--sys-radio-s);
+    background: var(--sys-capa-3);
+    word-break: break-all;
+  }
+  .in-codigos {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--sys-esp-2);
+    margin: 0 0 var(--sys-esp-4);
+    padding: var(--sys-esp-4);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa-3);
+    list-style: none;
+    text-align: center;
+  }
+  .in-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sys-esp-3);
+  }
+  .in-acciones .ui-boton {
+    flex: 1 1 12rem;
+    width: auto;
+  }
+}
