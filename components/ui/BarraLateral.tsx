@@ -1,28 +1,34 @@
 "use client"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react"
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react"
 import { Icono } from "@/components/iconos/Icono"
-import type { NombreIcono } from "@/components/iconos/trazos"
+import { IconoDuo, type IconoDuoApi, type NombreDuo } from "@/components/iconos/IconoDuo"
 import { navegacion as t } from "@/i18n/es/navegacion"
 import { authClient } from "@/lib/auth-client"
-import { conHover, escribirIconos, gsap, quieto } from "@/lib/gsap"
-import { NOMBRE_VISIBLE } from "@/lib/marca"
+import { EASE, gsap, quieto } from "@/lib/gsap"
+import { EMPRESA, PRODUCTO } from "@/lib/marca"
 import { Pista } from "./Pista"
 
-type Pagina = { href: string; texto: string; icono: NombreIcono }
+type Pagina = { href: string; texto: string; icono: NombreDuo }
 
-const SUELTAS: Pagina[] = [{ href: "/", texto: t.proyectos, icono: "proyectos" }]
-const ADMIN: Pagina[] = [
-  { href: "/grupos", texto: t.grupos, icono: "grupos" },
-  { href: "/usuarios", texto: t.usuarios, icono: "usuarios" },
+const SECCIONES: { titulo: string; paginas: Pagina[] }[] = [
+  { titulo: t.seccionPortal, paginas: [{ href: "/", texto: t.proyectos, icono: "carpeta" }] },
+  {
+    titulo: t.administracion,
+    paginas: [
+      { href: "/grupos", texto: t.grupos, icono: "grupos" },
+      { href: "/usuarios", texto: t.usuarios, icono: "personas" },
+    ],
+  },
 ]
 
 export const abrirBusqueda = () => window.dispatchEvent(new Event("portal:buscar"))
 
 /**
- * La barra lateral (docs/reglas/02 B2): sin cabecera arriba; logo, búsqueda y usuario adentro. Los grupos
- * se abren al pasar el mouse (120 ms de reposo) o al tocar, sin chevron, con los íconos en cascada.
+ * La barra lateral (WU-06 pantalla 2, D-022; referencia #3 Animate UI Sidebar): la empresa y "Portal"
+ * arriba, búsqueda, secciones siempre visibles ("Dale, visible") y un solo resaltado que se desliza de
+ * una opción a otra siguiendo el mouse y vuelve a la página actual. Se achica a íconos con una curva.
  */
 export function BarraLateral({ usuario, children }: { usuario: ReactNode; children: ReactNode }) {
   const ruta = usePathname()
@@ -30,7 +36,13 @@ export function BarraLateral({ usuario, children }: { usuario: ReactNode; childr
   const [cerrada, setCerrada] = useState(false)
   const [movil, setMovil] = useState(false)
   const [saliendo, setSaliendo] = useState(false)
-  const barra = useRef<HTMLElement>(null)
+  const nav = useRef<HTMLElement>(null)
+  const resaltado = useRef<HTMLSpanElement>(null)
+  const mueveY = useRef<gsap.QuickToFunc | null>(null)
+  const mueveAlto = useRef<gsap.QuickToFunc | null>(null)
+  const panel = useRef<IconoDuoApi>(null)
+  const lupa = useRef<IconoDuoApi>(null)
+  const salida = useRef<IconoDuoApi>(null)
 
   // En el teléfono, navegar cierra la barra.
   const [rutaVista, setRutaVista] = useState(ruta)
@@ -46,68 +58,107 @@ export function BarraLateral({ usuario, children }: { usuario: ReactNode; childr
     return () => window.removeEventListener("keydown", tecla)
   }, [movil])
 
+  const activa = (href: string) => (href === "/" ? ruta === "/" : ruta.startsWith(href))
+
+  /** Lleva el resaltado a una opción (o lo esconde si no hay ninguna). Sin estado de React. */
+  const resaltar = useCallback((el: HTMLElement | null, inmediato = false) => {
+    const r = resaltado.current
+    if (!r) return
+    if (!el) {
+      gsap.to(r, { opacity: 0, duration: 0.15, overwrite: "auto" })
+      return
+    }
+    const y = el.offsetTop
+    const alto = el.offsetHeight
+    if (inmediato || quieto() || !mueveY.current || !mueveAlto.current) {
+      gsap.set(r, { y, height: alto, opacity: 1 })
+      return
+    }
+    gsap.to(r, { opacity: 1, duration: 0.15, overwrite: "auto" })
+    mueveY.current(y)
+    mueveAlto.current(alto)
+  }, [])
+
+  const actual = useCallback(() => nav.current?.querySelector<HTMLElement>('[aria-current="page"]') ?? null, [])
+
+  useLayoutEffect(() => {
+    if (resaltado.current) {
+      mueveY.current = gsap.quickTo(resaltado.current, "y", { duration: 0.35, ease: EASE })
+      mueveAlto.current = gsap.quickTo(resaltado.current, "height", { duration: 0.35, ease: EASE })
+    }
+  }, [])
+
+  // Al cambiar de página o de ancho, el resaltado se apoya en la página actual.
+  useLayoutEffect(() => {
+    resaltar(actual(), true)
+  }, [ruta, cerrada, resaltar, actual])
+
   const salir = async () => {
     setSaliendo(true)
     await authClient.signOut()
     router.replace("/ingresar")
   }
 
-  const activa = (href: string) => (href === "/" ? ruta === "/" : ruta.startsWith(href))
+  const alternar = () => {
+    panel.current?.animar("alternar")
+    setCerrada((c) => !c)
+  }
 
   return (
     <div className="bl-marco" data-cerrada={cerrada || undefined} data-movil={movil || undefined}>
       <button type="button" className="bl-abrir" aria-label={t.abrirMenu} aria-expanded={movil} onClick={() => setMovil(true)}>
         <Icono nombre="menu" tamano={24} />
       </button>
-      <aside ref={barra} className="bl" aria-label={t.principal}>
+      <aside className="bl" aria-label={t.principal}>
         <div className="bl__marca">
-          <span className="bl__logo" aria-hidden="true">
-            <Icono nombre="carpeta" tamano={20} />
+          <span className="bl__nombres">
+            <span className="bl__empresa">{EMPRESA}</span>
+            <span className="bl__producto">{PRODUCTO}</span>
           </span>
-          <span className="bl__nombre">{NOMBRE_VISIBLE}</span>
+          <Pista texto={cerrada ? t.agrandar : t.achicar} lado="right">
+            <button type="button" className="bl__panel" onClick={alternar} aria-label={cerrada ? t.agrandar : t.achicar} aria-pressed={cerrada} onPointerEnter={() => panel.current?.animar()}>
+              <IconoDuo ref={panel} nombre="panel" tamano={20} />
+            </button>
+          </Pista>
           <button type="button" className="bl__cerrar-movil" aria-label={t.cerrarMenu} onClick={() => setMovil(false)}>
             <Icono nombre="cerrar" tamano={20} />
           </button>
         </div>
 
-        <Pista texto={t.buscarPista} lado="right">
-          <button type="button" className="bl__buscar" onClick={abrirBusqueda} onPointerEnter={(e) => escribirIconos(e.currentTarget)}>
-            <Icono nombre="buscar" />
-            <span className="bl__texto">{t.buscar}</span>
-            <kbd className="bl__tecla">Ctrl K</kbd>
-          </button>
-        </Pista>
+        <button type="button" className="bl__buscar" onClick={abrirBusqueda} onPointerEnter={() => lupa.current?.animar()} aria-label={t.buscarPista}>
+          <IconoDuo ref={lupa} nombre="lupa" tamano={20} />
+          <span className="bl__texto">{t.buscar}</span>
+          <kbd className="bl__tecla">Ctrl K</kbd>
+        </button>
 
-        <nav className="bl__nav">
-          <ul className="bl__lista">
-            {SUELTAS.map((p) => (
-              <li key={p.href}>
-                <Item pagina={p} activa={activa(p.href)} />
-              </li>
-            ))}
-            <li>
-              <Grupo titulo={t.administracion} icono="escudo" paginas={ADMIN} activa={activa} />
-            </li>
-          </ul>
+        <nav ref={nav} className="bl__nav" onPointerLeave={() => resaltar(actual())} onBlur={(e) => !nav.current?.contains(e.relatedTarget as Node) && resaltar(actual())}>
+          <span ref={resaltado} className="bl__resaltado" aria-hidden="true" />
+          {SECCIONES.map((s) => (
+            <div key={s.titulo} className="bl__seccion">
+              <p className="bl__seccion-titulo">{s.titulo}</p>
+              <ul className="bl__lista">
+                {s.paginas.map((p) => (
+                  <li key={p.href}>
+                    <Item pagina={p} activa={activa(p.href)} alEntrar={resaltar} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </nav>
 
         <div className="bl__pie">
           <div className="bl__usuario">
-            <Icono nombre="persona" />
+            <span className="bl__avatar" aria-hidden="true">
+              <IconoDuo nombre="persona" tamano={18} />
+            </span>
             <span className="bl__texto">{usuario}</span>
           </div>
-          <button type="button" className="bl__item" onClick={salir} disabled={saliendo} onPointerEnter={(e) => escribirIconos(e.currentTarget)}>
-            <Icono nombre="salir" />
+          <button type="button" className="bl__item bl__salir" onClick={salir} disabled={saliendo} onPointerEnter={() => salida.current?.animar()}>
+            <IconoDuo ref={salida} nombre="salir" tamano={20} />
             <span className="bl__texto">{saliendo ? t.saliendo : t.salir}</span>
           </button>
-          <button type="button" className="bl__item bl__achicar" onClick={() => setCerrada((c) => !c)} aria-pressed={cerrada}>
-            <Icono nombre="menu" />
-            <span className="bl__texto">{cerrada ? t.agrandar : t.achicar}</span>
-          </button>
         </div>
-
-        {/* La barra colapsada se abre tocándola en cualquier parte (02 B2). */}
-        {cerrada && <button type="button" className="bl__tapa" aria-label={t.agrandar} onClick={() => setCerrada(false)} />}
       </aside>
       {movil && <div className="bl-velo" aria-hidden="true" onClick={() => setMovil(false)} />}
       <div className="bl-contenido">{children}</div>
@@ -115,97 +166,22 @@ export function BarraLateral({ usuario, children }: { usuario: ReactNode; childr
   )
 }
 
-function Item({ pagina, activa }: { pagina: Pagina; activa: boolean }) {
+function Item({ pagina, activa, alEntrar }: { pagina: Pagina; activa: boolean; alEntrar: (el: HTMLElement) => void }) {
+  const icono = useRef<IconoDuoApi>(null)
+  const entrar = (el: HTMLElement) => {
+    alEntrar(el)
+    icono.current?.animar()
+  }
   return (
     <Link
       href={pagina.href}
       className="bl__item"
       aria-current={activa ? "page" : undefined}
-      onPointerEnter={(e) => escribirIconos(e.currentTarget)}
-      data-icono-item=""
+      onPointerEnter={(e) => entrar(e.currentTarget)}
+      onFocus={(e) => entrar(e.currentTarget)}
     >
-      <Icono nombre={pagina.icono} />
+      <IconoDuo ref={icono} nombre={pagina.icono} tamano={20} />
       <span className="bl__texto">{pagina.texto}</span>
     </Link>
-  )
-}
-
-function Grupo({ titulo, icono, paginas, activa }: { titulo: string; icono: NombreIcono; paginas: Pagina[]; activa: (h: string) => boolean }) {
-  const contieneActual = paginas.some((p) => activa(p.href))
-  const [abierto, setAbierto] = useState(contieneActual)
-  const porHover = useRef(false)
-  const reloj = useRef<number | undefined>(undefined)
-  const cuerpo = useRef<HTMLUListElement>(null)
-  const primera = useRef(true)
-
-  const cambiar = (abrir: boolean) => {
-    const c = cuerpo.current
-    if (!c || abrir === abierto) return
-    // La altura de partida se fija en línea ANTES del cambio de estado (05 §12).
-    c.style.height = `${c.offsetHeight}px`
-    setAbierto(abrir)
-  }
-
-  useLayoutEffect(() => {
-    const c = cuerpo.current
-    if (!c) return
-    if (primera.current) {
-      primera.current = false
-      c.style.height = abierto ? "auto" : "0px"
-      return
-    }
-    if (quieto()) {
-      c.style.height = abierto ? "auto" : "0px"
-      return
-    }
-    if (abierto) {
-      gsap.to(c, { height: c.scrollHeight, duration: 0.32, ease: "power3.out", overwrite: "auto", onComplete: () => void (c.style.height = "auto") })
-      escribirIconos(c, { retraso: 0.05, paso: 0.08 })
-    } else {
-      gsap.to(c, { height: 0, duration: 0.22, ease: "power2.inOut", overwrite: "auto" })
-    }
-  }, [abierto])
-
-  return (
-    <div
-      className="bl__grupo"
-      onPointerEnter={() => {
-        if (!conHover() || abierto) return
-        reloj.current = window.setTimeout(() => {
-          porHover.current = true
-          cambiar(true)
-        }, 120)
-      }}
-      onPointerLeave={() => {
-        window.clearTimeout(reloj.current)
-        if (porHover.current && !contieneActual) {
-          porHover.current = false
-          cambiar(false)
-        }
-      }}
-    >
-      <button
-        type="button"
-        className="bl__item bl__grupo-titulo"
-        aria-expanded={abierto}
-        onClick={() => {
-          window.clearTimeout(reloj.current)
-          // Si lo abrió el hover, el click lo deja fijo; si no, alterna.
-          if (porHover.current) porHover.current = false
-          else cambiar(!abierto)
-        }}
-        onPointerEnter={(e) => escribirIconos(e.currentTarget)}
-      >
-        <Icono nombre={icono} />
-        <span className="bl__texto">{titulo}</span>
-      </button>
-      <ul ref={cuerpo} className="bl__grupo-cuerpo" inert={!abierto}>
-        {paginas.map((p) => (
-          <li key={p.href}>
-            <Item pagina={p} activa={activa(p.href)} />
-          </li>
-        ))}
-      </ul>
-    </div>
   )
 }

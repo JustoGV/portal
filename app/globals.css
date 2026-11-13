@@ -24,6 +24,12 @@
   h1, h2, h3 {
     line-height: 1.2;
     letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  /* Nunca una sola palabra en el último renglón (regla de saltos de línea de Mateo, 2026-10-26). */
+  p, li, dd, dt, label, figcaption {
+    text-wrap: pretty;
   }
 
   ::selection {

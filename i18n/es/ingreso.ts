@@ -1,6 +1,5 @@
 export const ingreso = {
-  titulo: "Ingresar",
-  bajada: "Con tu email y tu contraseña.",
+  titulo: "Inicio de sesión",
   email: "Email",
   contrasena: "Contraseña",
   entrar: "Ingresar",
@@ -9,7 +8,6 @@ export const ingreso = {
   expirado: "Tu sesión expiró. Ingresá de nuevo.",
   inactiva: "Esta cuenta está desactivada. Pedile a tu socio que la active.",
   creada: "Cuenta creada. Ingresá con tu email y la contraseña que elegiste.",
-  olvido: "¿Te olvidaste la contraseña? Pedile a tu socio una contraseña inicial nueva desde Usuarios.",
   codigoTitulo: "Código de seguridad",
   codigoBajada: "Abrí la app de códigos de tu celular y escribí los 6 números de este portal.",
   codigo: "Código de 6 números",
@@ -23,17 +21,13 @@ export const ingreso = {
   demasiados: "Demasiados intentos. Esperá 15 minutos y probá de nuevo.",
   sinConexion: "No se pudo conectar. Revisá la conexión y probá de nuevo.",
   volver: "Volver",
-  lema: "Todos los proyectos, en un solo lugar.",
-  ventajas: [
-    { icono: "buscar", texto: "Encontrá cualquier proyecto por su nombre o con Ctrl K." },
-    { icono: "abrir", texto: "Un click y se abre en una pestaña nueva." },
-    { icono: "archivar", texto: "Lo que ya no se usa se archiva: ningún link se pierde." },
-  ],
 } as const
 
 export const primeraCuenta = {
   titulo: "Crear la primera cuenta",
-  bajada: "Todavía no hay ninguna cuenta. La que crees ahora es la de administrador; las siguientes se crean desde Usuarios.",
+  bajada: "Todavía no hay ninguna cuenta. Esta es la de administrador; las siguientes se crean desde Usuarios.",
+  paso1: "Tus datos",
+  paso2: "Tu contraseña",
   nombre: "Nombre y apellido",
   email: "Email",
   clave: "Contraseña",
@@ -47,6 +41,8 @@ export const primeraCuenta = {
 export const primerIngreso = {
   titulo: "Antes de empezar",
   bajada: "Una sola vez: cambiá la contraseña inicial por una que solo sepas vos.",
+  pasoActual: "La contraseña que te pasaron",
+  pasoNueva: "Tu contraseña nueva",
   paso1: "1. Tu contraseña",
   paso1Bajada: "Cambiá la contraseña inicial que te pasaron por una que solo sepas vos.",
   actual: "Contraseña inicial",
@@ -72,4 +68,17 @@ export const primerIngreso = {
   copiados: "Copiados",
   listo: "Ya los guardé, entrar",
   activoTitulo: "Segundo factor activado",
+} as const
+
+/** El campo de las pantallas de ingreso (components/ingreso/CampoDuo). */
+export const campoIngreso = {
+  mostrar: "Mostrar la contraseña",
+  ocultar: "Ocultar la contraseña",
+  mayus: "Bloq Mayús está activado",
+  emailOk: "Email válido",
+  emailFalta: "Falta completar: tiene que ser como nombre@dominio.com",
+  claveFalta: "Escribí tu contraseña",
+  pasoDe: (n: number, de: number) => `Paso ${n} de ${de}`,
+  continuar: "Continuar",
+  volver: "Volver",
 } as const

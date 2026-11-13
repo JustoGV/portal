@@ -1,7 +1,6 @@
 "use client"
 import { useRouter } from "next/navigation"
 import { useRef } from "react"
-import { Link } from "react-aria-components"
 import { archivarProyecto, restaurarProyecto } from "@/acciones/proyectos"
 import { Icono } from "@/components/iconos/Icono"
 import { Boton } from "@/components/ui/Boton"
@@ -9,7 +8,6 @@ import { BotonIcono } from "@/components/ui/BotonIcono"
 import { CajaTabla } from "@/components/ui/CajaTabla"
 import { useConfirmar } from "@/components/ui/Confirmar"
 import { Paginacion } from "@/components/ui/Paginacion"
-import { Pista } from "@/components/ui/Pista"
 import { useResultado } from "@/components/ui/Resultado"
 import { Vacio } from "@/components/ui/Vacio"
 import { comun } from "@/i18n/es/comun"
@@ -18,8 +16,10 @@ import { formatDia } from "@/lib/fecha"
 import { escribirIconos } from "@/lib/gsap"
 import { conParametros } from "@/lib/parametros"
 import type { FilaProyecto } from "@/lib/proyecto"
+import { pegar } from "@/lib/texto"
 import { sitioDe } from "@/lib/url"
 import { useEditorProyecto } from "./EditorProyecto"
+import { useVistaPrevia, VistaPrevia } from "./VistaPrevia"
 
 type Props = {
   filas: FilaProyecto[]
@@ -79,36 +79,15 @@ export function ListaProyectos({ filas, total, pagina, porPagina, actuales, filt
 
   return (
     <>
-      <CajaTabla etiqueta={t.tabla} filas={filas.length}>
-        <table className="ui-tabla">
-          <caption className="sr-solo">{t.tabla}</caption>
-          <thead>
-            <tr>
-              <th scope="col">{t.colNombre}</th>
-              <th scope="col" data-prioridad="2">
-                {t.colGrupo}
-              </th>
-              <th scope="col" data-prioridad="3">
-                {t.colLink}
-              </th>
-              <th scope="col" data-prioridad="3">
-                {t.colDescripcion}
-              </th>
-              <th scope="col" data-prioridad="3">
-                {t.colActualizado}
-              </th>
-              <th scope="col">
-                <span className="sr-solo">{t.colAcciones}</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+      <VistaPrevia>
+        <CajaTabla etiqueta={t.tabla} filas={filas.length}>
+          <ul className="pr-lista" aria-label={t.tabla}>
             {filas.map((p, i) => (
               <Fila key={p.id} p={p} i={i} archivados={archivados} alEditar={() => editor.abrirEdicion(p)} alArchivo={() => cambiarArchivo(p)} />
             ))}
-          </tbody>
-        </table>
-      </CajaTabla>
+          </ul>
+        </CajaTabla>
+      </VistaPrevia>
       <Paginacion
         total={total}
         pagina={pagina}
@@ -120,43 +99,54 @@ export function ListaProyectos({ filas, total, pagina, porPagina, actuales, filt
   )
 }
 
+/**
+ * Una fila de la lista (referencia #5, D-017): el nombre manda y abre el proyecto; toda la fila es el
+ * área de toque del link (el ::after del link la cubre). Editar y archivar quedan por encima, con su nombre
+ * y su tooltip. Al entrar el mouse: la fila sube un nivel, el nombre se subraya, la flecha y los íconos se
+ * escriben (04 §5) y aparece la tarjeta con el link completo.
+ */
 function Fila({ p, i, archivados, alEditar, alArchivo }: { p: FilaProyecto; i: number; archivados: boolean; alEditar: () => void; alArchivo: () => void }) {
-  const fila = useRef<HTMLTableRowElement>(null)
+  const fila = useRef<HTMLLIElement>(null)
+  const previa = useVistaPrevia()
   return (
-    <tr ref={fila} style={{ "--i": i } as React.CSSProperties} onPointerEnter={() => escribirIconos(fila.current?.querySelector(".ui-tabla__fila-acciones") ?? null, { paso: 0.05 })}>
-      <td>
-        <a className="pr-abrir" href={p.url} target="_blank" rel="noopener noreferrer">
-          <span className="pr-abrir__nombre">{p.nombre}</span>
-          <span className="sr-solo">({t.abrirPista})</span>
+    <li
+      ref={fila}
+      className="pr-fila"
+      style={{ "--i": i } as React.CSSProperties}
+      onPointerEnter={(e) => {
+        if (e.pointerType !== "mouse") return
+        escribirIconos(fila.current, { paso: 0.05 })
+        previa.mostrar(p, e)
+      }}
+      onPointerMove={previa.mover}
+      onPointerLeave={previa.ocultar}
+    >
+      <div className="pr-fila__principal">
+        <a className="pr-fila__abrir" href={p.url} target="_blank" rel="noopener noreferrer" onFocus={() => escribirIconos(fila.current, { paso: 0.05 })}>
+          <span className="pr-fila__nombre">{pegar(p.nombre)}</span>
+          <Icono nombre="abrir" tamano={16} className="pr-fila__flecha" />
+          <span className="sr-solo">
+            ({t.abrirPista}: {sitioDe(p.url)})
+          </span>
         </a>
-      </td>
-      <td data-prioridad="2">{p.grupoNombre ?? <span className="ui-tabla__secundario">{t.sinGrupo}</span>}</td>
-      <td data-prioridad="3" className="ui-tabla__secundario pr-celda-corta">
-        {sitioDe(p.url)}
-      </td>
-      <td data-prioridad="3" className="ui-tabla__secundario pr-celda-corta">
-        {p.descripcion ?? "–"}
-      </td>
-      <td data-prioridad="3" className="ui-tabla__secundario">
-        {formatDia(p.actualizadoEn)}
-      </td>
-      <td className="ui-tabla__acciones">
-        <span className="ui-tabla__fila-acciones">
-          <Pista texto={t.abrirPista}>
-            <Link className="ui-boton-icono" href={p.url} target="_blank" rel="noopener noreferrer" aria-label={`${t.abrir} ${p.nombre}`} onHoverStart={(e) => escribirIconos(e.target)}>
-              <Icono nombre="abrir" />
-            </Link>
-          </Pista>
-          <BotonIcono icono="editar" etiqueta={`${t.editar} ${p.nombre}`} pista={t.editar} onPress={alEditar} />
-          <BotonIcono
-            icono={archivados ? "restaurar" : "archivar"}
-            etiqueta={`${archivados ? t.restaurar : t.archivar} ${p.nombre}`}
-            pista={archivados ? t.restaurar : t.archivar}
-            peligro={!archivados}
-            onPress={alArchivo}
-          />
-        </span>
-      </td>
-    </tr>
+        {p.descripcion && <p className="pr-fila__descripcion">{pegar(p.descripcion)}</p>}
+      </div>
+      <div className="pr-fila__meta">
+        {p.grupoNombre ? <span className="pr-grupo">{p.grupoNombre}</span> : <span className="pr-grupo pr-grupo--sin">{t.sinGrupo}</span>}
+        <time className="pr-fila__fecha" dateTime={new Date(p.actualizadoEn).toISOString()}>
+          {t.actualizado(formatDia(p.actualizadoEn))}
+        </time>
+      </div>
+      <div className="pr-fila__acciones" onPointerEnter={previa.ocultar} onPointerLeave={(e) => e.pointerType === "mouse" && previa.mostrar(p, e)}>
+        <BotonIcono icono="editar" etiqueta={`${t.editar} ${p.nombre}`} pista={t.editar} onPress={alEditar} />
+        <BotonIcono
+          icono={archivados ? "restaurar" : "archivar"}
+          etiqueta={`${archivados ? t.restaurar : t.archivar} ${p.nombre}`}
+          pista={archivados ? t.restaurar : t.archivar}
+          peligro={!archivados}
+          onPress={alArchivo}
+        />
+      </div>
+    </li>
   )
 }

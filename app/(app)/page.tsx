@@ -12,6 +12,7 @@ import { listarGruposActivos } from "@/dal/grupos"
 import { exigirPagina } from "@/dal/guard"
 import { contarProyectos, listarProyectos, type FiltroProyectos } from "@/dal/proyectos"
 import { proyectos as t } from "@/i18n/es/proyectos"
+import { pegar } from "@/lib/texto"
 import { conParametros, leerBusqueda, leerEstado, leerPagina, leerPorPagina, leerUuid, type ParametrosLista } from "@/lib/parametros"
 import "@/styles/proyectos.css"
 
@@ -42,7 +43,7 @@ export default async function PaginaProyectos({ searchParams }: { searchParams: 
           <header className="ui-pagina__cabecera" data-llega="" style={{ "--llega-i": 0 } as React.CSSProperties}>
             <div>
               <h1 className="ui-pagina__titulo">{t.titulo}</h1>
-              <p className="ui-pagina__bajada">{t.bajada}</p>
+              <p className="ui-pagina__bajada">{pegar(t.bajada)}</p>
             </div>
             <BotonNuevoProyecto />
           </header>
@@ -130,6 +131,16 @@ function FiltrosEsqueleto() {
   )
 }
 
+/** Filas quietas con el alto final de la lista (05 §13), así nada salta cuando llegan los proyectos. */
 function TablaEsqueleto() {
-  return <div className="ui-skeleton" style={{ height: "28rem", borderRadius: "var(--sys-radio-l)" }} aria-hidden="true" />
+  return (
+    <div className="pr-esqueleto" aria-hidden="true">
+      {[62, 48, 70, 55, 66, 44].map((ancho, i) => (
+        <div key={i} className="pr-esqueleto__fila">
+          <span className="ui-skeleton" style={{ width: `${Math.round(ancho * 0.5)}%`, height: "1.25rem" }} />
+          <span className="ui-skeleton" style={{ width: `${ancho}%`, height: "0.875rem" }} />
+        </div>
+      ))}
+    </div>
+  )
 }

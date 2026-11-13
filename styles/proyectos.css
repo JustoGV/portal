@@ -1,34 +1,310 @@
 @layer modulos {
-  .pr-abrir {
-    display: inline-flex;
+  /* ---------- Lista de proyectos (referencia #5, D-017) ---------- */
+  .pr-lista {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .pr-fila {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas: "principal meta acciones";
     align-items: center;
-    gap: var(--sys-esp-2);
-    min-height: var(--sys-toque);
+    column-gap: var(--sys-esp-6);
+    min-height: 5rem;
+    padding: var(--sys-esp-4) var(--sys-esp-4) var(--sys-esp-4) var(--sys-esp-6);
+    border-bottom: 1px solid var(--sys-borde);
+    transition: background-color var(--sys-dur-1) var(--sys-ease);
+  }
+  .pr-fila:last-child {
+    border-bottom: 0;
+  }
+
+  .pr-fila__principal {
+    grid-area: principal;
+    display: grid;
+    gap: var(--sys-esp-1);
+    min-width: 0;
+  }
+
+  /* El link del nombre. Su ::after cubre toda la fila: tocar cualquier parte abre el proyecto. */
+  .pr-fila__abrir {
+    justify-self: start;
+    max-width: 100%;
     color: var(--sys-texto-1);
+    font-size: var(--sys-tipo-xl);
     font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
     text-decoration: none;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+    outline: none;
+    transition: color var(--sys-dur-1) var(--sys-ease);
   }
-  .pr-abrir .ui-icono {
+  .pr-fila__abrir::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .pr-fila__abrir:focus-visible::after {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: -3px;
+    border-radius: var(--sys-radio-m);
+  }
+
+  /* El subrayado se escribe de izquierda a derecha, renglón por renglón si el nombre ocupa dos. */
+  .pr-fila__nombre {
+    padding-bottom: 2px;
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0% 2px no-repeat;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    transition: background-size var(--sys-dur-2) var(--sys-ease);
+  }
+
+  .pr-fila__flecha {
+    display: inline-block;
+    margin-left: var(--sys-esp-2);
+    vertical-align: -0.0625rem;
+    color: var(--sys-texto-3);
+    opacity: 0;
+    transform: translate(-4px, 4px);
+    transition:
+      opacity var(--sys-dur-1) var(--sys-ease),
+      transform var(--sys-dur-2) var(--sys-ease),
+      color var(--sys-dur-1) var(--sys-ease);
+  }
+
+  .pr-fila__descripcion {
+    margin: 0;
+    min-width: 0;
     color: var(--sys-texto-2);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .pr-abrir:hover .pr-abrir__nombre {
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-    .pr-abrir:hover,
-    .pr-abrir:hover .ui-icono {
-      color: var(--sys-marca-tinta);
-    }
-  }
-  .pr-celda-corta {
-    max-width: 18rem;
+    font-size: var(--sys-tipo-m);
+    line-height: 1.45;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  .pr-fila__meta {
+    grid-area: meta;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--sys-esp-4);
+  }
+
+  /* El grupo: píldora con borde (no es un estado: sin punto de color, 05 §8). */
+  .pr-grupo {
+    display: inline-flex;
+    align-items: center;
+    max-width: 18rem;
+    padding: 0.1875rem 0.75rem;
+    border: 1px solid var(--sys-borde-2);
+    border-radius: var(--sys-radio-full);
+    color: var(--sys-texto-1);
+    font-size: var(--sys-tipo-s);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pr-grupo--sin {
+    border-color: transparent;
+    padding-inline: 0;
+    color: var(--sys-texto-3);
+    font-weight: 500;
+  }
+
+  .pr-fila__fecha {
+    color: var(--sys-texto-3);
+    font-size: var(--sys-tipo-s);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* Editar y archivar quedan por encima del área del link. */
+  .pr-fila__acciones {
+    grid-area: acciones;
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    gap: var(--sys-esp-1);
+  }
+
+  /* ---------- Con mouse: el estado de reposo es limpio; las acciones aparecen con la fila ---------- */
+  @media (hover: hover) and (pointer: fine) {
+    .pr-fila__acciones {
+      opacity: 0;
+      transition: opacity var(--sys-dur-1) var(--sys-ease);
+    }
+    .pr-fila:hover {
+      background: var(--sys-capa-2);
+    }
+    .pr-fila:hover .pr-fila__acciones,
+    .pr-fila:focus-within .pr-fila__acciones {
+      opacity: 1;
+    }
+    .pr-fila:hover .pr-fila__nombre {
+      background-size: 100% 2px;
+    }
+    .pr-fila:hover .pr-fila__flecha {
+      opacity: 1;
+      transform: none;
+      color: var(--sys-marca-tinta);
+    }
+    .pr-fila:hover .pr-fila__abrir {
+      color: var(--sys-marca-tinta);
+    }
+  }
+  /* Con teclado, el mismo estado que con el mouse. */
+  .pr-fila:has(.pr-fila__abrir:focus-visible) {
+    background: var(--sys-capa-2);
+  }
+  .pr-fila:has(.pr-fila__abrir:focus-visible) .pr-fila__nombre {
+    background-size: 100% 2px;
+  }
+  .pr-fila:has(.pr-fila__abrir:focus-visible) .pr-fila__flecha {
+    opacity: 1;
+    transform: none;
+  }
+  /* Apretado: responde al bajar el dedo (05 §0). */
+  .pr-fila:has(.pr-fila__abrir:active) {
+    background: var(--sys-capa-3);
+  }
+
+  /* ---------- Ancho angosto (la caja es el contenedor): grupo y fecha bajan a una segunda línea ---------- */
+  @container (max-width: 44rem) {
+    .pr-fila {
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas:
+        "principal acciones"
+        "meta meta";
+      row-gap: var(--sys-esp-3);
+      align-items: start;
+      padding: var(--sys-esp-4) var(--sys-esp-2) var(--sys-esp-4) var(--sys-esp-4);
+    }
+    .pr-fila__abrir {
+      font-size: var(--sys-tipo-l);
+    }
+    .pr-fila__descripcion {
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .pr-fila__meta {
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      gap: var(--sys-esp-2) var(--sys-esp-3);
+    }
+    .pr-fila__acciones {
+      align-self: start;
+      margin-top: -0.625rem;
+    }
+    .pr-grupo {
+      max-width: 100%;
+    }
+  }
+
+  /* Entrada en cascada (07 §2): una vez por lista montada, nunca en un refresco. */
+  .llega .pr-fila {
+    animation: ui-fila-entra 500ms var(--sys-ease) backwards;
+    animation-delay: calc(min(var(--i, 0), 14) * var(--paso, 60ms));
+  }
+
+  /* ---------- Tarjeta que sigue al mouse ---------- */
+  .pr-previa {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 60;
+    width: min(22rem, calc(100vw - 1.5rem));
+    padding: var(--sys-esp-4);
+    border: 1px solid var(--sys-borde-2);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa-3);
+    box-shadow: var(--sys-sombra);
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.96);
+    transform-origin: 0 0;
+  }
+  .pr-previa > p {
+    margin: 0;
+  }
+  .pr-previa__sitio {
+    color: var(--sys-texto-1);
+    font-size: var(--sys-tipo-l);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+  .pr-previa .pr-previa__url {
+    margin-top: var(--sys-esp-1);
+    color: var(--sys-marca-tinta);
+    font-size: var(--sys-tipo-s);
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .pr-previa .pr-previa__descripcion {
+    margin-top: var(--sys-esp-3);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+  .pr-previa .pr-previa__pie {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-2);
+    margin-top: var(--sys-esp-3);
+    padding-top: var(--sys-esp-3);
+    border-top: 1px solid var(--sys-borde);
+    color: var(--sys-texto-3);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* ---------- Esqueleto de la lista: filas quietas, del alto final ---------- */
+  .pr-esqueleto {
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-l);
+    background: var(--sys-capa);
+    overflow: hidden;
+  }
+  .pr-esqueleto__fila {
+    display: grid;
+    gap: var(--sys-esp-2);
+    min-height: 5rem;
+    align-content: center;
+    padding: var(--sys-esp-4) var(--sys-esp-6);
+    border-bottom: 1px solid var(--sys-borde);
+  }
+  .pr-esqueleto__fila:last-child {
+    border-bottom: 0;
+  }
+
   .pr-filtros-esqueleto {
     display: flex;
     gap: var(--sys-esp-3);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .llega .pr-fila {
+      animation: none;
+    }
+    .pr-fila__nombre,
+    .pr-fila__flecha,
+    .pr-fila__acciones {
+      transition: none;
+    }
   }
 }

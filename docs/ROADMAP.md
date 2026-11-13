@@ -97,3 +97,20 @@ Unidades en orden. Cada una termina con `typecheck`, `lint` y `test` en verde, l
 **Archivos:** configuración de Sentry (`instrumentation.ts`, `sentry.*.config.ts` con `beforeSend`), Speed Insights, ajustes que salgan de medir.
 
 **Terminado cuando:** la lista de `docs/reglas/10` §8 completa (incluida una restauración de prueba del backup, con fecha); LCP, INP y CLS medidos en el preview dentro de las metas; datos de muestra borrados con el ok del dueño.
+
+## WU-06 · Rediseño pantalla por pantalla (Mateo, 2026-11-12)
+
+**Objetivo:** cada pantalla rediseñada entera (sus tarjetas, etiquetas, botones, íconos propios animados, formularios en pasos, avisos y movimiento) con el método de `docs/trabajo/MATEO.md` §5 y las reglas del §10. **Una por vez, en este orden; no se pasa a la siguiente sin su OK.**
+
+| # | Pantalla | Qué entra | Estado |
+|---|---|---|---|
+| 1 | **Ingreso** (`/ingresar`, `/configurar`, `/primer-ingreso`) | Las tres comparten diseño. Fuente candidata: el login del sistema de discapacidad (`servicios/sistema-front`, `/login`), aprobado por el socio para los sistemas de CESS - GVG. **Hecho el 2026-11-12: variante "Escenario" (D-019)** | ✅ OK de Mateo ("Queda, seguimos") |
+| 2 | **Barra lateral y `Ctrl+K`** | El marco de todas las pantallas: logo, búsqueda, navegación, usuario | Sigue |
+| 3 | **Proyectos** | La lista (hecha el 2026-11-12, D-017, **espera su OK**), el formulario de nuevo/editar en pasos, las tarjetas de resultado, los avisos y sus íconos | En curso |
+| 4 | **Grupos** | Lista, formulario, avisos, íconos | — |
+| 5 | **Usuarios** | Lista, formulario con validación de email, contraseña inicial, inactividad, íconos | — |
+| 6 | **Cuenta y configuración** (pendiente, pedido de Mateo 2026-11-12) | El pie de la barra (círculo con persona + nombre + "Salir") no le gusta: *"esto no me gusta, no hay una sección de configuración"*. Hacer una sección de configuración (la cuenta propia, cambiar la contraseña, cerrar sesión, lo que hoy está suelto) y rediseñar ese pie como entrada a ella. Con su ronda de referencias, como las demás | — |
+
+**Reglas:** `02` B8, `04` (con D-018), `05`, `06`, `07`, `08`, `12`; `docs/trabajo/MATEO.md` §4, §5 y §10.
+
+**Terminado cuando:** las seis pantallas con su OK, cada una mirada a 375, 1440 y 1920 en claro y oscuro, chequeo de saltos en 0, peor caso probado, consola limpia.

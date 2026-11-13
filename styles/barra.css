@@ -1,7 +1,9 @@
-/* Barra lateral (docs/reglas/02 B2, 05 §12). La única @media estructural: en pantalla chica se abre encima. */
+/* Barra lateral (docs/reglas/02 B2, 05 §12; WU-06 pantalla 2, D-022, referencia #3 Animate UI Sidebar).
+   La única @media estructural: en pantalla chica se abre encima. */
 @layer componentes {
   .bl-marco {
     --ancho-barra: var(--sys-barra);
+    --curva-barra: cubic-bezier(0.65, 0, 0.35, 1);
     min-height: 100dvh;
   }
   .bl-marco[data-cerrada] {
@@ -13,49 +15,64 @@
     z-index: 40;
     display: flex;
     flex-direction: column;
-    gap: var(--sys-esp-2);
+    gap: var(--sys-esp-3);
     width: var(--ancho-barra);
-    padding: var(--sys-esp-4) var(--sys-esp-3);
+    padding: var(--sys-esp-5) var(--sys-esp-3) var(--sys-esp-4);
     border-right: 1px solid var(--sys-barra-borde);
-    background: var(--sys-barra-fondo);
+    background:
+      radial-gradient(120% 40% at 0% 0%, rgb(48 97 216 / 0.18), transparent 70%),
+      var(--sys-barra-fondo);
     color: var(--sys-barra-texto-1);
     /* Adentro de la barra el anillo de foco es el claro: el oscuro no se ve sobre azul noche. */
     --sys-foco: var(--sys-barra-foco);
+    --duo-1: var(--sys-barra-texto-2);
+    --duo-2: var(--sys-barra-acento);
     overflow-x: hidden;
     overflow-y: auto;
+    transition: width var(--sys-dur-3) var(--curva-barra);
   }
   .bl-contenido {
     margin-left: var(--ancho-barra);
     min-width: 0;
+    transition: margin-left var(--sys-dur-3) var(--curva-barra);
   }
+
+  /* ---------- Arriba: la empresa y "Portal", como en el ingreso (D-019) ---------- */
   .bl__marca {
     display: flex;
     align-items: center;
-    gap: var(--sys-esp-3);
+    gap: var(--sys-esp-2);
     min-height: var(--sys-toque);
-    padding: 0 var(--sys-esp-2) var(--sys-esp-3);
-    margin-bottom: var(--sys-esp-2);
+    padding: 0 0 var(--sys-esp-4) var(--sys-esp-2);
     border-bottom: 1px solid var(--sys-barra-borde);
   }
-  .bl__logo {
+  .bl__nombres {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+  .bl__empresa { font-size: var(--sys-tipo-xl); font-weight: 800; letter-spacing: -0.02em; }
+  .bl__producto { color: var(--sys-barra-acento); font-size: var(--sys-tipo-xs); font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; }
+  .bl__panel,
+  .bl__cerrar-movil {
     display: grid;
     place-items: center;
     flex: none;
-    width: 2.25rem;
-    height: 2.25rem;
+    width: var(--sys-toque);
+    height: var(--sys-toque);
+    border: 0;
     border-radius: var(--sys-radio-s);
-    background: var(--sys-marca);
-    color: var(--sys-marca-texto);
+    background: transparent;
+    color: var(--sys-barra-texto-2);
+    cursor: pointer;
   }
-  .bl__nombre {
-    color: var(--sys-barra-texto-1);
-    letter-spacing: -0.01em;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-weight: 700;
+  @media (hover: hover) and (pointer: fine) {
+    .bl__panel:hover { background: var(--sys-barra-capa); --duo-1: var(--sys-barra-texto-1); }
   }
+
+  /* ---------- Buscar (Ctrl+K) ---------- */
   .bl__buscar {
     display: flex;
     align-items: center;
@@ -63,19 +80,21 @@
     min-height: var(--sys-toque);
     padding: 0 var(--sys-esp-3);
     border: 1px solid var(--sys-barra-borde-control);
-    border-radius: var(--sys-radio-s);
+    border-radius: var(--sys-radio-m);
     background: var(--sys-barra-capa);
     color: var(--sys-barra-texto-2);
     font: inherit;
     text-align: left;
     cursor: pointer;
-    transition: background-color var(--sys-dur-1) var(--sys-ease);
+    transition: border-color var(--sys-dur-1) var(--sys-ease), color var(--sys-dur-1) var(--sys-ease);
   }
-  .bl__buscar .bl__texto {
-    flex: 1;
+  .bl__buscar svg { flex: none; }
+  .bl__buscar .bl__texto { flex: 1; }
+  @media (hover: hover) and (pointer: fine) {
+    .bl__buscar:hover { border-color: var(--sys-barra-acento); color: var(--sys-barra-texto-1); }
   }
   .bl__tecla {
-    padding: 0 var(--sys-esp-2);
+    padding: 0.0625rem var(--sys-esp-2);
     border: 1px solid var(--sys-barra-borde-control);
     border-radius: 6px;
     color: var(--sys-barra-texto-2);
@@ -84,23 +103,49 @@
     font-weight: 600;
     white-space: nowrap;
   }
+
+  /* ---------- Secciones y el resaltado que viaja ---------- */
   .bl__nav {
+    position: relative;
     flex: 1;
+    display: grid;
+    align-content: start;
+    gap: var(--sys-esp-5);
     margin-top: var(--sys-esp-2);
   }
-  .bl__lista,
-  .bl__grupo-cuerpo {
+  .bl__resaltado {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--sys-toque);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-barra-capa);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .bl__seccion { display: grid; gap: var(--sys-esp-1); }
+  .bl__seccion-titulo {
+    margin: 0;
+    padding: 0 var(--sys-esp-3);
+    color: var(--sys-barra-texto-2);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: opacity var(--sys-dur-2) var(--sys-ease);
+  }
+  .bl__lista {
     display: grid;
     gap: 2px;
     list-style: none;
     margin: 0;
     padding: 0;
   }
-  .bl__grupo-cuerpo {
-    overflow: hidden;
-    padding-left: var(--sys-esp-4);
-  }
   .bl__item {
+    position: relative;
     display: flex;
     align-items: center;
     gap: var(--sys-esp-3);
@@ -108,7 +153,7 @@
     min-height: var(--sys-toque);
     padding: 0 var(--sys-esp-3);
     border: 0;
-    border-radius: var(--sys-radio-s);
+    border-radius: var(--sys-radio-m);
     background: transparent;
     color: var(--sys-barra-texto-2);
     font: inherit;
@@ -116,35 +161,34 @@
     text-align: left;
     text-decoration: none;
     cursor: pointer;
-    transition: background-color var(--sys-dur-1) var(--sys-ease), color var(--sys-dur-1) var(--sys-ease);
+    transition: color var(--sys-dur-1) var(--sys-ease);
   }
+  .bl__item svg { flex: none; }
   @media (hover: hover) and (pointer: fine) {
-    .bl__item:hover,
-    .bl__buscar:hover {
-      background: var(--sys-barra-capa);
-      color: var(--sys-barra-texto-1);
-    }
+    .bl__item:hover { color: var(--sys-barra-texto-1); --duo-1: var(--sys-barra-texto-1); }
   }
-  .bl__item:active {
-    background: var(--sys-barra-capa);
+  .bl__item[aria-current="page"] { color: var(--sys-barra-texto-1); --duo-1: var(--sys-barra-texto-1); }
+  /* La página actual: una línea de color a la izquierda, además del resaltado que descansa en ella. */
+  .bl__item[aria-current="page"]::before {
+    content: "";
+    position: absolute;
+    left: -0.75rem;
+    top: 25%;
+    bottom: 25%;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--sys-barra-acento);
   }
-  .bl__item[aria-current="page"] {
-    background: var(--sys-barra-activo);
-    color: var(--sys-barra-texto-1);
-  }
-  .bl__item[aria-current="page"] .ui-icono {
-    color: var(--sys-barra-acento);
-  }
-  .bl__item:disabled {
-    color: var(--sys-barra-texto-2);
-    cursor: progress;
-  }
+  .bl__item:disabled { cursor: progress; }
   .bl__texto {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    transition: opacity var(--sys-dur-2) var(--sys-ease);
   }
+
+  /* ---------- Abajo: la cuenta y salir ---------- */
   .bl__pie {
     display: grid;
     gap: 2px;
@@ -156,32 +200,55 @@
     align-items: center;
     gap: var(--sys-esp-3);
     min-height: var(--sys-toque);
-    padding: 0 var(--sys-esp-3);
+    padding: 0 var(--sys-esp-2);
     color: var(--sys-barra-texto-1);
+    font-weight: 700;
+  }
+  .bl__avatar {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-marca);
+    --duo-1: #fdfdff;
+    --duo-2: #bcd2ff;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .bl__salir:hover { background: var(--sys-barra-capa); }
+  }
+
+  /* ---------- Achicada: una columna de íconos; el nombre aparece al pasar el mouse ---------- */
+  .bl-marco[data-cerrada] .bl { overflow: visible; }
+  .bl-marco[data-cerrada] .bl__marca { justify-content: center; padding-left: 0; }
+  .bl-marco[data-cerrada] .bl__nombres,
+  .bl-marco[data-cerrada] .bl__tecla { display: none; }
+  .bl-marco[data-cerrada] .bl__seccion-titulo { opacity: 0; height: 0; overflow: hidden; }
+  .bl-marco[data-cerrada] .bl__buscar,
+  .bl-marco[data-cerrada] .bl__item,
+  .bl-marco[data-cerrada] .bl__usuario { position: relative; justify-content: center; padding: 0; }
+  .bl-marco[data-cerrada] .bl__texto {
+    position: absolute;
+    left: calc(100% + var(--sys-esp-3));
+    top: 50%;
+    z-index: 2;
+    padding: var(--sys-esp-1) var(--sys-esp-3);
+    border-radius: var(--sys-radio-s);
+    background: var(--sys-texto-1);
+    color: var(--sys-lienzo);
+    font-size: var(--sys-tipo-s);
     font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-4px, -50%);
+    transition: opacity var(--sys-dur-1) var(--sys-ease), transform var(--sys-dur-1) var(--sys-ease);
   }
-  .bl__usuario .ui-icono {
-    color: var(--sys-barra-acento);
+  .bl-marco[data-cerrada] :is(.bl__item, .bl__buscar, .bl__usuario):is(:hover, :focus-visible) .bl__texto {
+    opacity: 1;
+    transform: translate(0, -50%);
   }
-  .bl__tapa {
-    position: absolute;
-    inset: 0;
-    border: 0;
-    background: transparent;
-    cursor: pointer;
-  }
-  .bl-marco[data-cerrada] .bl__texto,
-  .bl-marco[data-cerrada] .bl__tecla,
-  .bl-marco[data-cerrada] .bl__nombre {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-  .bl-marco[data-cerrada] .bl__grupo-cuerpo {
-    padding-left: 0;
-  }
+
   .bl-abrir,
   .bl__cerrar-movil {
     display: none;
@@ -224,31 +291,13 @@
       color: var(--sys-texto-1);
       cursor: pointer;
     }
-    .bl__cerrar-movil {
-      display: grid;
-      place-items: center;
-      width: var(--sys-toque);
-      height: var(--sys-toque);
-      margin-left: auto;
-      border: 0;
-      border-radius: var(--sys-radio-s);
-      background: transparent;
-      color: var(--sys-barra-texto-2);
-      cursor: pointer;
-    }
-    .bl__achicar,
-    .bl__tapa {
-      display: none;
-    }
+    .bl__cerrar-movil { display: grid; }
     /* En el teléfono no hay "barra achicada": se abre encima entera. */
-    .bl-marco[data-cerrada] .bl__texto,
-    .bl-marco[data-cerrada] .bl__tecla,
-    .bl-marco[data-cerrada] .bl__nombre {
-      position: static;
-      width: auto;
-      height: auto;
-      clip-path: none;
-    }
+    .bl__panel { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bl, .bl-contenido, .bl__texto, .bl__seccion-titulo { transition: none; }
   }
 
   /* ---------- Búsqueda rápida (Ctrl+K): abre y cierra al instante, sin animación (05 §14) ---------- */

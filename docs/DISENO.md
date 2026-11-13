@@ -46,14 +46,14 @@ Prohibido por medición: nada (todos los pares de texto de estado sobre todos lo
 
 ## 4. Navegación
 
-Barra lateral izquierda (`docs/reglas/02` B2), sin cabecera arriba: logo, botón de búsqueda (`Ctrl+K`) y usuario dentro de la barra.
+Barra lateral izquierda (`docs/reglas/02` B2), sin cabecera arriba (D-022, referencia #3 Animate UI Sidebar): arriba "CESS - GVG" + "PORTAL" y el botón de achicar, después la búsqueda (`Ctrl+K`), las secciones y, al pie, la cuenta y "Salir".
 
-| Grupo | Página | Ícono |
+| Sección | Página | Ícono (a dos colores, D-018) |
 |---|---|---|
-| (sin grupo, primera) | Proyectos | carpeta con un más (trazo propio, `D-008`) |
+| Portal | Proyectos | carpeta |
 | Administración | Grupos | cuatro casillas con un más |
 | Administración | Usuarios | dos personas |
 
-El grupo Administración se despliega al pasar el mouse (120 ms) o al tocar, sin chevron, con los íconos en cascada.
+Las secciones están siempre a la vista. Un solo resaltado se desliza a la opción bajo el mouse y vuelve a la página actual; la actual lleva además una línea de color a la izquierda. Achicada, queda una columna de íconos y el nombre aparece al lado al pasar el mouse.
 
 Cada pantalla nueva sale de una ronda de 5 a 7 referencias reales de ese componente (`docs/reglas/02` B8) antes de construirla.

@@ -1,5 +1,6 @@
 export const navegacion = {
   principal: "Navegación principal",
+  seccionPortal: "Portal",
   proyectos: "Proyectos",
   administracion: "Administración",
   grupos: "Grupos",
