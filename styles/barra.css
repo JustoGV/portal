@@ -110,14 +110,15 @@
     flex: 1;
     display: grid;
     align-content: start;
-    gap: var(--sys-esp-5);
+    gap: var(--sys-esp-2);
     margin-top: var(--sys-esp-2);
   }
+  /* El alto, el ancho y la posición los pone el componente: mide la fila donde tiene que apoyarse. */
   .bl__resaltado {
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
+    width: 100%;
     height: var(--sys-toque);
     border-radius: var(--sys-radio-m);
     background: var(--sys-barra-capa);
@@ -125,25 +126,40 @@
     opacity: 0;
     pointer-events: none;
   }
-  .bl__seccion { display: grid; gap: var(--sys-esp-1); }
-  .bl__seccion-titulo {
-    margin: 0;
-    padding: 0 var(--sys-esp-3);
-    color: var(--sys-barra-texto-2);
-    font-size: var(--sys-tipo-xs);
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    transition: opacity var(--sys-dur-2) var(--sys-ease);
+  /* Cada sección es una fila que se abre y cierra, con sus páginas debajo como sub-enlaces unidos por
+     una línea (D-024, corrección de Mateo del 2026-11-14). */
+  .bl__seccion { display: grid; }
+  .bl__item.bl__grupo { color: var(--sys-barra-texto-1); font-weight: 700; }
+  .bl__grupo .bl__texto { flex: 1; }
+  .bl__pico {
+    --duo-1: var(--sys-barra-texto-2);
+    transition: transform var(--sys-dur-2) var(--sys-ease);
+  }
+  .bl__grupo[aria-expanded="true"] .bl__pico { transform: rotate(90deg); }
+  /* El alto pasa de 0 a lo que mida la lista sin calcularlo: una fila de grilla de 0fr a 1fr. */
+  .bl__sub {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--sys-dur-2) var(--sys-ease);
+  }
+  .bl__seccion[data-abierta] .bl__sub { grid-template-rows: 1fr; }
+  /* El recorte deja 4 px a cada lado para que el anillo de foco de un sub-enlace no quede cortado. */
+  .bl__sub-recorte {
+    min-height: 0;
+    margin: 0 -4px;
+    padding: 0 4px;
+    overflow: hidden;
   }
   .bl__lista {
     display: grid;
     gap: 2px;
     list-style: none;
-    margin: 0;
-    padding: 0;
+    /* La línea baja desde el centro del ícono de la sección: 0,75rem de relleno + 10 px de medio ícono. */
+    margin: 2px 0 var(--sys-esp-1) calc(var(--sys-esp-3) + 10px);
+    padding: 0 0 0 var(--sys-esp-2);
+    border-left: 1px solid var(--sys-barra-borde-control);
   }
+  .bl__item--sub { min-height: 2.5rem; font-weight: 500; }
   .bl__item {
     position: relative;
     display: flex;
@@ -169,7 +185,8 @@
   }
   .bl__item[aria-current="page"] { color: var(--sys-barra-texto-1); --duo-1: var(--sys-barra-texto-1); }
   /* La página actual: una línea de color a la izquierda, además del resaltado que descansa en ella. */
-  .bl__item[aria-current="page"]::before {
+  .bl__item[aria-current="page"]::before,
+  .bl__grupo[data-actual]::before {
     content: "";
     position: absolute;
     left: -0.75rem;
@@ -179,6 +196,12 @@
     border-radius: 0 3px 3px 0;
     background: var(--sys-barra-acento);
   }
+  /* En un sub-enlace la marca se apoya sobre la línea de la sección: ese tramo se enciende. */
+  .bl__item--sub[aria-current="page"]::before {
+    left: calc(-1 * var(--sys-esp-2) - 2px);
+    border-radius: 3px;
+  }
+  .bl__item--sub[aria-current="page"] { font-weight: 700; }
   .bl__item:disabled { cursor: progress; }
   .bl__texto {
     min-width: 0;
@@ -224,7 +247,13 @@
   .bl-marco[data-cerrada] .bl__marca { justify-content: center; padding-left: 0; }
   .bl-marco[data-cerrada] .bl__nombres,
   .bl-marco[data-cerrada] .bl__tecla { display: none; }
-  .bl-marco[data-cerrada] .bl__seccion-titulo { opacity: 0; height: 0; overflow: hidden; }
+  /* Sin filas de sección: quedan los íconos de las páginas, sin sangría ni línea. */
+  .bl-marco[data-cerrada] .bl__grupo { display: none; }
+  .bl-marco[data-cerrada] .bl__sub { grid-template-rows: 1fr; transition: none; }
+  .bl-marco[data-cerrada] .bl__sub-recorte { overflow: visible; }
+  .bl-marco[data-cerrada] .bl__lista { margin: 0; padding: 0; border-left: 0; }
+  .bl-marco[data-cerrada] .bl__item--sub { min-height: var(--sys-toque); }
+  .bl-marco[data-cerrada] .bl__item--sub[aria-current="page"]::before { left: -0.75rem; border-radius: 0 3px 3px 0; }
   .bl-marco[data-cerrada] .bl__buscar,
   .bl-marco[data-cerrada] .bl__item,
   .bl-marco[data-cerrada] .bl__usuario { position: relative; justify-content: center; padding: 0; }
@@ -297,10 +326,12 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .bl, .bl-contenido, .bl__texto, .bl__seccion-titulo { transition: none; }
+    .bl, .bl-contenido, .bl__texto, .bl__sub, .bl__pico { transition: none; }
   }
 
-  /* ---------- Búsqueda rápida (Ctrl+K): abre y cierra al instante, sin animación (05 §14) ---------- */
+  /* ---------- Búsqueda rápida (Ctrl+K): abre y cierra al instante, sin animación (05 §14) ----------
+     D-025, referencia #1 Holo · Command Palette: lista a la izquierda, ficha de lo marcado a la derecha,
+     contador y teclas abajo. En el teléfono queda solo la lista. */
   .bq-velo {
     position: fixed;
     inset: 0;
@@ -312,15 +343,18 @@
     background: var(--sys-velo);
   }
   .bq {
-    width: min(100%, 40rem);
-    max-height: 70vh;
+    width: min(100%, 52rem);
+    max-height: 76vh;
     display: flex;
     flex-direction: column;
+    border: 1px solid var(--sys-borde);
     border-radius: var(--sys-radio-xl);
     background: var(--sys-capa);
     box-shadow: var(--sys-sombra);
     outline: 0 solid transparent;
     overflow: hidden;
+    --duo-1: var(--sys-texto-2);
+    --duo-2: var(--sys-marca-tinta);
   }
   .bq__dialogo {
     display: flex;
@@ -332,10 +366,11 @@
     display: flex;
     align-items: center;
     gap: var(--sys-esp-3);
-    padding: 0 var(--sys-esp-5);
+    padding: 0 var(--sys-esp-4) 0 var(--sys-esp-5);
     border-bottom: 1px solid var(--sys-borde);
     color: var(--sys-texto-2);
   }
+  .bq__campo > svg { flex: none; }
   .bq__entrada {
     flex: 1;
     min-width: 0;
@@ -349,26 +384,99 @@
   .bq__entrada:focus-visible {
     outline: 0 solid transparent;
   }
+  .bq__tecla {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.625rem;
+    height: 1.625rem;
+    padding: 0 var(--sys-esp-2);
+    border: 1px solid var(--sys-borde-2);
+    border-radius: 6px;
+    background: var(--sys-capa-2);
+    color: var(--sys-texto-2);
+    font: inherit;
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    line-height: 1;
+  }
+  .bq__tecla--boton {
+    flex: none;
+    /* El área de toque llega a 44 px sin agrandar el dibujo. */
+    position: relative;
+    cursor: pointer;
+  }
+  .bq__tecla--boton::after {
+    content: "";
+    position: absolute;
+    inset: -9px -6px;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .bq__tecla--boton:hover { border-color: var(--sys-marca-borde); color: var(--sys-texto-1); }
+  }
+
+  /* El alto es fijo para que la paleta no salte de tamaño mientras se escribe. */
+  .bq__cuerpo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    height: min(28rem, 56vh);
+    min-height: 0;
+  }
+  .bq__cuerpo[data-con-ficha] { grid-template-columns: minmax(0, 1fr) 20rem; }
   .bq__lista {
+    min-height: 0;
     overflow-y: auto;
     padding: var(--sys-esp-2);
     list-style: none;
     margin: 0;
   }
+  .bq__grupo {
+    padding: var(--sys-esp-3) var(--sys-esp-3) var(--sys-esp-1);
+    color: var(--sys-texto-3);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
   .bq__opcion {
+    position: relative;
     display: flex;
     align-items: center;
     gap: var(--sys-esp-3);
     min-height: 3.25rem;
     padding: var(--sys-esp-2) var(--sys-esp-3);
-    border-radius: var(--sys-radio-s);
+    border-radius: var(--sys-radio-m);
     cursor: pointer;
+    scroll-margin: var(--sys-esp-2);
+  }
+  .bq__cuadro {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-s);
+    background: var(--sys-capa);
   }
   .bq__opcion[aria-selected="true"] {
     background: var(--sys-marca-suave);
   }
-  .bq__opcion[aria-selected="true"] .ui-icono {
-    color: var(--sys-marca-tinta);
+  /* La marcada: la misma barrita de la barra lateral, y su cuadro pasa al color de la marca. */
+  .bq__opcion[aria-selected="true"]::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 22%;
+    bottom: 22%;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--sys-marca);
+  }
+  .bq__opcion[aria-selected="true"] .bq__cuadro {
+    border-color: transparent;
+    background: var(--sys-marca);
+    --duo-1: var(--sys-marca-texto);
+    --duo-2: var(--sys-marca-texto);
   }
   .bq__opcion-texto {
     display: grid;
@@ -388,21 +496,153 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .bq__pie,
   .bq__vacio {
-    padding: var(--sys-esp-3) var(--sys-esp-5);
+    padding: var(--sys-esp-4) var(--sys-esp-5);
     color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+  }
+
+  /* Falló la búsqueda: qué pasó y cómo reintentar, en el mismo espacio que ocupaba la lista. */
+  .bq__cuerpo--error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sys-esp-3);
+    padding: var(--sys-esp-5);
+    text-align: center;
+    --duo-1: var(--sys-danger);
+    --duo-2: var(--sys-danger);
+  }
+  .bq__error-texto { margin: 0; color: var(--sys-texto-1); font-weight: 600; }
+  .bq__reintentar {
+    min-height: var(--sys-toque);
+    padding: 0 var(--sys-esp-5);
+    border: 1px solid var(--sys-borde-control);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa);
+    color: var(--sys-texto-1);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .bq__reintentar:hover { border-color: var(--sys-marca-borde); background: var(--sys-marca-suave); }
+  }
+  .bq__teclas[hidden] { display: none; }
+
+  /* ---------- La ficha de lo marcado ---------- */
+  .bq__ficha {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sys-esp-3);
+    min-height: 0;
+    padding: var(--sys-esp-4);
+    border-left: 1px solid var(--sys-borde);
+    background: var(--sys-capa-2);
+    overflow-y: auto;
+    animation: bq-ficha var(--sys-dur-1) var(--sys-ease);
+  }
+  @keyframes bq-ficha {
+    from { opacity: 0; transform: translateY(4px); }
+  }
+  .bq__ficha-cabeza {
+    display: grid;
+    place-items: center;
+    flex: none;
+    height: 5rem;
+    border-radius: var(--sys-radio-l);
+    background:
+      radial-gradient(120% 140% at 0% 0%, rgb(255 255 255 / 0.22), transparent 55%),
+      linear-gradient(135deg, var(--sys-marca), var(--sys-marca-activo));
+    --duo-1: var(--sys-marca-texto);
+    --duo-2: #bcd2ff;
+  }
+  .bq__ficha-nombre {
+    margin: 0;
+    color: var(--sys-texto-1);
+    font-size: var(--sys-tipo-l);
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+  .bq__ficha-texto {
+    margin: 0;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    text-wrap: pretty;
+    /* Una descripción larga no empuja los datos fuera de la ficha: se corta en cuatro renglones. */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    overflow: hidden;
+  }
+  .bq__ficha-datos {
+    display: grid;
+    /* Sin esto la columna se estira hasta el dato más largo y la ficha desborda. */
+    grid-template-columns: minmax(0, 1fr);
+    margin: 0;
     font-size: var(--sys-tipo-s);
   }
-  .bq__pie {
-    border-top: 1px solid var(--sys-borde);
+  .bq__ficha-datos > div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--sys-esp-3);
+    padding: var(--sys-esp-2) 0;
+    border-bottom: 1px solid var(--sys-borde);
   }
-  .bq__grupo {
-    padding: var(--sys-esp-2) var(--sys-esp-3) var(--sys-esp-1);
-    color: var(--sys-texto-2);
+  .bq__ficha-datos dt { flex: none; color: var(--sys-texto-2); }
+  .bq__ficha-datos dd {
+    margin: 0;
+    min-width: 0;
+    color: var(--sys-texto-1);
+    font-weight: 600;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .bq__ficha-nota {
+    margin: auto 0 0;
+    color: var(--sys-texto-3);
     font-size: var(--sys-tipo-xs);
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+  }
+
+  /* ---------- Abajo: cuántos hay y las teclas ---------- */
+  .bq__pie {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sys-esp-4);
+    min-height: 2.75rem;
+    padding: 0 var(--sys-esp-4) 0 var(--sys-esp-5);
+    border-top: 1px solid var(--sys-borde);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    white-space: nowrap;
+  }
+  .bq__teclas {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-1);
+  }
+  .bq__teclas .bq__tecla:nth-of-type(3) { margin-left: var(--sys-esp-3); }
+
+  /* Pantalla chica: sin ficha y casi a pantalla completa. Sin teclado, las teclas del pie sobran. */
+  @media (max-width: 47.99rem) {
+    .bq-velo { padding: var(--sys-esp-3); }
+    .bq { max-height: calc(100dvh - 2 * var(--sys-esp-3)); }
+    .bq__cuerpo,
+    .bq__cuerpo[data-con-ficha] { grid-template-columns: minmax(0, 1fr); height: min(30rem, 64dvh); }
+    .bq__ficha { display: none; }
+    .bq__teclas { display: none; }
+    .bq__entrada { font-size: var(--sys-tipo-l); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bq__ficha { animation: none; }
   }
 }

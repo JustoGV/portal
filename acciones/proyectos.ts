@@ -120,7 +120,7 @@ export async function restaurarProyecto(id: string) {
   return cambiarArchivo(id, false)
 }
 
-export type ResultadoRapido = { id: string; nombre: string; url: string; grupo: string | null }
+export type ResultadoRapido = { id: string; nombre: string; url: string; grupo: string | null; descripcion: string | null; actualizadoEn: Date }
 
 /** Ctrl+K. */
 export async function buscarProyectosRapido(texto: string): Promise<Resultado<ResultadoRapido[]>> {

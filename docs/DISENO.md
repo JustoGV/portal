@@ -54,6 +54,6 @@ Barra lateral izquierda (`docs/reglas/02` B2), sin cabecera arriba (D-022, refer
 | Administración | Grupos | cuatro casillas con un más |
 | Administración | Usuarios | dos personas |
 
-Las secciones están siempre a la vista. Un solo resaltado se desliza a la opción bajo el mouse y vuelve a la página actual; la actual lleva además una línea de color a la izquierda. Achicada, queda una columna de íconos y el nombre aparece al lado al pasar el mouse.
+Cada sección ("Portal", casa; "Administración", escudo) es una fila que se abre y cierra con un pico a la derecha; sus páginas van debajo como sub-enlaces, con sangría y unidas por una línea vertical (D-024). Arrancan abiertas. Un solo resaltado se desliza a la fila bajo el mouse y vuelve a la página actual; la actual enciende su tramo de la línea. Si la sección de la página actual está cerrada, el resaltado y la marca descansan en la fila de la sección. Achicada, queda una columna de íconos y el nombre aparece al lado al pasar el mouse.
 
 Cada pantalla nueva sale de una ronda de 5 a 7 referencias reales de ese componente (`docs/reglas/02` B8) antes de construirla.

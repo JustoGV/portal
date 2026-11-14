@@ -105,7 +105,7 @@ Unidades en orden. Cada una termina con `typecheck`, `lint` y `test` en verde, l
 | # | Pantalla | Qué entra | Estado |
 |---|---|---|---|
 | 1 | **Ingreso** (`/ingresar`, `/configurar`, `/primer-ingreso`) | Las tres comparten diseño. Fuente candidata: el login del sistema de discapacidad (`servicios/sistema-front`, `/login`), aprobado por el socio para los sistemas de CESS - GVG. **Hecho el 2026-11-12: variante "Escenario" (D-019)** | ✅ OK de Mateo ("Queda, seguimos") |
-| 2 | **Barra lateral y `Ctrl+K`** | El marco de todas las pantallas: logo, búsqueda, navegación, usuario | Sigue |
+| 2 | **Barra lateral y `Ctrl+K`** | El marco de todas las pantallas: logo, búsqueda, navegación, usuario | Barra ✅ OK de Mateo el 2026-11-14 (D-022 + D-024). `Ctrl+K` rehecho con ficha (D-025), **espera su OK** |
 | 3 | **Proyectos** | La lista (hecha el 2026-11-12, D-017, **espera su OK**), el formulario de nuevo/editar en pasos, las tarjetas de resultado, los avisos y sus íconos | En curso |
 | 4 | **Grupos** | Lista, formulario, avisos, íconos | — |
 | 5 | **Usuarios** | Lista, formulario con validación de email, contraseña inicial, inactividad, íconos | — |

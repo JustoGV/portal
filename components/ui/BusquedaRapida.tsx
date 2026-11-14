@@ -3,22 +3,25 @@ import { useRouter } from "next/navigation"
 import { useEffect, useId, useRef, useState } from "react"
 import { Dialog, Modal, ModalOverlay } from "react-aria-components"
 import { buscarProyectosRapido, type ResultadoRapido } from "@/acciones/proyectos"
-import { Icono } from "@/components/iconos/Icono"
-import type { NombreIcono } from "@/components/iconos/trazos"
+import { IconoDuo, type IconoDuoApi, type NombreDuo } from "@/components/iconos/IconoDuo"
 import { navegacion as t } from "@/i18n/es/navegacion"
+import { formatDia } from "@/lib/fecha"
+import { pegar } from "@/lib/texto"
 import { sitioDe } from "@/lib/url"
 
-type Opcion = { tipo: "proyecto"; p: ResultadoRapido } | { tipo: "pagina"; href: string; texto: string; icono: NombreIcono }
+type Pagina = { href: string; texto: string; icono: NombreDuo; ficha: string }
+type Opcion = { tipo: "proyecto"; p: ResultadoRapido } | ({ tipo: "pagina" } & Pagina)
 
-const PAGINAS = [
-  { href: "/", texto: "Proyectos", icono: "proyectos" },
-  { href: "/grupos", texto: "Grupos", icono: "grupos" },
-  { href: "/usuarios", texto: "Usuarios", icono: "usuarios" },
-] as const
+const PAGINAS: Pagina[] = [
+  { href: "/", texto: t.proyectos, icono: "carpeta", ficha: t.fichaProyectos },
+  { href: "/grupos", texto: t.grupos, icono: "grupos", ficha: t.fichaGrupos },
+  { href: "/usuarios", texto: t.usuarios, icono: "personas", ficha: t.fichaUsuarios },
+]
 
 /**
- * Ctrl+K (docs/reglas/05 §14): abre y cierra al instante, sin animación. Enter abre el proyecto en otra
- * pestaña. Los resultados cambian mientras se escribe.
+ * Ctrl+K (docs/reglas/05 §14; WU-06 pantalla 2, D-025; referencia #1 Holo · Command Palette de 21st.dev):
+ * a la izquierda la lista en dos grupos, a la derecha la ficha de lo marcado, abajo el contador y las
+ * teclas. Abre y cierra al instante, sin animación. Enter abre el servicio en otra pestaña.
  */
 export function BusquedaRapida() {
   const [abierta, setAbierta] = useState(false)
@@ -57,11 +60,13 @@ function Contenido({ alCerrar }: { alCerrar: () => void }) {
   const [proyectos, setProyectos] = useState<ResultadoRapido[] | null>(null)
   const [error, setError] = useState(false)
   const [activo, setActivo] = useState(0)
+  const [intento, setIntento] = useState(0)
   const pedido = useRef(0)
+  const iconos = useRef<(IconoDuoApi | null)[]>([])
 
   useEffect(() => {
     const n = ++pedido.current
-    const t = window.setTimeout(
+    const espera = window.setTimeout(
       async () => {
         try {
           const r = await buscarProyectosRapido(texto)
@@ -80,12 +85,26 @@ function Contenido({ alCerrar }: { alCerrar: () => void }) {
       },
       texto ? 150 : 0,
     )
-    return () => window.clearTimeout(t)
-  }, [texto, router])
+    return () => window.clearTimeout(espera)
+  }, [texto, router, intento])
 
   const q = texto.trim().toLowerCase()
+  const servicios: Opcion[] = (proyectos ?? []).map((p) => ({ tipo: "proyecto", p }))
   const paginas: Opcion[] = PAGINAS.filter((p) => !q || p.texto.toLowerCase().includes(q)).map((p) => ({ tipo: "pagina", ...p }))
-  const opciones: Opcion[] = [...(proyectos ?? []).map((p) => ({ tipo: "proyecto" as const, p })), ...paginas]
+  const opciones = [...servicios, ...paginas]
+  const marcada = opciones[Math.min(activo, opciones.length - 1)]
+
+  // La fila marcada siempre queda a la vista al moverse con las flechas.
+  useEffect(() => {
+    document.getElementById(`${id}-${activo}`)?.scrollIntoView({ block: "nearest" })
+  }, [activo, id])
+
+  /** Marca una fila porque la persona se movió (flechas o mouse): ahí sí se mueve su ícono. */
+  const mover = (i: number) => {
+    if (i === activo || i < 0 || i >= opciones.length) return
+    setActivo(i)
+    iconos.current[i]?.animar()
+  }
 
   const elegir = (o: Opcion | undefined) => {
     if (!o) return
@@ -94,10 +113,36 @@ function Contenido({ alCerrar }: { alCerrar: () => void }) {
     else router.push(o.href)
   }
 
+  const fila = (o: Opcion, i: number) => (
+    <li
+      key={o.tipo === "proyecto" ? o.p.id : o.href}
+      id={`${id}-${i}`}
+      role="option"
+      aria-selected={i === activo}
+      className="bq__opcion"
+      onPointerMove={() => mover(i)}
+      onClick={() => elegir(o)}
+    >
+      <span className="bq__cuadro" aria-hidden="true">
+        <IconoDuo
+          ref={(api) => {
+            iconos.current[i] = api
+          }}
+          nombre={o.tipo === "proyecto" ? "abrir" : o.icono}
+          tamano={18}
+        />
+      </span>
+      <span className="bq__opcion-texto">
+        <span className="bq__nombre">{o.tipo === "proyecto" ? o.p.nombre : o.texto}</span>
+        {o.tipo === "proyecto" && <span className="bq__sitio">{o.p.grupo ?? t.fichaSinGrupo}</span>}
+      </span>
+    </li>
+  )
+
   return (
     <>
       <div className="bq__campo">
-        <Icono nombre="buscar" tamano={24} />
+        <IconoDuo nombre="lupa" tamano={22} />
         <input
           className="bq__entrada"
           autoFocus
@@ -113,53 +158,96 @@ function Contenido({ alCerrar }: { alCerrar: () => void }) {
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") {
               e.preventDefault()
-              setActivo((a) => Math.min(opciones.length - 1, a + 1))
+              mover(activo + 1)
             } else if (e.key === "ArrowUp") {
               e.preventDefault()
-              setActivo((a) => Math.max(0, a - 1))
+              mover(activo - 1)
             } else if (e.key === "Enter") {
               e.preventDefault()
-              elegir(opciones[activo])
+              elegir(marcada)
             }
           }}
         />
+        <button type="button" className="bq__tecla bq__tecla--boton" onClick={alCerrar} aria-label={t.busquedaCerrar}>
+          Esc
+        </button>
       </div>
+
       {error ? (
-        <p className="bq__vacio" role="status">
-          {t.busquedaError}
-        </p>
+        // Mismo alto que la lista: la paleta no cambia de tamaño al fallar.
+        <div className="bq__cuerpo bq__cuerpo--error" role="status">
+          <IconoDuo nombre="alerta" tamano={32} />
+          <p className="bq__error-texto">{t.busquedaError}</p>
+          <button type="button" className="bq__reintentar" onClick={() => setIntento((n) => n + 1)}>
+            {t.busquedaReintentar}
+          </button>
+        </div>
       ) : (
-        <ul id={`${id}-lista`} className="bq__lista" role="listbox" aria-label={t.busquedaTitulo}>
-          {proyectos !== null && proyectos.length === 0 && (
-            <li className="bq__vacio" role="presentation">
-              {q ? t.busquedaVacia : t.busquedaSinProyectos}
-            </li>
-          )}
-          {opciones.map((o, i) => (
-            <li
-              key={o.tipo === "proyecto" ? o.p.id : o.href}
-              id={`${id}-${i}`}
-              role="option"
-              aria-selected={i === activo}
-              className="bq__opcion"
-              onPointerMove={() => setActivo(i)}
-              onClick={() => elegir(o)}
-            >
-              <Icono nombre={o.tipo === "proyecto" ? "abrir" : o.icono} />
-              <span className="bq__opcion-texto">
-                <span className="bq__nombre">{o.tipo === "proyecto" ? o.p.nombre : `${t.irA} ${o.texto}`}</span>
-                {o.tipo === "proyecto" && (
-                  <span className="bq__sitio">
-                    {o.p.grupo ? `${o.p.grupo} · ` : ""}
-                    {sitioDe(o.p.url)}
-                  </span>
-                )}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <div className="bq__cuerpo" data-con-ficha={marcada ? true : undefined}>
+          <ul id={`${id}-lista`} className="bq__lista" role="listbox" aria-label={t.busquedaTitulo}>
+            {proyectos !== null && proyectos.length === 0 && (
+              <li className="bq__vacio" role="presentation">
+                {q ? t.busquedaVacia : t.busquedaSinProyectos}
+              </li>
+            )}
+            {servicios.length > 0 && (
+              <li className="bq__grupo" role="presentation">
+                {t.busquedaGrupoServicios}
+              </li>
+            )}
+            {servicios.map((o, i) => fila(o, i))}
+            {paginas.length > 0 && (
+              <li className="bq__grupo" role="presentation">
+                {t.busquedaGrupoPaginas}
+              </li>
+            )}
+            {paginas.map((o, i) => fila(o, servicios.length + i))}
+          </ul>
+          {marcada && <Ficha key={marcada.tipo === "proyecto" ? marcada.p.id : marcada.href} opcion={marcada} />}
+        </div>
       )}
-      <p className="bq__pie">{t.busquedaAyuda}</p>
+
+      <div className="bq__pie">
+        <span role="status">{error ? "" : opciones.length === 1 ? t.busquedaUnResultado : `${opciones.length} ${t.busquedaResultados}`}</span>
+        <span className="bq__teclas" aria-hidden="true" hidden={error || opciones.length === 0}>
+          <kbd className="bq__tecla">↑</kbd>
+          <kbd className="bq__tecla">↓</kbd>
+          {t.teclaMover}
+          <kbd className="bq__tecla">↵</kbd>
+          {t.teclaAbrir}
+        </span>
+      </div>
     </>
+  )
+}
+
+/** La ficha de lo marcado: qué es y a dónde lleva, antes de abrirlo. En el teléfono no se muestra. */
+function Ficha({ opcion: o }: { opcion: Opcion }) {
+  const servicio = o.tipo === "proyecto"
+  return (
+    <aside className="bq__ficha" aria-label={t.fichaTitulo}>
+      <div className="bq__ficha-cabeza" aria-hidden="true">
+        <IconoDuo nombre={servicio ? "abrir" : o.icono} tamano={40} />
+      </div>
+      <p className="bq__ficha-nombre">{servicio ? o.p.nombre : o.texto}</p>
+      <p className="bq__ficha-texto">{pegar(servicio ? (o.p.descripcion ?? t.fichaSinDescripcion) : o.ficha)}</p>
+      {servicio && (
+        <dl className="bq__ficha-datos">
+          <div>
+            <dt>{t.fichaGrupo}</dt>
+            <dd>{o.p.grupo ?? t.fichaSinGrupo}</dd>
+          </div>
+          <div>
+            <dt>{t.fichaSitio}</dt>
+            <dd>{sitioDe(o.p.url)}</dd>
+          </div>
+          <div>
+            <dt>{t.fichaActualizado}</dt>
+            <dd>{formatDia(o.p.actualizadoEn)}</dd>
+          </div>
+        </dl>
+      )}
+      <p className="bq__ficha-nota">{servicio ? t.fichaOtraPestana : t.fichaEstaPestana}</p>
+    </aside>
   )
 }

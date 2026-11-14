@@ -80,10 +80,10 @@ export const buscarDuplicado = async (campo: "nombre" | "url", valor: string, ex
   return fila ?? null
 }
 
-/** Para Ctrl+K: hasta 8, activos, por nombre. */
+/** Para Ctrl+K: hasta 8, activos, por nombre. Trae lo que muestra la ficha (descripción y última actualización). */
 export const buscarRapido = async (q: string) =>
   db
-    .select({ id: proyectos.id, nombre: proyectos.nombre, url: proyectos.url, grupo: grupos.nombre })
+    .select({ id: proyectos.id, nombre: proyectos.nombre, url: proyectos.url, grupo: grupos.nombre, descripcion: proyectos.descripcion, actualizadoEn: proyectos.actualizadoEn })
     .from(proyectos)
     .leftJoin(grupos, eq(grupos.id, proyectos.grupoId))
     .where(and(isNull(proyectos.archivadoEn), condBusqueda(q)))

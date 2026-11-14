@@ -6,7 +6,7 @@
 import { forwardRef, useImperativeHandle, useRef } from "react"
 import { EASE, gsap, quieto } from "@/lib/gsap"
 
-export type NombreDuo = "sobre" | "candado" | "ojo" | "flecha" | "tilde" | "carpeta" | "alerta" | "lupa" | "abrir" | "archivo" | "persona" | "llave" | "reloj" | "grupos" | "personas" | "salir" | "panel"
+export type NombreDuo = "sobre" | "candado" | "ojo" | "flecha" | "tilde" | "carpeta" | "alerta" | "lupa" | "abrir" | "archivo" | "persona" | "llave" | "reloj" | "grupos" | "personas" | "salir" | "panel" | "inicio" | "escudo" | "pico"
 
 export type IconoDuoApi = { animar: (variante?: "entrar" | "foco" | "alternar") => void }
 
@@ -176,6 +176,26 @@ function Dibujo({ nombre, tachado }: { nombre: NombreDuo; tachado?: boolean }) {
           <path data-parte="columna" style={C2} d="M9 4.5v15" />
         </>
       )
+    // Patrón "wired outline" de lordicon (sin abrir el ícono puntual): el techo se asienta y la puerta se dibuja.
+    case "inicio":
+      return (
+        <>
+          <path data-parte="casa" style={C1} d="M5 10.5V19a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19v-8.5" />
+          <path data-parte="techo" style={C1} d="M3 11.5l9-7.5 9 7.5" />
+          <path data-parte="puerta" style={C2} d="M9.75 20.5v-5.5h4.5v5.5" />
+        </>
+      )
+    // Patrón "wired outline" de lordicon (sin abrir el ícono puntual): el escudo late y el tilde se escribe.
+    case "escudo":
+      return (
+        <>
+          <path data-parte="escudo" style={C1} d="M12 3.5l7.5 2.75v5.5c0 4.5-3 7.75-7.5 9-4.5-1.25-7.5-4.5-7.5-9v-5.5L12 3.5Z" />
+          <path data-parte="marca" style={C2} d="M8.75 12l2.25 2.25 4.25-4.5" />
+        </>
+      )
+    // El pico que dice si una sección está abierta. Lo gira el CSS (.bl__pico); no tiene animación propia.
+    case "pico":
+      return <path data-parte="pico" style={C1} d="M9.5 6.5l5.5 5.5-5.5 5.5" />
   }
 }
 
@@ -265,6 +285,16 @@ export const IconoDuo = forwardRef<IconoDuoApi, Props>(function IconoDuo({ nombr
           break
         case "panel":
           tl.fromTo(parte("columna"), { x: 0 }, { x: variante === "alternar" ? -3 : 3, duration: 0.18, yoyo: true, repeat: 1, ease: "power2.inOut" })
+          break
+        case "inicio":
+          tl.fromTo(parte("techo"), { y: -2.5 }, { y: 0, duration: 0.5, ease: "bounce.out" })
+            .fromTo(parte("puerta"), { drawSVG: "0% 0%" }, { drawSVG: "0% 100%", duration: 0.35 }, 0.1)
+          break
+        case "escudo":
+          tl.fromTo(parte("escudo"), { scale: 0.88, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.4, ease: "back.out(3)" })
+            .fromTo(parte("marca"), { drawSVG: "0% 0%" }, { drawSVG: "0% 100%", duration: 0.3 }, 0.12)
+          break
+        case "pico":
           break
       }
     },
