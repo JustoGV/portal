@@ -114,3 +114,27 @@ Unidades en orden. Cada una termina con `typecheck`, `lint` y `test` en verde, l
 **Reglas:** `02` B8, `04` (con D-018), `05`, `06`, `07`, `08`, `12`; `docs/trabajo/MATEO.md` §4, §5 y §10.
 
 **Terminado cuando:** las seis pantallas con su OK, cada una mirada a 375, 1440 y 1920 en claro y oscuro, chequeo de saltos en 0, peor caso probado, consola limpia.
+
+**Orden confirmado (Mateo, 2026-11-14):** las seis pantallas se terminan antes de empezar `WU-07`: *"haría el rediseño del portal, y en base al rediseño luego armamos el tablero"*. Claude propuso meter el tablero después de la pantalla 3 y Mateo lo rechazó; no se vuelve a proponer. En el celular, cada pantalla tiene que usarse como una app, no como una web achicada.
+
+## WU-07 · Tablero de trabajo (Mateo, 2026-11-14)
+
+**Objetivo:** que los tres socios vean en el portal qué hay que hacer y qué espera a quién, y que Claudio conteste sus dudas ahí. Mateo: *"podríamos poner un CRM en el portal… un lugar donde diga dudas Claudio, entonces él entra al portal y ve todas esas dudas y las puede responder desde ahí"*.
+
+**Qué entra en la primera versión:** cuatro listas (`Dudas para Claudio`, `Servicios`, `Tareas`, `Correcciones`), tarjetas, comentarios y etiquetas por servicio. Una forma de que el chat de Claude lea el tablero. **Queda para después:** documentos y formularios dentro de la tarjeta.
+
+**No empieza hasta que `WU-06` tenga el OK en sus seis pantallas.**
+
+**Antes del plan:** ronda de 5 a 7 referencias de tableros (`docs/trabajo/MATEO.md` §5); leer `docs/reglas/10-SEGURIDAD.md` y `11-DATOS.md`, porque suma tablas y permisos; un `D-` nuevo que amplíe el alcance del BRIEF (hoy el portal es un lanzador de links); acordarlo con el socio.
+
+**Archivos:** se declaran en el plan, con su GO-AHEAD.
+
+**Terminado cuando:** los tres entran, ven sus tarjetas y comentan; Claudio contestó una duda desde el portal; el chat responde "¿qué sigo?" leyendo el tablero.
+
+## WU-08 · Registro de casos (Mateo, 2026-11-14)
+
+**Objetivo:** guardar cada problema que trae un cliente con las preguntas que se le mandaron, lo que contestó y cómo se resolvió. Hoy ese trabajo no queda en ningún lado.
+
+**Va después de** `WU-07` y de los formularios por chat (cerebro, `_proceso/plan-de-trabajo.md`, paso 3). **Antes de cargar un caso real** hay que resolver qué datos son de salud y cómo se disocian (`OQ-` nueva al planearla).
+
+**Terminado cuando:** un caso real está cargado de punta a punta.

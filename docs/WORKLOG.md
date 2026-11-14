@@ -7,13 +7,13 @@ Dos secciones. **§1 ESTADO** se sobrescribe completa cada vez que se cierra una
 | Campo | Valor |
 |---|---|
 | Tarea actual | **WU-06 · Rediseño pantalla por pantalla** (`docs/ROADMAP.md`). Pantalla 1 Ingreso ✅ con OK de Mateo. Pantalla 2 Barra lateral: la barra está hecha (D-022) y espera su OK; falta la ronda de `Ctrl+K`, que cierra la pantalla. Proyectos: la lista está hecha (D-017) y espera su OK. |
-| Estado real | Todo en la rama `diseno/lista-proyectos`, **sin commitear** (sale de `main` en `52d2b00`). `typecheck` y `lint` limpios, `test` 79 pasan (1 salteado) contra Postgres local en `portal-cess-pg-55442`. Next.js 16.4.6 (D-021). Mateo creó su cuenta local (`mateogaviraghi24@gmail.com`, con `pnpm crear-admin`, la corrió él) y entró: el ingreso real y el cambio de contraseña inicial funcionan. |
+| Estado real | Rama `diseno/lista-proyectos`, commiteada (sale de `main` en `52d2b00`) y **sin subir**: `123b793` con el rediseño y un commit de documentación del 2026-11-14 encima. `typecheck` y `lint` limpios, `test` 79 pasan (1 salteado) contra Postgres local en `portal-cess-pg-55442`. Next.js 16.4.6 (D-021). Mateo creó su cuenta local (`mateogaviraghi24@gmail.com`, con `pnpm crear-admin`, la corrió él) y entró: el ingreso real y el cambio de contraseña inicial funcionan. |
 | Radar de seguridad | 2026-11-12 · `pnpm audit --prod`: 0 críticas, 0 altas, 3 moderadas en herramientas (TD-006). |
-| Último chat | 2026-11-12/13 · Mateo, local: lista de Proyectos, Ingreso (3 prototipos → Escenario), Next.js seguro, barra lateral, reglas y orden de WU-06. |
-| Qué espera de Mateo | OK o correcciones a la barra lateral ("queda, sigue Ctrl+K"); OK a la lista de Proyectos; decir si se commitea la rama; OQ-009 con el socio (nombre, rama `nombre-portal-consultora`, Next actualizado, cuenta de Claudio). |
+| Último chat | 2026-11-14 · Mateo, local: reorganización de todo el trabajo de la consultora (sin código). El portal pasa a ser el lugar de trabajo de los tres socios; `WU-07` (tablero) y `WU-08` (registro de casos) nuevas, las dos **después** de terminar `WU-06`. |
+| Qué espera de Mateo | **De a una** (regla suya del 14/11): primero, OK o correcciones a la barra lateral. Después: OK a la lista de Proyectos; decir "subí el portal" si quiere la rama en GitHub; OQ-009 y el reparto de tareas con el socio. |
 | Qué espera del socio | OQ-009; después OQ-002 (cuentas) para publicar (WU-05). |
 | Qué espera de terceros | — |
-| Próxima acción | Ronda de 5 a 7 referencias de `Ctrl+K` (búsqueda rápida, `components/ui/BusquedaRapida.tsx`, clases `bq__` de `styles/barra.css`) con el método de `docs/trabajo/MATEO.md` §5 y §10; después pantalla 3 Proyectos (formulario en pasos, tarjetas de resultado, avisos, íconos); 4 Grupos; 5 Usuarios (incluye TD-008); 6 Cuenta y configuración. |
+| Próxima acción | Ronda de 5 a 7 referencias de `Ctrl+K` (búsqueda rápida, `components/ui/BusquedaRapida.tsx`, clases `bq__` de `styles/barra.css`) con el método de `docs/trabajo/MATEO.md` §5 y §10; después pantalla 3 Proyectos (formulario en pasos, tarjetas de resultado, avisos, íconos); 4 Grupos; 5 Usuarios (incluye TD-008); 6 Cuenta y configuración. **Las seis antes de `WU-07`: ese orden lo fijó Mateo y no se vuelve a proponer otro.** La cola de toda la consultora vive en `C:\Dev\cess-consultora\brain\_proceso\plan-de-trabajo.md`. |
 | Qué no se toca | Las reglas de `docs/reglas/` sin un `D-` que diga por qué. `docs/reglas/02-CRITERIO-DASHBOARD.md` Parte A. Las migraciones 0000–0002 una vez que corran en producción. La rama `nombre-portal-consultora` del socio (OQ-009). Ningún `.env.example`. |
 
 ## 2. REGISTRO
@@ -104,3 +104,12 @@ Dos secciones. **§1 ESTADO** se sobrescribe completa cada vez que se cierra una
 - **Gates:** sin cambios de código desde la entrada de la barra (`typecheck`, `lint` limpios; `test` 79 pasan).
 - **Sigue:** la ronda de `Ctrl+K`.
 
+
+### 2026-11-14 · Reorganización del trabajo de la consultora (solo documentación) · Mateo
+- **Pedido:** "estoy muy perdido, no sé cómo podemos avanzar… siempre falta uno para el peso". Charla por preguntas, de a una. GO-AHEAD: "Armarlo de una forma eficiente, que sea muy, muy, muy profesional… empezar a trabajar como líderes técnicos".
+- **Hecho:** el orden de toda la consultora quedó en el cerebro (`brain/_proceso/plan-de-trabajo.md`): 1) rediseño completo del portal (`WU-06`), 2) tablero de trabajo (`WU-07`), 3) formularios por chat, 4) registro de casos (`WU-08`). En este repo: `WU-06` con el orden confirmado y `WU-07` y `WU-08` descritas en el ROADMAP. Reglas de diseño dictadas por Mateo para todos los sistemas (vara: sus proyectos Sanalys y EDV): formularios en tarjetas por pasos, tres niveles de texto, tablas centradas, etiqueta en cada botón, desplegables propios, confirmación y error animados que dicen por qué, movimiento que muestra el cambio al filtrar, íconos propios, tablero y configuración completos, y en el celular como una app.
+- **Archivos:** `docs/ROADMAP.md` (orden de `WU-06`, `WU-07`, `WU-08`), este archivo (ESTADO).
+- **Verificado:** nada que correr; no se tocó código.
+- **Resuelto en el camino:** Claude propuso dos veces hacer el tablero después de la pantalla 3 y lo escribió en el ROADMAP como decidido. Mateo lo rechazó: "habíamos dicho el rediseño primero, ¿por qué me proponés el tablero?". Corregido. Causa: reabrir una decisión ya tomada. Regla: el orden que fija Mateo no se vuelve a proponer.
+- **Gates:** no se corrieron (sin cambios de código desde `123b793`).
+- **Sigue:** OK de Mateo a la barra lateral, y la ronda de `Ctrl+K`. Una sola pregunta por vez. `WU-07` necesita antes un `D-` que amplíe el alcance del BRIEF y el acuerdo con el socio.
