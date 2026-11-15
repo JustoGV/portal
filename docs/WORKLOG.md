@@ -1,5 +1,5 @@
 | Próxima acción | **Pantalla 4, Grupos, entera y de una vez** (D-028): ronda de pantallas completas o las mismas piezas de Servicios (D-030) llevadas a Grupos, lo que Mateo prefiera; plan y GO-AHEAD. Cada entrega con el sistema levantado y el link, capturas en claro, y la alineación medida con números (G-011). Siguen 5 Usuarios (TD-008) y 6 Cuenta y configuración; **las seis antes de `WU-07`**. |
-| Qué espera de Mateo | **De a una.** Decir si se commitea la pantalla 3 (está entera en el árbol de trabajo). Después: nombrar la pantalla 4; "subí el portal" si quiere la rama en GitHub; OQ-009 y el reparto con el socio (D-030 cambia D-004 y apaga el tema oscuro). |
+| Qué espera de Mateo | **De a una.** Nombrar la pantalla 4, Grupos. Después: "subí el portal" si quiere la rama en GitHub; OQ-009 y el reparto con el socio (D-030 cambia D-004 y apaga el tema oscuro). |
 | Tarea actual | **WU-06 · Rediseño pantalla por pantalla** (`docs/ROADMAP.md`). Pantallas 1, 2 y **3 ✅ (Servicios, cerrada el 2026-11-15 con el "Queda" de Mateo, D-030)**. Van 3 de 6. Sigue la pantalla 4, Grupos. |
 # WORKLOG
 
@@ -10,7 +10,7 @@ Dos secciones. **§1 ESTADO** se sobrescribe completa cada vez que se cierra una
 | Campo | Valor |
 |---|---|
 | Tarea actual | **WU-06 · Rediseño pantalla por pantalla** (`docs/ROADMAP.md`). Pantallas 1 y 2 ✅. **Pantalla 3, Servicios: rehecha entera el 2026-11-15 como combinación (D-029, D-030) y esperando el OK de Mateo.** Cifras que filtran, buscador y filtro de grupo, tabla con orden, ficha en tarjeta que crece desde la fila, formulario en pasos completado, portal siempre en claro. |
-| Estado real | Rama `diseno/lista-proyectos` (sale de `main` en `52d2b00`), **sin subir**. Commiteado hasta `087e711`; **toda la pantalla 3 está en el árbol de trabajo, sin commitear** (formulario en pasos, textos de "Servicios", pantalla completa, tema claro). `typecheck` y `lint` limpios; `test` 79 pasan y 1 salteado, con `DATABASE_URL_DIRECT` apuntando a la base local (G-005). Next.js 16.4.6 (D-021). |
+| Estado real | Rama `diseno/lista-proyectos` (sale de `main` en `52d2b00`), commiteada entera y **sin subir**: el código llega hasta `0e9a0e0` (pantalla 3) y encima van los commits del registro. `typecheck` y `lint` limpios; `test` 79 pasan y 1 salteado, con `DATABASE_URL_DIRECT` apuntando a la base local (G-005). Next.js 16.4.6 (D-021). |
 | Radar de seguridad | 2026-11-12 · `pnpm audit --prod`: 0 críticas, 0 altas, 3 moderadas en herramientas (TD-006). Vence el 2026-11-19. |
 | Último chat | 2026-11-15 · Mateo, local: rechazo de la pantalla por piezas (D-028), ronda de 7 pantallas completas, pedido de combinar (D-029), plan combinado con GO-AHEAD y construcción de la pantalla entera (D-030). |
 | Qué espera de Mateo | **De a una.** Mirar la pantalla Servicios entera en `http://localhost:3000` y decir si queda o qué corregir. Después: "subí el portal" si quiere la rama en GitHub; OQ-009 y el reparto con el socio (ahora también D-030: cambia D-004 y apaga el tema oscuro). |
