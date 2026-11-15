@@ -26,6 +26,7 @@ export const TRAZOS = {
   menu: ["M4 7h16", "M4 12h16", "M4 17h16"],
   cerrar: ["M6 6l12 12", "M18 6 6 18"],
   tilde: ["M5 12.5l4.5 4.5L19 7.5"],
+  ficha: ["M4.5 5.5h15v13h-15z", "M8 10h8", "M8 14h5"],
   alerta: ["M12 3.5 21.5 20h-19z", "M12 10v4.5", "M12 17.2v.3"],
 } as const
 

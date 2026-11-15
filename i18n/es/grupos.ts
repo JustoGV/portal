@@ -1,19 +1,19 @@
 export const grupos = {
   titulo: "Grupos",
-  bajada: "Ordenan los proyectos. Se crean también desde el formulario de un proyecto.",
+  bajada: "Ordenan los servicios. También se crean al\u00a0cargar un\u00a0servicio.",
   nuevo: "Nuevo grupo",
   estado: "Estado",
   activos: "Activos",
   archivados: "Archivados",
   tabla: "Lista de grupos",
   colNombre: "Nombre",
-  colProyectos: "Proyectos",
+  colProyectos: "Servicios",
   colAcciones: "Acciones",
   renombrar: "Renombrar",
   archivar: "Archivar",
   restaurar: "Restaurar",
   vacioTitulo: "Todavía no hay grupos",
-  vacioTexto: "Un grupo junta proyectos parecidos, por ejemplo «Clientes» o «Internos».",
+  vacioTexto: "Un grupo junta servicios parecidos, por ejemplo «Clientes» o «Internos».",
   sinArchivados: "No hay grupos archivados",
   tituloNuevo: "Nuevo grupo",
   tituloRenombrar: "Renombrar grupo",
@@ -23,8 +23,8 @@ export const grupos = {
   archivarTitulo: (n: string) => `¿Archivar «${n}»?`,
   archivarTexto: (cuantos: number) =>
     cuantos > 0
-      ? `Deja de ofrecerse al cargar un proyecto. Sus ${cuantos === 1 ? "proyecto sigue" : `${cuantos} proyectos siguen`} mostrándolo. Lo podés restaurar cuando quieras.`
-      : "Deja de ofrecerse al cargar un proyecto. Lo podés restaurar cuando quieras.",
+      ? `Deja de ofrecerse al cargar un servicio. Sus ${cuantos === 1 ? "servicio sigue" : `${cuantos} servicios siguen`} mostrándolo. Lo podés restaurar cuando quieras.`
+      : "Deja de ofrecerse al cargar un servicio. Lo podés restaurar cuando quieras.",
   archivado: "Grupo archivado",
   restaurado: "Grupo restaurado",
 } as const

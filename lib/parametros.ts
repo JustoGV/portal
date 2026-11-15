@@ -23,6 +23,18 @@ export const leerUuid = (v: string | string[] | undefined) => {
 }
 export const esUuid = (s: string) => UUID.test(s)
 
+/** El filtro de grupo: un grupo, "ninguno" (los que no tienen grupo) o todos (null). */
+export const SIN_GRUPO = "ninguno"
+export const leerGrupo = (v: string | string[] | undefined) => (uno(v) === SIN_GRUPO ? SIN_GRUPO : leerUuid(v))
+
+/** Por qué columna se ordena la tabla y hacia dónde. Por defecto, por nombre de la A a la Z. */
+export const ORDENES = ["nombre", "grupo", "actualizado"] as const
+export type Orden = (typeof ORDENES)[number]
+export const leerOrden = (p: ParametrosLista): { orden: Orden; dir: "asc" | "desc" } => {
+  const o = uno(p.orden)
+  return { orden: (ORDENES as readonly string[]).includes(o ?? "") ? (o as Orden) : "nombre", dir: uno(p.dir) === "desc" ? "desc" : "asc" }
+}
+
 /** La misma dirección con algunos parámetros cambiados. `null` saca el parámetro. */
 export const conParametros = (ruta: string, actuales: Record<string, string | null | undefined>, cambios: Record<string, string | number | null>) => {
   const q = new URLSearchParams()

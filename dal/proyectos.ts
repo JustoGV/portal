@@ -1,13 +1,14 @@
 import "server-only"
-import { and, eq, ilike, isNotNull, isNull, ne, or, sql, type SQL } from "drizzle-orm"
+import { and, asc, desc, eq, ilike, isNotNull, isNull, ne, or, sql, type SQL } from "drizzle-orm"
 import { db } from "@/db"
 import { grupos, proyectos } from "@/db/schema"
 import type { FilaProyecto } from "@/lib/proyecto"
+import { SIN_GRUPO, type Orden } from "@/lib/parametros"
 import { escaparLike } from "@/lib/texto"
 
 // Lecturas de Proyectos. Quien llama ya pasó por el guard (la página o la acción).
 
-export type FiltroProyectos = { q: string; grupo: string | null; estado: "activos" | "archivados"; pagina: number; por: number }
+export type FiltroProyectos = { q: string; grupo: string | null; estado: "activos" | "archivados"; pagina: number; por: number; orden?: Orden; dir?: "asc" | "desc" }
 
 const ordenNombre = sql`${proyectos.nombreClave} collate "es-x-icu"`
 
@@ -17,10 +18,19 @@ const condBusqueda = (q: string): SQL | undefined => {
   return or(ilike(proyectos.nombre, patron), ilike(proyectos.descripcion, patron), ilike(proyectos.url, patron))
 }
 const condEstado = (estado: FiltroProyectos["estado"]) => (estado === "activos" ? isNull(proyectos.archivadoEn) : isNotNull(proyectos.archivadoEn))
+/** Un grupo, los que no tienen grupo, o todos. */
+const condGrupo = (grupo: string | null): SQL | undefined => (grupo === SIN_GRUPO ? isNull(proyectos.grupoId) : grupo ? eq(proyectos.grupoId, grupo) : undefined)
+/** La columna de orden sale de una lista cerrada (lib/parametros), nunca del texto del pedido. Siempre con desempate único (07 §3). */
+const ordenDe = (orden: Orden = "nombre", dir: "asc" | "desc" = "asc") => {
+  const hacia = dir === "desc" ? desc : asc
+  if (orden === "actualizado") return [hacia(proyectos.actualizadoEn), ordenNombre, proyectos.id]
+  if (orden === "grupo") return [sql`lower(${grupos.nombre}) collate "es-x-icu" ${sql.raw(dir === "desc" ? "desc" : "asc")} nulls last`, ordenNombre, proyectos.id]
+  return [sql`${ordenNombre} ${sql.raw(dir === "desc" ? "desc" : "asc")}`, proyectos.id]
+}
 
 /** Una página de la lista, con el total en la misma lectura (docs/reglas/07 §3). */
 export const listarProyectos = async (f: FiltroProyectos): Promise<{ filas: FilaProyecto[]; total: number }> => {
-  const donde = and(condEstado(f.estado), f.grupo ? eq(proyectos.grupoId, f.grupo) : undefined, condBusqueda(f.q))
+  const donde = and(condEstado(f.estado), condGrupo(f.grupo), condBusqueda(f.q))
   const filas = await db
     .select({
       id: proyectos.id,
@@ -36,7 +46,7 @@ export const listarProyectos = async (f: FiltroProyectos): Promise<{ filas: Fila
     .from(proyectos)
     .leftJoin(grupos, eq(grupos.id, proyectos.grupoId))
     .where(donde)
-    .orderBy(ordenNombre, proyectos.id)
+    .orderBy(...ordenDe(f.orden, f.dir))
     .limit(f.por)
     .offset((f.pagina - 1) * f.por)
   let total = filas[0]?.total ?? 0
@@ -67,6 +77,21 @@ export const contarProyectos = async (q: string, estado: FiltroProyectos["estado
       .orderBy(sql`lower(${grupos.nombre}) collate "es-x-icu"`),
   ])
   return { activos: estados?.activos ?? 0, archivados: estados?.archivados ?? 0, porGrupo }
+}
+
+/** Las cuatro cifras de arriba de la pantalla: no dependen de la búsqueda ni de los filtros. */
+export const cifrasProyectos = async () => {
+  const [[p], [g]] = await Promise.all([
+    db
+      .select({
+        activos: sql<number>`count(*) filter (where ${proyectos.archivadoEn} is null)`.mapWith(Number),
+        archivados: sql<number>`count(*) filter (where ${proyectos.archivadoEn} is not null)`.mapWith(Number),
+        sinGrupo: sql<number>`count(*) filter (where ${proyectos.archivadoEn} is null and ${proyectos.grupoId} is null)`.mapWith(Number),
+      })
+      .from(proyectos),
+    db.select({ n: sql<number>`count(*)`.mapWith(Number) }).from(grupos).where(isNull(grupos.archivadoEn)),
+  ])
+  return { activos: p?.activos ?? 0, archivados: p?.archivados ?? 0, sinGrupo: p?.sinGrupo ?? 0, grupos: g?.n ?? 0 }
 }
 
 /** ¿Hay otro proyecto con este nombre o este link? (el aviso en vivo; la base lo frena igual). */

@@ -3,7 +3,7 @@
    Marca azul índigo, tono 264 (D-014); los neutrales se tiñen hacia ella. */
 @layer tokens {
   :root {
-    color-scheme: light dark;
+    color-scheme: light; /* el portal abre siempre en claro (D-030) */
     --sys-lienzo: #f2f4fa;
     --sys-capa: #fefeff;
     --sys-capa-2: #f6f8fc;
@@ -98,8 +98,10 @@
     --sys-barra-cerrada: 4.5rem;
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
+  /* Tema oscuro: ya no sigue al sistema (D-030, "no quiero que sea negro"). Queda detrás de un atributo que
+     hoy nadie pone, por si la pantalla de configuración lo ofrece más adelante. */
+  :root[data-tema="oscuro"] {
+    color-scheme: dark;
       --sys-lienzo: #0c0e14;
       --sys-capa: #13161d;
       --sys-capa-2: #1b1f28;
@@ -150,7 +152,6 @@
       --sys-info-solido-texto: var(--sys-lienzo);
       --sys-sombra: 0 16px 40px -12px rgb(0 0 0 / 0.6), 0 2px 6px -2px rgb(0 0 0 / 0.4);
       --sys-velo: rgb(0 0 0 / 0.55);
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {

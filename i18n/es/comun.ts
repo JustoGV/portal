@@ -21,4 +21,11 @@ export const comun = {
   guardadoTitulo: "Guardado",
   noGuardadoTitulo: "No se guardó",
   abriendo: "Abriendo…",
+  // Formularios en pasos (D-026)
+  siguiente: "Siguiente",
+  atras: "Atrás",
+  pasoDe: (n: number, total: number) => `Paso ${n} de ${total}`,
+  pasoActual: "paso actual",
+  pasoHecho: "completo",
+  pasoPendiente: "pendiente",
 } as const

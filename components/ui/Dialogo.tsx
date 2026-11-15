@@ -13,11 +13,13 @@ type Props = {
   /** Si hay cambios sin guardar, cerrar pregunta antes (docs/reglas/05 §4). */
   hayCambios?: boolean
   ancho?: string
+  /** De dónde sale la tarjeta (la fila o el botón que la abrió): crece desde ahí. */
+  origen?: () => DOMRect | null
   children: ReactNode
 }
 
 /** El formulario de alta o edición en una tarjeta centrada, detrás de un botón que dice qué hay adentro. */
-export function Dialogo({ abierto, alCerrar, titulo, bajada, hayCambios, ancho, children }: Props) {
+export function Dialogo({ abierto, alCerrar, titulo, bajada, hayCambios, ancho, origen, children }: Props) {
   const idTitulo = useId()
   const confirmar = useConfirmar()
 
@@ -30,7 +32,7 @@ export function Dialogo({ abierto, alCerrar, titulo, bajada, hayCambios, ancho, 
   }
 
   return (
-    <TarjetaModal abierto={abierto} alPedirCierre={pedirCierre} idTitulo={idTitulo} ancho={ancho}>
+    <TarjetaModal abierto={abierto} alPedirCierre={pedirCierre} idTitulo={idTitulo} ancho={ancho} origen={origen}>
       <div className="ui-dialogo__cabecera">
         <div>
           <h2 id={idTitulo} className="ui-dialogo__titulo">

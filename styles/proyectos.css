@@ -1,110 +1,203 @@
 @layer modulos {
-  /* ---------- Lista de proyectos (referencia #5, D-017) ---------- */
-  .pr-lista {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
+  /* ---------- Pantalla Servicios (WU-06 pantalla 3, D-030) ---------- */
 
-  .pr-fila {
-    position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
-    grid-template-areas: "principal meta acciones";
+  /* Título con su contador al lado (Untitled UI, Shadcn Admin). */
+  .pr-titulo {
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    column-gap: var(--sys-esp-6);
-    min-height: 5rem;
-    padding: var(--sys-esp-4) var(--sys-esp-4) var(--sys-esp-4) var(--sys-esp-6);
-    border-bottom: 1px solid var(--sys-borde);
-    transition: background-color var(--sys-dur-1) var(--sys-ease);
+    gap: var(--sys-esp-3);
   }
-  .pr-fila:last-child {
-    border-bottom: 0;
-  }
-
-  .pr-fila__principal {
-    grid-area: principal;
-    display: grid;
-    gap: var(--sys-esp-1);
-    min-width: 0;
-  }
-
-  /* El link del nombre. Su ::after cubre toda la fila: tocar cualquier parte abre el proyecto. */
-  .pr-fila__abrir {
-    justify-self: start;
-    max-width: 100%;
-    color: var(--sys-texto-1);
-    font-size: var(--sys-tipo-xl);
+  .pr-titulo__cuenta {
+    padding: 0.125rem 0.75rem;
+    border: 1px solid var(--sys-marca-borde);
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-marca-suave);
+    color: var(--sys-marca-tinta);
+    font-size: var(--sys-tipo-s);
     font-weight: 700;
-    line-height: 1.3;
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Las cuatro cifras que filtran (EDV, Square UI Bookmarks) ---------- */
+  .pr-cifras {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--sys-esp-4);
+    margin-bottom: var(--sys-esp-5);
+  }
+  .pr-cifra {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    min-height: 5rem;
+    padding: var(--sys-esp-3) var(--sys-esp-4);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-l);
+    background: var(--sys-capa);
+    color: var(--sys-texto-1);
     text-decoration: none;
-    text-wrap: balance;
-    overflow-wrap: anywhere;
-    outline: none;
-    transition: color var(--sys-dur-1) var(--sys-ease);
-  }
-  .pr-fila__abrir::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-  }
-  .pr-fila__abrir:focus-visible::after {
-    outline: 2px solid var(--sys-foco);
-    outline-offset: -3px;
-    border-radius: var(--sys-radio-m);
-  }
-
-  /* El subrayado se escribe de izquierda a derecha, renglón por renglón si el nombre ocupa dos. */
-  .pr-fila__nombre {
-    padding-bottom: 2px;
-    background: linear-gradient(currentColor, currentColor) 0 100% / 0% 2px no-repeat;
-    -webkit-box-decoration-break: clone;
-    box-decoration-break: clone;
-    transition: background-size var(--sys-dur-2) var(--sys-ease);
-  }
-
-  .pr-fila__flecha {
-    display: inline-block;
-    margin-left: var(--sys-esp-2);
-    vertical-align: -0.0625rem;
-    color: var(--sys-texto-3);
-    opacity: 0;
-    transform: translate(-4px, 4px);
     transition:
-      opacity var(--sys-dur-1) var(--sys-ease),
-      transform var(--sys-dur-2) var(--sys-ease),
-      color var(--sys-dur-1) var(--sys-ease);
+      border-color var(--sys-dur-1) var(--sys-ease),
+      background-color var(--sys-dur-1) var(--sys-ease),
+      transform var(--sys-dur-1) var(--sys-ease);
   }
-
-  .pr-fila__descripcion {
-    margin: 0;
+  .pr-cifra:focus-visible {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .pr-cifra:hover {
+      border-color: var(--sys-marca-borde);
+      background: var(--sys-capa-2);
+    }
+  }
+  .pr-cifra:active {
+    transform: scale(0.98);
+  }
+  .pr-cifra[data-actual] {
+    border-color: var(--sys-marca);
+    background: var(--sys-marca-suave);
+  }
+  .pr-cifra__icono {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa-2);
+    --duo-1: var(--sys-texto-1);
+    --duo-2: var(--sys-marca-tinta);
+  }
+  .pr-cifra[data-actual] .pr-cifra__icono {
+    border-color: var(--sys-marca-borde);
+    background: var(--sys-capa);
+  }
+  .pr-cifra__texto {
+    display: grid;
     min-width: 0;
-    color: var(--sys-texto-2);
+  }
+  .pr-cifra__titulo {
     font-size: var(--sys-tipo-m);
-    line-height: 1.45;
+    font-weight: 700;
+  }
+  .pr-cifra__pista {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+  }
+  .pr-cifra__numero {
+    font-size: var(--sys-tipo-3xl);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .pr-cifra-esqueleto {
+    height: 5rem;
+    border-radius: var(--sys-radio-l);
+  }
+  @container (max-width: 64rem) {
+    .pr-cifras {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @container (max-width: 30rem) {
+    .pr-cifras {
+      gap: var(--sys-esp-2);
+    }
+    .pr-cifra {
+      grid-template-columns: minmax(0, 1fr) auto;
+      min-height: 4rem;
+      padding: var(--sys-esp-2) var(--sys-esp-3);
+    }
+    .pr-cifra__icono,
+    .pr-cifra__pista {
+      display: none;
+    }
+    .pr-cifra__numero {
+      font-size: var(--sys-tipo-2xl);
+    }
   }
 
-  .pr-fila__meta {
-    grid-area: meta;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: var(--sys-esp-4);
+  /* ---------- La tabla ---------- */
+  /* Anchos fijos por columna: el nombre manda y ninguna columna le roba lugar a otra según el dato. */
+  .pr-tabla {
+    table-layout: fixed;
   }
-
-  /* El grupo: píldora con borde (no es un estado: sin punto de color, 05 §8). */
-  .pr-grupo {
-    display: inline-flex;
-    align-items: center;
-    max-width: 18rem;
-    padding: 0.1875rem 0.75rem;
-    border: 1px solid var(--sys-borde-2);
-    border-radius: var(--sys-radio-full);
+  .pr-tabla th:nth-child(1) { width: 32%; }
+  .pr-tabla th:nth-child(2) { width: 19%; }
+  .pr-tabla th:nth-child(3) { width: 19%; }
+  .pr-tabla th:nth-child(4) { width: 9rem; }
+  .pr-tabla th:nth-child(5) { width: 9.5rem; }
+  .pr-tabla th:nth-child(6) { width: 13.5rem; }
+  .pr-tabla th:first-child,
+  .pr-tabla td:first-child {
+    text-align: left;
+  }
+  .pr-tr {
+    cursor: pointer;
+  }
+  .pr-td-servicio {
+    overflow: hidden;
+  }
+  .pr-nombre {
+    display: block;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
     color: var(--sys-texto-1);
+    font: inherit;
+    font-size: var(--sys-tipo-l);
+    font-weight: 700;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+  }
+  .pr-nombre:focus-visible {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+    border-radius: var(--sys-radio-s);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .pr-tr:hover .pr-nombre {
+      color: var(--sys-marca-tinta);
+    }
+  }
+  .pr-descripcion {
+    margin-top: 0.125rem;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pr-sitio {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pr-fecha {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .pr-grupo {
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: middle;
+    padding: 0.1875rem 0.75rem;
+    border: 1px solid var(--sys-marca-borde);
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-marca-suave);
+    color: var(--sys-marca-tinta);
     font-size: var(--sys-tipo-s);
     font-weight: 600;
     white-space: nowrap;
@@ -113,167 +206,166 @@
   }
   .pr-grupo--sin {
     border-color: transparent;
+    background: none;
     padding-inline: 0;
     color: var(--sys-texto-3);
     font-weight: 500;
   }
-
-  .pr-fila__fecha {
-    color: var(--sys-texto-3);
-    font-size: var(--sys-tipo-s);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
-
-  /* Editar y archivar quedan por encima del área del link. */
-  .pr-fila__acciones {
-    grid-area: acciones;
-    position: relative;
-    z-index: 1;
+  .pr-acciones-extra {
     display: inline-flex;
     gap: var(--sys-esp-1);
   }
+  /* Tabla angosta (teléfono): queda "Abrir" en la fila; lo demás está en la ficha, a un toque. */
+  @container (max-width: 38rem) {
+    .pr-acciones-extra {
+      display: none;
+    }
+    .pr-tabla th:nth-child(1) { width: auto; }
+    .pr-tabla th:nth-child(6) { width: 6.25rem; }
+  }
 
-  /* ---------- Con mouse: el estado de reposo es limpio; las acciones aparecen con la fila ---------- */
-  @media (hover: hover) and (pointer: fine) {
-    .pr-fila__acciones {
-      opacity: 0;
-      transition: opacity var(--sys-dur-1) var(--sys-ease);
+  /* Pantalla angosta: el filtro ocupa el ancho entero, debajo del buscador. */
+  @container (max-width: 38rem) {
+    .ui-herramientas__filtros,
+    .ui-herramientas__filtros .ui-filtro {
+      width: 100%;
     }
-    .pr-fila:hover {
-      background: var(--sys-capa-2);
-    }
-    .pr-fila:hover .pr-fila__acciones,
-    .pr-fila:focus-within .pr-fila__acciones {
-      opacity: 1;
-    }
-    .pr-fila:hover .pr-fila__nombre {
-      background-size: 100% 2px;
-    }
-    .pr-fila:hover .pr-fila__flecha {
-      opacity: 1;
-      transform: none;
-      color: var(--sys-marca-tinta);
-    }
-    .pr-fila:hover .pr-fila__abrir {
-      color: var(--sys-marca-tinta);
+    .ui-herramientas__filtros .ui-filtro__boton {
+      flex: 1;
+      max-width: none;
     }
   }
-  /* Con teclado, el mismo estado que con el mouse. */
-  .pr-fila:has(.pr-fila__abrir:focus-visible) {
+
+  /* El pie de la tabla: cuántos se ven y la paginación. */
+  .pr-pie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sys-esp-3);
+    padding: var(--sys-esp-3) var(--sys-esp-4);
+    border-top: 1px solid var(--sys-borde-2);
     background: var(--sys-capa-2);
   }
-  .pr-fila:has(.pr-fila__abrir:focus-visible) .pr-fila__nombre {
-    background-size: 100% 2px;
-  }
-  .pr-fila:has(.pr-fila__abrir:focus-visible) .pr-fila__flecha {
-    opacity: 1;
-    transform: none;
-  }
-  /* Apretado: responde al bajar el dedo (05 §0). */
-  .pr-fila:has(.pr-fila__abrir:active) {
-    background: var(--sys-capa-3);
-  }
-
-  /* ---------- Ancho angosto (la caja es el contenedor): grupo y fecha bajan a una segunda línea ---------- */
-  @container (max-width: 44rem) {
-    .pr-fila {
-      grid-template-columns: minmax(0, 1fr) auto;
-      grid-template-areas:
-        "principal acciones"
-        "meta meta";
-      row-gap: var(--sys-esp-3);
-      align-items: start;
-      padding: var(--sys-esp-4) var(--sys-esp-2) var(--sys-esp-4) var(--sys-esp-4);
-    }
-    .pr-fila__abrir {
-      font-size: var(--sys-tipo-l);
-    }
-    .pr-fila__descripcion {
-      white-space: normal;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-    }
-    .pr-fila__meta {
-      justify-content: flex-start;
-      flex-wrap: wrap;
-      gap: var(--sys-esp-2) var(--sys-esp-3);
-    }
-    .pr-fila__acciones {
-      align-self: start;
-      margin-top: -0.625rem;
-    }
-    .pr-grupo {
-      max-width: 100%;
-    }
-  }
-
-  /* Entrada en cascada (07 §2): una vez por lista montada, nunca en un refresco. */
-  .llega .pr-fila {
-    animation: ui-fila-entra 500ms var(--sys-ease) backwards;
-    animation-delay: calc(min(var(--i, 0), 14) * var(--paso, 60ms));
-  }
-
-  /* ---------- Tarjeta que sigue al mouse ---------- */
-  .pr-previa {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 60;
-    width: min(22rem, calc(100vw - 1.5rem));
-    padding: var(--sys-esp-4);
-    border: 1px solid var(--sys-borde-2);
-    border-radius: var(--sys-radio-m);
-    background: var(--sys-capa-3);
-    box-shadow: var(--sys-sombra);
-    pointer-events: none;
-    opacity: 0;
-    visibility: hidden;
-    transform: scale(0.96);
-    transform-origin: 0 0;
-  }
-  .pr-previa > p {
-    margin: 0;
-  }
-  .pr-previa__sitio {
-    color: var(--sys-texto-1);
-    font-size: var(--sys-tipo-l);
-    font-weight: 700;
-    overflow-wrap: anywhere;
-  }
-  .pr-previa .pr-previa__url {
-    margin-top: var(--sys-esp-1);
-    color: var(--sys-marca-tinta);
-    font-size: var(--sys-tipo-s);
-    overflow-wrap: anywhere;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .pr-previa .pr-previa__descripcion {
-    margin-top: var(--sys-esp-3);
+  .pr-pie__cuenta {
     color: var(--sys-texto-2);
     font-size: var(--sys-tipo-m);
-    line-height: 1.5;
-    text-wrap: pretty;
+    font-variant-numeric: tabular-nums;
   }
-  .pr-previa .pr-previa__pie {
-    display: flex;
-    align-items: center;
-    gap: var(--sys-esp-2);
-    margin-top: var(--sys-esp-3);
-    padding-top: var(--sys-esp-3);
-    border-top: 1px solid var(--sys-borde);
-    color: var(--sys-texto-3);
-    font-size: var(--sys-tipo-xs);
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+  .pr-pie .ui-paginacion {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .pr-pie .ui-paginacion > [aria-live] {
+    display: none; /* la cuenta ya está a la izquierda: un dato, una sola vez */
   }
 
-  /* ---------- Esqueleto de la lista: filas quietas, del alto final ---------- */
+  /* ---------- La ficha del servicio ---------- */
+  .pr-ficha__cabecera {
+    align-items: center;
+    padding-bottom: var(--sys-esp-4);
+    border-bottom: 1px solid var(--sys-borde);
+  }
+  .pr-ficha__sobre {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .pr-ficha__cuenta {
+    color: var(--sys-marca-tinta);
+    font-variant-numeric: tabular-nums;
+  }
+  .pr-ficha__ayuda {
+    margin-top: 0.125rem;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+  .pr-ficha__mandos {
+    display: flex;
+    gap: var(--sys-esp-1);
+  }
+  .pr-ficha__cuerpo {
+    display: grid;
+    gap: var(--sys-esp-4);
+  }
+  .pr-ficha__titular {
+    display: grid;
+    gap: var(--sys-esp-3);
+  }
+  .pr-ficha__nombre {
+    font-size: var(--sys-tipo-2xl);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+  .pr-ficha__etiquetas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sys-esp-2);
+  }
+  .pr-ficha__descripcion {
+    color: var(--sys-texto-1);
+    font-size: var(--sys-tipo-l);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  .pr-ficha__descripcion[data-vacio] {
+    color: var(--sys-texto-2);
+  }
+  .pr-ficha__acciones {
+    justify-content: space-between;
+  }
+  .pr-ficha__resto {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--sys-esp-3);
+  }
+  @container (max-width: 30rem) {
+    .pr-ficha__ayuda {
+      display: none;
+    }
+    .pr-ficha__acciones,
+    .pr-ficha__resto {
+      flex-direction: column-reverse;
+      align-items: stretch;
+    }
+    .pr-ficha__acciones .ui-boton {
+      width: 100%;
+    }
+  }
+
+  /* La vista previa de la fila en el último paso del formulario. */
+  .pr-previa-fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sys-esp-3);
+    margin-bottom: var(--sys-esp-3);
+    padding: var(--sys-esp-3) var(--sys-esp-4);
+    border: 1px solid var(--sys-marca-borde);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-marca-suave);
+  }
+  .pr-previa-fila > div {
+    min-width: 0;
+  }
+  .pr-previa-fila .pr-nombre {
+    cursor: default;
+  }
+  .pr-previa-fila .pr-grupo {
+    flex: none;
+    max-width: 40%;
+    background: var(--sys-capa);
+  }
+
+  /* ---------- Esqueleto de la tabla: filas quietas, del alto final ---------- */
   .pr-esqueleto {
     border: 1px solid var(--sys-borde);
     border-radius: var(--sys-radio-l);
@@ -283,28 +375,16 @@
   .pr-esqueleto__fila {
     display: grid;
     gap: var(--sys-esp-2);
-    min-height: 5rem;
+    min-height: 3.75rem;
     align-content: center;
-    padding: var(--sys-esp-4) var(--sys-esp-6);
+    padding: var(--sys-esp-2) var(--sys-esp-4);
     border-bottom: 1px solid var(--sys-borde);
   }
   .pr-esqueleto__fila:last-child {
     border-bottom: 0;
   }
-
   .pr-filtros-esqueleto {
     display: flex;
     gap: var(--sys-esp-3);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .llega .pr-fila {
-      animation: none;
-    }
-    .pr-fila__nombre,
-    .pr-fila__flecha,
-    .pr-fila__acciones {
-      transition: none;
-    }
   }
 }
