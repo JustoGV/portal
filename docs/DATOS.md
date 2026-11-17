@@ -35,17 +35,23 @@ Postgres (Neon) con Drizzle. Convenciones de `docs/reglas/11`: `snake_case`, cla
 | `inactividad_minutos` | integer, null | `null` = nunca; `check (inactividad_minutos in (30, 60, 120, 240, 480))`; default `480` (supuesto de `OQ-001`) |
 | `actualizado_en`, `actualizado_por` | timestamptz, uuid | |
 
-### `grupos`
+### `grupos` (en la pantalla, «Clientes»: D-032)
 
 | Campo | Tipo | Regla |
 |---|---|---|
 | `id` | uuid | PK |
 | `nombre` | text | 1 a 40, recortado, espacios colapsados |
 | `nombre_clave` | text | **generada**: `lower(nombre)`; **índice único** |
+| `responsable_nombre` | text, null | Nombre y apellido de quien está a cargo del lado del cliente. 1 a 80, recortado (migración `0003`) |
+| `responsable_cargo` | text, null | 1 a 60, recortado |
+| `responsable_mail` | text, null | Hasta 254, **en minúsculas**, con forma `algo@dominio.algo` (check) |
+| `responsable_telefono` | text, null | Formato internacional E.164 (`+5493424551234`), check `^\+[1-9][0-9]{7,14}$` (migración `0004`, D-033). Lo arma la app con `libphonenumber-js` |
+| `responsable_dni` | text, null | 7 u 8 cifras sin puntos, check `^[0-9]{7,8}$` (migración `0004`) |
 | `archivado_en` | timestamptz, null | |
 | `creado_en`, `actualizado_en` | timestamptz | |
 
 - No se borra: se archiva. Un grupo archivado no se ofrece en el formulario, pero sus proyectos lo siguen mostrando.
+- **Datos personales (D-032, D-033):** los cinco `responsable_*` son de una persona. Vacío es `NULL`, nunca un texto vacío. Se corrigen y se vacían desde Editar. La auditoría (`grupo.responsable`) guarda qué campos cambiaron, nunca el valor. No van en la URL ni en los logs (`docs/reglas/10` §7). Los ven todos los que entran al portal (permiso `grupos.gestionar`). Los datos de prueba usan `example.com` y teléfonos 5555.
 
 ### `proyectos`
 

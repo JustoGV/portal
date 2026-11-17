@@ -29,7 +29,8 @@ app/
   (publico)/primer-ingreso/      cambio de contraseña + alta del segundo factor
   (app)/layout.tsx               barra lateral; el marco no espera datos
   (app)/page.tsx                 Proyectos (la pantalla principal)
-  (app)/grupos/                  Grupos
+  (app)/clientes/                Clientes (D-032; por dentro, grupos)
+  (app)/grupos/                  redirige a /clientes con los mismos filtros
   (app)/usuarios/                Cuentas y configuración de inactividad
   api/auth/[...all]/route.ts     endpoints de better-auth
 components/
@@ -69,11 +70,11 @@ scripts/tokens.ts                calcula los colores de los tokens y mide su con
 | `/ingresar` | público | "¿Cómo entro?" |
 | `/primer-ingreso` | sesión sin segundo factor | "¿Qué me falta para poder usar el portal?" |
 | `/` Proyectos | `proyectos.ver` | "¿Dónde está el proyecto que busco?": la lista, con la búsqueda arriba |
-| `/grupos` | `grupos.gestionar` | "¿Cómo están ordenados mis proyectos?" |
+| `/clientes` | `grupos.gestionar` | "¿Quiénes son mis clientes, quién está a cargo y qué servicios tienen?" (D-032). `/grupos` redirige acá |
 | `/usuarios` | `usuarios.gestionar` | "¿Quién tiene acceso y está activo?" |
 | `Ctrl+K` | `proyectos.ver` | "Llevame a X ya" |
 
-Filtros en la URL: `/?q=texto&grupo=<uuid>&estado=activos|archivados&pagina=2&por=25`.
+Filtros en la URL: `/?q=texto&cliente=<uuid>&estado=activos|archivados&pagina=2&por=25`. El filtro se llama `cliente` desde D-032; `grupo` se sigue leyendo para no romper links viejos.
 
 ## 4. Roles y permisos
 
@@ -84,7 +85,7 @@ Un rol, `admin`, guardado en la fila `usuarios.rol` (`D-002`). La matriz vive en
 | `proyectos.ver` (lista, búsqueda, `Ctrl+K`, abrir) | ✓ |
 | `proyectos.editar` (alta, edición) | ✓ |
 | `proyectos.archivar` (archivar y restaurar) | ✓ |
-| `grupos.gestionar` (crear, renombrar, archivar) | ✓ |
+| `grupos.gestionar` (clientes: crear, editar con su responsable, archivar) | ✓ |
 | `usuarios.gestionar` (alta, desactivar, contraseña inicial nueva) | ✓ |
 | `configuracion.editar` (cierre por inactividad) | ✓ |
 
