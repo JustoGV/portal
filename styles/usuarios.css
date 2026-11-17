@@ -1,25 +1,395 @@
+/* La pantalla Usuarios (WU-06 pantalla 5, D-034). Usa las piezas de Servicios (proyectos.css: cifras, filas,
+   ficha) y de Clientes (grupos.css: barra de filtros, ficha en dos columnas, iniciales); acá va lo propio. */
 @layer modulos {
-  .us-clave {
-    margin-top: var(--sys-esp-4);
-    padding: var(--sys-esp-4);
-    border-radius: var(--sys-radio-m);
+  /* ---------- Barra: Estado y Ordenar, dos botones ---------- */
+  @media (max-width: 64rem) {
+    .cl-barra__filtros.us-barra__filtros {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 30rem) {
+    .cl-barra__filtros.us-barra__filtros > :last-child {
+      grid-column: auto;
+    }
+  }
+
+  /* ---------- Tabla ---------- */
+  /* Anchos fijos, como Servicios: la persona manda y ninguna columna le roba lugar a otra según el dato. */
+  .us-tabla {
+    table-layout: fixed;
+  }
+  .us-tabla th:nth-child(1) { width: 34%; }
+  .us-tabla th:nth-child(2) { width: 13.5rem; }
+  .us-tabla th:nth-child(3) { width: 9.5rem; }
+  .us-tabla th:nth-child(4) { width: 9.5rem; }
+  .us-tabla th:nth-child(5) { width: 8rem; }
+  .us-tabla th:nth-child(6) { width: 10rem; }
+  .us-tabla th:first-child,
+  .us-tabla td:first-child {
+    text-align: left;
+  }
+  .us-td-persona {
+    min-width: 0;
+  }
+  .us-persona {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    min-width: 0;
+    text-align: start;
+  }
+  .us-iniciales {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: var(--sys-tipo-s);
+  }
+  .cf-iniciales[data-apagada] {
     background: var(--sys-capa-3);
-    font-size: var(--sys-tipo-xl);
-    text-align: center;
+    color: var(--sys-texto-2);
+  }
+  .us-persona__textos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: var(--sys-esp-2);
+    min-width: 0;
+  }
+  .us-persona__nombre {
+    font-weight: 700;
+  }
+  .us-persona__mail {
+    flex-basis: 100%;
+    overflow: hidden;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .us-vos {
+    display: inline-flex;
+    align-items: center;
+    margin-inline-start: var(--sys-esp-2);
+    padding: 0 var(--sys-esp-2);
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-marca-suave);
+    color: var(--sys-marca-tinta);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    line-height: 1.6;
+    vertical-align: middle;
+  }
+  .us-persona__textos .us-vos {
+    margin-inline-start: 0;
+  }
+  .us-fecha {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  /* La cuenta recién creada se marca una vez, 1,2 s, y se apaga sola. */
+  .us-tr--reciente > td {
+    animation: us-reciente 1.2s var(--sys-ease) both;
+  }
+  @keyframes us-reciente {
+    from {
+      background: var(--sys-marca-suave);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .us-tr--reciente > td {
+      animation: none;
+    }
+  }
+
+  /* ---------- Ficha ---------- */
+  .us-titular {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sys-esp-4);
+    min-width: 0;
+  }
+  .us-titular__iniciales {
+    width: 3.5rem;
+    height: 3.5rem;
+    font-size: var(--sys-tipo-l);
+  }
+  .us-titular__textos {
+    display: grid;
+    gap: var(--sys-esp-1);
+    min-width: 0;
+  }
+  .us-titular__mail {
+    color: var(--sys-texto-2);
+    overflow-wrap: anywhere;
+  }
+  .us-titular .cf-meta {
+    margin-top: var(--sys-esp-1);
+  }
+  .us-filas {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-m);
+    list-style: none;
+    overflow: hidden;
+  }
+  .us-fila {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    min-height: 3.75rem;
+    padding: var(--sys-esp-3) var(--sys-esp-4);
+  }
+  /* Un botón en la fila va debajo del texto: el texto no se aprieta para dejarle lugar. */
+  .us-fila:has(> .ui-boton) {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .us-fila > .ui-boton {
+    grid-column: 2;
+    justify-self: start;
+  }
+  .us-fila + .us-fila {
+    border-top: 1px solid var(--sys-borde);
+  }
+  .us-fila__textos {
+    display: grid;
+    gap: 0.125rem;
+    min-width: 0;
+    line-height: 1.35;
+  }
+  .us-fila__titulo {
+    font-weight: 700;
+  }
+  .us-fila__texto {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+  .us-fila__pie {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .us-esqueleto {
+    display: grid;
+    gap: var(--sys-esp-2);
+  }
+  .us-esqueleto .ui-skeleton {
+    height: 3.75rem;
+    border-radius: var(--sys-radio-m);
+  }
+  .us-movimientos {
+    display: grid;
+    gap: var(--sys-esp-2);
+  }
+  .us-movimientos__lista {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .us-movimiento {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: var(--sys-esp-3);
+    padding: var(--sys-esp-2) 0;
+  }
+  .us-movimiento + .us-movimiento {
+    border-top: 1px solid var(--sys-borde);
+  }
+  .us-movimiento__punto {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-marca);
+    transform: translateY(-0.1rem);
+  }
+  .us-movimiento__quien {
+    color: var(--sys-texto-2);
+  }
+  .us-movimiento__cuando {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .us-ficha__nota {
+    align-self: center;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+
+  /* ---------- Alta: vista previa y «Pasale los datos» ---------- */
+  .us-previa {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    margin-bottom: var(--sys-esp-4);
+    padding: var(--sys-esp-4);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa-2);
+  }
+  .us-previa__textos {
+    display: grid;
+    flex: 1 1 12rem;
+    min-width: 0;
+  }
+  .us-previa__textos .us-persona__nombre {
+    overflow-wrap: anywhere;
+  }
+  .us-datos {
+    display: grid;
+    gap: var(--sys-esp-4);
+  }
+  .us-datos__texto {
+    color: var(--sys-texto-2);
+  }
+  .us-datos__lista {
+    margin: 0;
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-m);
+    overflow: hidden;
+  }
+  .us-dato {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    min-height: 3.5rem;
+    padding: var(--sys-esp-2) var(--sys-esp-1) var(--sys-esp-2) var(--sys-esp-4);
+  }
+  .us-dato + .us-dato {
+    border-top: 1px solid var(--sys-borde);
+  }
+  .us-dato__textos {
+    display: grid;
+    min-width: 0;
+    line-height: 1.35;
+  }
+  .us-dato__valor {
+    margin: 0;
+    font-weight: 600;
+    overflow-wrap: break-word;
+  }
+  .us-clave {
+    margin: var(--sys-esp-1) 0 0;
+    padding: var(--sys-esp-2) var(--sys-esp-3);
+    border-radius: var(--sys-radio-s);
+    background: var(--sys-capa-3);
+    font-size: var(--sys-tipo-l);
+    letter-spacing: 0.04em;
     word-break: break-all;
+  }
+  @media (max-width: 30rem) {
+    .us-clave {
+      font-size: var(--sys-tipo-m);
+      letter-spacing: 0;
+    }
+  }
+  .us-clave > span[aria-hidden] {
+    display: inline-block;
+  }
+
+  /* ---------- Cierre por inactividad: una fila con su control ---------- */
+  .us-ajuste {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sys-esp-4) var(--sys-esp-6);
+    margin-top: var(--sys-esp-7);
+    padding: var(--sys-esp-5);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-l);
+    background: var(--sys-capa);
+  }
+  .us-ajuste__textos {
+    display: grid;
+    flex: 1 1 22rem;
+    gap: var(--sys-esp-1);
+    min-width: 0;
+  }
+  .us-ajuste__titulo {
+    font-size: var(--sys-tipo-l);
+    font-weight: 700;
+  }
+  .us-ajuste__bajada {
+    color: var(--sys-texto-2);
+  }
+  .us-ajuste > :last-child {
+    flex: 1 1 24rem;
+    max-width: 30rem;
   }
   .us-inactividad {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
-    gap: var(--sys-esp-4);
-    max-width: 36rem;
+    gap: var(--sys-esp-3);
   }
   .us-inactividad .ui-campo {
-    flex: 1 1 16rem;
+    flex: 1 1 14rem;
   }
   /* El botón al lado de un campo queda a la altura del control, no del bloque (05 §1). */
   .us-inactividad .ui-boton {
     min-height: 3.5rem;
+  }
+}
+
+/* ---------- En el teléfono: cada cuenta en dos renglones, como Circle · Members (D-034) ----------
+   La persona arriba a lo ancho; debajo, su estado a la izquierda y las acciones a la derecha. Sin cabecera:
+   cada dato se entiende por sí solo. La tabla sigue siendo una tabla para el lector de pantalla. */
+@layer modulos {
+  @media (max-width: 47.99rem) {
+    .us-tabla {
+      table-layout: auto;
+    }
+    .us-tabla thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .us-tabla tbody tr {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas:
+        "persona persona"
+        "estado acciones";
+      align-items: center;
+      gap: var(--sys-esp-2) var(--sys-esp-3);
+      height: auto;
+      padding: var(--sys-esp-3) var(--sys-esp-4);
+      border-bottom: 1px solid var(--sys-borde);
+    }
+    .us-tabla tbody tr:last-child {
+      border-bottom: 0;
+    }
+    .us-tabla td {
+      padding: 0;
+      border-bottom: 0;
+    }
+    .us-tabla td[data-prioridad] {
+      display: none;
+    }
+    .us-tabla td:nth-child(1) {
+      grid-area: persona;
+    }
+    .us-tabla td:nth-child(2) {
+      grid-area: estado;
+      justify-self: start;
+    }
+    .us-tabla td.ui-tabla__acciones {
+      grid-area: acciones;
+      width: auto;
+    }
+    .us-ajuste {
+      padding: 0;
+      border: 0;
+      background: none;
+    }
   }
 }

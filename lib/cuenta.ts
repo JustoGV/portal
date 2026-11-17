@@ -1,12 +1,15 @@
 import { z } from "zod"
 import { CONTRASENA_MAX, CONTRASENA_MIN } from "./contrasena"
+import { MAIL_MAX, mailValido, normalizarMail } from "./mail"
 import { NOMBRE_PERSONA_MAX } from "./nombre"
+import { esUuid } from "./parametros"
 import { limpiarTexto } from "./texto"
 
 export const MENSAJES_CUENTA = {
   nombreFalta: "Escribí el nombre de la persona",
   nombreLargo: `El nombre tiene hasta ${NOMBRE_PERSONA_MAX} letras`,
   emailMal: "Revisá el email: tiene que ser como nombre@dominio.com",
+  emailSinCorreo: (dominio: string) => `«${dominio}» no recibe mails. Revisá cómo está escrito.`,
   emailRepetido: "Ya existe una cuenta con ese email",
   claveCorta: `La contraseña tiene al menos ${CONTRASENA_MIN} caracteres`,
   claveLarga: `La contraseña tiene hasta ${CONTRASENA_MAX} caracteres`,
@@ -15,11 +18,29 @@ export const MENSAJES_CUENTA = {
   claveActualMal: "La contraseña inicial no es correcta",
 } as const
 
-export const normalizarEmail = (e: string) => e.trim().toLowerCase()
+/** El mail con el que se entra: las mismas reglas que el del responsable de un cliente (lib/mail.ts, D-034). */
+export const normalizarEmail = normalizarMail
+export const EMAIL_MAX = MAIL_MAX
+
+export const validarNombreCuenta = (v: string): string | null => {
+  const n = limpiarTexto(v)
+  if (!n) return MENSAJES_CUENTA.nombreFalta
+  return n.length > NOMBRE_PERSONA_MAX ? MENSAJES_CUENTA.nombreLargo : null
+}
+export const validarEmail = (v: string): string | null => (mailValido(normalizarMail(v)) ? null : MENSAJES_CUENTA.emailMal)
 
 export const esquemaCuenta = z.object({
   nombre: z.string().transform(limpiarTexto).pipe(z.string().min(1, MENSAJES_CUENTA.nombreFalta).max(NOMBRE_PERSONA_MAX, MENSAJES_CUENTA.nombreLargo)),
-  email: z.string().transform(normalizarEmail).pipe(z.email(MENSAJES_CUENTA.emailMal).max(254, MENSAJES_CUENTA.emailMal)),
+  email: z
+    .string()
+    .transform(normalizarEmail)
+    .refine((m) => mailValido(m), MENSAJES_CUENTA.emailMal),
+})
+
+/** Editar una cuenta: solo el nombre. El mail no se cambia: es con lo que la persona entra. */
+export const esquemaEditarCuenta = z.object({
+  id: z.string().refine(esUuid, "Cuenta inválida"),
+  nombre: esquemaCuenta.shape.nombre,
 })
 
 export const esquemaClaveNueva = z
@@ -60,5 +81,15 @@ export type FilaUsuario = {
   segundoFactor: boolean
   debeCambiarClave: boolean
   creadoEn: string
+  /** Cuándo abrió su última sesión; null si nunca entró. */
+  ultimoIngreso: string | null
+  /** Cuántas sesiones tiene abiertas ahora. */
+  sesiones: number
   esYo: boolean
 }
+
+/** Una sesión abierta, para la ficha: de dónde y desde cuándo. Sin la dirección IP (D-034). */
+export type SesionAbierta = { id: string; dispositivo: string; movil: boolean; abierta: string; usada: string; esEsta: boolean }
+/** Un movimiento de la auditoría sobre la cuenta: qué pasó, cuándo y quién lo hizo. */
+export type MovimientoCuenta = { id: string; accion: string; cuando: string; quien: string | null }
+export type DetalleUsuario = { sesiones: SesionAbierta[]; movimientos: MovimientoCuenta[] }

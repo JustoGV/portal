@@ -62,6 +62,22 @@ export const leerSiNo = (v: string | string[] | undefined): SiNo | null => {
   const s = uno(v)
   return s === "con" || s === "sin" ? s : null
 }
+/** Usuarios (D-034): qué cuentas se ven y en qué orden. Activas al entrar. */
+export const VISTAS_USUARIOS = ["activas", "primer-ingreso", "sin-factor", "desactivadas", "todas"] as const
+export type VistaUsuarios = (typeof VISTAS_USUARIOS)[number]
+export const leerVistaUsuarios = (p: ParametrosLista): VistaUsuarios => {
+  const v = uno(p.ver)
+  return (VISTAS_USUARIOS as readonly string[]).includes(v ?? "") ? (v as VistaUsuarios) : "activas"
+}
+export const ORDENES_USUARIOS = ["nombre", "ingreso", "nuevas"] as const
+export type OrdenUsuarios = (typeof ORDENES_USUARIOS)[number]
+export const leerOrdenUsuarios = (p: ParametrosLista): OrdenUsuarios => {
+  const o = uno(p.orden)
+  return (ORDENES_USUARIOS as readonly string[]).includes(o ?? "") ? (o as OrdenUsuarios) : "nombre"
+}
+/** Las cuentas van de a 12, como los clientes; con menos, no hay páginas. */
+export const POR_PAGINA_USUARIOS = 12
+
 /** Los clientes van de a 12: entran justo en filas de 4, 3, 2 y 1. */
 export const POR_PAGINA_CLIENTES = 12
 export const ORDENES_GRUPOS = ["nombre", "servicios", "nuevos"] as const

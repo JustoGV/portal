@@ -15,6 +15,7 @@ import { grupos as t } from "@/i18n/es/grupos"
 import { formatDia } from "@/lib/fecha"
 import { gsap, quieto } from "@/lib/gsap"
 import { formatearDni, formatearTelefono, type FilaGrupo } from "@/lib/grupo"
+import { iniciales } from "@/lib/nombre"
 import { limpiarTexto, pegar } from "@/lib/texto"
 import { sitioDe } from "@/lib/url"
 
@@ -33,15 +34,6 @@ type Props = {
 /** Desde cuántos servicios la columna trae su buscador. */
 const BUSCAR_DESDE = 7
 const sinAcentos = (s: string) => s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase()
-
-/** «María de los Ángeles Fernández» → «MF». */
-const iniciales = (nombre: string) => {
-  const p = nombre
-    .trim()
-    .split(/\s+/u)
-    .filter((x) => x.length > 2 || /^\p{Lu}/u.test(x))
-  return ((p[0]?.[0] ?? "") + (p.length > 1 ? (p[p.length - 1]?.[0] ?? "") : "")).toUpperCase()
-}
 
 /** Lo que se marca para llamar: solo los números y el + del principio. */
 const paraLlamar = (tel: string) => tel.replace(/[^0-9+]/gu, "")

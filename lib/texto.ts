@@ -10,7 +10,7 @@ export const escaparLike = (texto: string) => texto.replace(/[\\%_]/g, (c) => `\
 // juntas al renglón siguiente. Solo para mostrar: lo guardado no cambia.
 const DURO = "\u00a0"
 const RE_ENLACE =
-  /(?<=^|[\s\u00a0(«"“¿¡])(lo|la|el|los|las|le|les|de|del|y|e|o|u|ni|con|para|más|por|en|a|al|un|una|unos|unas|que|tu|tus|su|sus|sin|se|es|mi|te)[ \t]+(?=\S)/giu
+  /(?<=^|[\s\u00a0(«"“¿¡])(lo|la|el|los|las|le|les|de|del|y|e|o|u|ni|no|con|para|más|por|en|a|al|un|una|unos|unas|que|tu|tus|su|sus|sin|se|es|mi|te)[ \t]+(?=\S)/giu
 const RE_ULTIMAS = /[ \t]+(\S+)[ \t]*$/gmu
 
 export const pegar = (texto: string) => texto.replace(RE_ENLACE, `$1${DURO}`).replace(RE_ULTIMAS, `${DURO}$1`)
