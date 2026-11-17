@@ -22,6 +22,20 @@
       "when": 1791904400488,
       "tag": "0002_permisos_triggers",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794922569619,
+      "tag": "0003_responsable",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794925106172,
+      "tag": "0004_responsable_dni",
+      "breakpoints": true
     }
   ]
 }

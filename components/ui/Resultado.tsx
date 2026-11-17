@@ -1,6 +1,6 @@
 "use client"
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react"
-import { Icono } from "@/components/iconos/Icono"
+import { IconoDuo, type IconoDuoApi } from "@/components/iconos/IconoDuo"
 import { comun } from "@/i18n/es/comun"
 import { gsap, quieto } from "@/lib/gsap"
 import { Boton } from "./Boton"
@@ -51,29 +51,24 @@ export function ProveedorResultado({ children }: { children: ReactNode }) {
 
 function Tarjeta({ aviso, alCerrar }: { aviso: Aviso; alCerrar: () => void }) {
   const ref = useRef<HTMLDivElement>(null)
+  const dibujo = useRef<IconoDuoApi>(null)
   const espera = aviso.tipo !== "guardado"
 
   useLayoutEffect(() => {
     const t = ref.current
     if (!t) return
     const icono = t.querySelector(".ui-resultado__icono")
-    const trazos = t.querySelectorAll("[data-trazo]")
     if (quieto()) {
       gsap.set(t, { opacity: 1 })
       return
     }
     const tl = gsap.timeline()
     tl.fromTo(t, { opacity: 0, y: -16 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" })
-    if (aviso.tipo === "guardado") {
-      tl.fromTo(icono, { scale: 0.6 }, { scale: 1, duration: 0.4, ease: "expo.out" }, 0.05)
-      tl.fromTo(trazos, { drawSVG: "0% 0%" }, { drawSVG: "0% 100%", duration: 0.4, ease: "power2.out" }, 0.2)
-    } else if (aviso.tipo === "error") {
-      tl.fromTo(icono, { rotate: -90 }, { rotate: 0, duration: 0.45, ease: "power3.out" }, 0.05)
-      tl.fromTo(trazos, { drawSVG: "0% 0%" }, { drawSVG: "0% 100%", duration: 0.3, stagger: 0.1, ease: "power2.out" }, 0.2)
-    } else {
-      tl.fromTo(trazos, { drawSVG: "0% 0%" }, { drawSVG: "0% 100%", duration: 0.35, stagger: 0.08, ease: "power2.out" }, 0.1)
-      tl.to(icono, { keyframes: { rotate: [0, -12, 9, -5, 0], easeEach: "sine.inOut" }, duration: 0.7 }, 0.3)
-    }
+    if (aviso.tipo === "guardado") tl.fromTo(icono, { scale: 0.6 }, { scale: 1, duration: 0.4, ease: "expo.out" }, 0.05)
+    else if (aviso.tipo === "error") tl.fromTo(icono, { rotate: -90 }, { rotate: 0, duration: 0.45, ease: "power3.out" }, 0.05)
+    // El dibujo a dos colores (D-018) se escribe por partes: primero el aro y después su marca (tilde, cruz
+    // o signo, que además se balancea). Arranca a los 0,1 s, con la tarjeta ya entrando.
+    tl.call(() => dibujo.current?.animar("entrar"), [], 0.1)
     return () => {
       tl.kill()
     }
@@ -102,7 +97,7 @@ function Tarjeta({ aviso, alCerrar }: { aviso: Aviso; alCerrar: () => void }) {
     return () => window.removeEventListener("keydown", tecla, true)
   }, [espera, alCerrar])
 
-  const icono = aviso.tipo === "guardado" ? "tilde" : aviso.tipo === "error" ? "cerrar" : "alerta"
+  const icono = aviso.tipo === "guardado" ? "tilde" : aviso.tipo === "error" ? "cruz" : "alerta"
 
   return (
     <>
@@ -117,7 +112,7 @@ function Tarjeta({ aviso, alCerrar }: { aviso: Aviso; alCerrar: () => void }) {
         aria-labelledby="ui-resultado-titulo"
       >
         <div className="ui-resultado__icono">
-          <Icono nombre={icono} tamano={32} />
+          <IconoDuo ref={dibujo} nombre={icono} tamano={36} />
         </div>
         <p id="ui-resultado-titulo" className="ui-resultado__titulo">
           {aviso.titulo}

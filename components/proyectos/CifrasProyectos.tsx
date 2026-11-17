@@ -12,7 +12,7 @@ type Tarjeta = { id: string; n: number; titulo: string; pista: string; icono: No
 
 /**
  * Las cuatro cifras de arriba (D-030; de las tarjetas que filtran de EDV y de los contadores de Square UI
- * Bookmarks). Tocar una filtra la tabla; "Grupos" lleva a su pantalla. El número cuenta desde cero una
+ * Bookmarks). Tocar una filtra la tabla; "Clientes" lleva a su pantalla. El número cuenta desde cero una
  * sola vez, al entrar a la pantalla: después cambia sin moverse (docs/reglas/05 §10, 08 §2.1).
  */
 export function CifrasProyectos({ cifras, vista, hrefs }: { cifras: Cifras; vista: "activos" | "sinGrupo" | "archivados" | null; hrefs: { activos: string; sinGrupo: string; archivados: string } }) {
@@ -37,7 +37,7 @@ export function CifrasProyectos({ cifras, vista, hrefs }: { cifras: Cifras; vist
     { id: "activos", n: cifras.activos, titulo: t.cifraActivos, pista: t.cifraActivosPista, icono: "abrir", href: hrefs.activos, filtra: true, actual: vista === "activos" },
     { id: "sinGrupo", n: cifras.sinGrupo, titulo: t.cifraSinGrupo, pista: t.cifraSinGrupoPista, icono: "carpeta", href: hrefs.sinGrupo, filtra: true, actual: vista === "sinGrupo" },
     { id: "archivados", n: cifras.archivados, titulo: t.cifraArchivados, pista: t.cifraArchivadosPista, icono: "archivo", href: hrefs.archivados, filtra: true, actual: vista === "archivados" },
-    { id: "grupos", n: cifras.grupos, titulo: t.cifraGrupos, pista: t.cifraGruposPista, icono: "grupos", href: "/grupos", filtra: false, actual: false },
+    { id: "grupos", n: cifras.grupos, titulo: t.cifraGrupos, pista: t.cifraGruposPista, icono: "grupos", href: "/clientes", filtra: false, actual: false },
   ]
 
   return (

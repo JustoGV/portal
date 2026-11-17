@@ -14,7 +14,7 @@ type Opcion = { tipo: "proyecto"; p: ResultadoRapido } | ({ tipo: "pagina" } & P
 
 const PAGINAS: Pagina[] = [
   { href: "/", texto: t.proyectos, icono: "carpeta", ficha: t.fichaProyectos },
-  { href: "/grupos", texto: t.grupos, icono: "grupos", ficha: t.fichaGrupos },
+  { href: "/clientes", texto: t.grupos, icono: "grupos", ficha: t.fichaGrupos },
   { href: "/usuarios", texto: t.usuarios, icono: "personas", ficha: t.fichaUsuarios },
 ]
 

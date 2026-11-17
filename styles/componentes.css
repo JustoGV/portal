@@ -499,6 +499,9 @@
     margin: 0 auto var(--sys-esp-4);
     border-radius: var(--sys-radio-full);
     border: 2px solid currentColor;
+    /* El dibujo va a dos colores (D-018): el aro en el color del resultado y su marca en el del texto. */
+    --duo-1: currentColor;
+    --duo-2: var(--sys-texto-1);
   }
   .ui-resultado[data-tipo="guardado"] .ui-resultado__icono {
     color: var(--sys-ok);

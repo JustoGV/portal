@@ -14,7 +14,7 @@ import { exigirPagina } from "@/dal/guard"
 import { cifrasProyectos, contarProyectos, listarProyectos, type FiltroProyectos } from "@/dal/proyectos"
 import { proyectos as t } from "@/i18n/es/proyectos"
 import { pegar } from "@/lib/texto"
-import { conParametros, leerBusqueda, leerEstado, leerGrupo, leerOrden, leerPagina, leerPorPagina, SIN_GRUPO, type ParametrosLista } from "@/lib/parametros"
+import { conParametros, leerBusqueda, leerEstado, leerCliente, leerOrden, leerPagina, leerPorPagina, SIN_GRUPO, type ParametrosLista } from "@/lib/parametros"
 import "@/styles/proyectos.css"
 
 export const metadata: Metadata = { title: t.titulo }
@@ -28,12 +28,12 @@ export default async function PaginaProyectos({ searchParams }: { searchParams: 
   await exigirPagina("proyectos.ver", "/")
   const p = await searchParams
   const { orden, dir } = leerOrden(p)
-  const f: FiltroProyectos = { q: leerBusqueda(p), grupo: leerGrupo(p.grupo), estado: leerEstado(p), pagina: leerPagina(p), por: leerPorPagina(p), orden, dir }
+  const f: FiltroProyectos = { q: leerBusqueda(p), grupo: leerCliente(p), estado: leerEstado(p), pagina: leerPagina(p), por: leerPorPagina(p), orden, dir }
   const actuales = {
     q: f.q || null,
-    grupo: f.grupo,
+    cliente: f.grupo,
     estado: f.estado === "archivados" ? "archivados" : null,
-    por: f.por !== 25 ? String(f.por) : null,
+    por: f.por !== 10 ? String(f.por) : null,
     orden: orden !== "nombre" ? orden : dir === "desc" ? orden : null,
     dir: dir === "desc" ? "desc" : null,
   }
@@ -73,7 +73,7 @@ export default async function PaginaProyectos({ searchParams }: { searchParams: 
             </div>
             <LimiteError>
               <Suspense fallback={<FiltrosEsqueleto />}>
-                <Filtros cuentas={cuentas} f={f} actuales={actuales} />
+                <Filtros cuentas={cuentas} grupos={grupos} f={f} actuales={actuales} />
               </Suspense>
             </LimiteError>
           </div>
@@ -100,7 +100,7 @@ async function Contador({ cifras }: { cifras: ReturnType<typeof cifrasProyectos>
 
 async function Cifras({ cifras, f, actuales }: { cifras: ReturnType<typeof cifrasProyectos>; f: FiltroProyectos; actuales: Actuales }) {
   const c = await cifras
-  // Cada cifra es un filtro entero: deja la búsqueda y el orden, y fija estado y grupo.
+  // Cada cifra es un filtro entero: deja la búsqueda y el orden, y fija estado y cliente (en la URL, `cliente`: D-032).
   const base = { ...actuales, pagina: null }
   const vista = f.estado === "archivados" ? (f.grupo ? null : "archivados") : f.grupo === SIN_GRUPO ? "sinGrupo" : f.grupo ? null : "activos"
   return (
@@ -108,19 +108,23 @@ async function Cifras({ cifras, f, actuales }: { cifras: ReturnType<typeof cifra
       cifras={c}
       vista={vista}
       hrefs={{
-        activos: conParametros("/", base, { estado: null, grupo: null }),
-        sinGrupo: conParametros("/", base, { estado: null, grupo: SIN_GRUPO }),
-        archivados: conParametros("/", base, { estado: "archivados", grupo: null }),
+        activos: conParametros("/", base, { estado: null, cliente: null }),
+        sinGrupo: conParametros("/", base, { estado: null, cliente: SIN_GRUPO }),
+        archivados: conParametros("/", base, { estado: "archivados", cliente: null }),
       }}
     />
   )
 }
 
-async function Filtros({ cuentas, f, actuales }: { cuentas: ReturnType<typeof contarProyectos>; f: FiltroProyectos; actuales: Actuales }) {
-  const c = await cuentas
+async function Filtros({ cuentas, grupos, f, actuales }: { cuentas: ReturnType<typeof contarProyectos>; grupos: ReturnType<typeof listarGruposActivos>; f: FiltroProyectos; actuales: Actuales }) {
+  const [c, todos] = await Promise.all([cuentas, grupos])
+  // Un cliente sin servicios no sale en las cuentas: si es el elegido (llegó desde su ficha), igual va en la lista
+  // con 0, así el filtro dice su nombre y no queda en blanco.
+  const elegido = f.grupo && f.grupo !== SIN_GRUPO && !c.porGrupo.some((g) => g.id === f.grupo) ? todos.find((g) => g.id === f.grupo) : undefined
+  const porGrupo = elegido ? [...c.porGrupo, { id: elegido.id, nombre: elegido.nombre, cuenta: 0 }] : c.porGrupo
   const base = { ...actuales, pagina: null }
-  // Solo se muestran los filtros que tienen algo (docs/reglas/07 §4): sin grupos, no hay filtro de grupo.
-  if (c.porGrupo.length === 0 && f.grupo === null) return null
+  // Solo se muestran los filtros que tienen algo (docs/reglas/07 §4): sin clientes, no hay filtro de cliente.
+  if (porGrupo.length === 0 && f.grupo === null) return null
   const enEstado = f.estado === "archivados" ? c.archivados : c.activos
   return (
     <div className="ui-herramientas__filtros">
@@ -128,9 +132,9 @@ async function Filtros({ cuentas, f, actuales }: { cuentas: ReturnType<typeof co
         etiqueta={t.grupo}
         actual={f.grupo ?? "todos"}
         opciones={[
-          { valor: "todos", texto: t.filtroTodos, cuenta: enEstado, href: conParametros("/", base, { grupo: null }) },
-          ...c.porGrupo.map((g) => ({ valor: g.id, texto: g.nombre, cuenta: g.cuenta, href: conParametros("/", base, { grupo: g.id }) })),
-          { valor: SIN_GRUPO, texto: t.sinGrupo, href: conParametros("/", base, { grupo: SIN_GRUPO }) },
+          { valor: "todos", texto: t.filtroTodos, cuenta: enEstado, href: conParametros("/", base, { cliente: null }) },
+          ...porGrupo.map((g) => ({ valor: g.id, texto: g.nombre, cuenta: g.cuenta, href: conParametros("/", base, { cliente: g.id }) })),
+          { valor: SIN_GRUPO, texto: t.sinGrupo, href: conParametros("/", base, { cliente: SIN_GRUPO }) },
         ]}
       />
     </div>

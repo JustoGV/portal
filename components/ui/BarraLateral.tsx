@@ -20,7 +20,7 @@ const SECCIONES: SeccionDatos[] = [
     titulo: t.administracion,
     icono: "escudo",
     paginas: [
-      { href: "/grupos", texto: t.grupos, icono: "grupos" },
+      { href: "/clientes", texto: t.grupos, icono: "grupos" },
       { href: "/usuarios", texto: t.usuarios, icono: "personas" },
     ],
   },

@@ -6,7 +6,7 @@
 import { forwardRef, useImperativeHandle, useRef } from "react"
 import { EASE, gsap, quieto } from "@/lib/gsap"
 
-export type NombreDuo = "sobre" | "candado" | "ojo" | "flecha" | "tilde" | "carpeta" | "alerta" | "lupa" | "abrir" | "archivo" | "persona" | "llave" | "reloj" | "grupos" | "personas" | "salir" | "panel" | "inicio" | "escudo" | "pico"
+export type NombreDuo = "sobre" | "candado" | "ojo" | "flecha" | "tilde" | "carpeta" | "alerta" | "lupa" | "abrir" | "archivo" | "persona" | "llave" | "reloj" | "grupos" | "personas" | "salir" | "panel" | "inicio" | "escudo" | "pico" | "cruz"
 
 export type IconoDuoApi = { animar: (variante?: "entrar" | "foco" | "alternar") => void }
 
@@ -194,6 +194,15 @@ function Dibujo({ nombre, tachado }: { nombre: NombreDuo; tachado?: boolean }) {
         </>
       )
     // El pico que dice si una sección está abierta. Lo gira el CSS (.bl__pico); no tiene animación propia.
+    // Patrón "wired outline" de lordicon (sin abrir el ícono puntual): el aro se dibuja y las dos rayas de la cruz se escriben, una tras otra.
+    case "cruz":
+      return (
+        <>
+          <circle data-parte="aro" style={C1} cx="12" cy="12" r="9" />
+          <path data-parte="raya1" style={C2} d="M8.75 8.75l6.5 6.5" />
+          <path data-parte="raya2" style={C2} d="M15.25 8.75l-6.5 6.5" />
+        </>
+      )
     case "pico":
       return <path data-parte="pico" style={C1} d="M9.5 6.5l5.5 5.5-5.5 5.5" />
   }
@@ -293,6 +302,10 @@ export const IconoDuo = forwardRef<IconoDuoApi, Props>(function IconoDuo({ nombr
         case "escudo":
           tl.fromTo(parte("escudo"), { scale: 0.88, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.4, ease: "back.out(3)" })
             .fromTo(parte("marca"), { drawSVG: "0% 0%" }, { drawSVG: "0% 100%", duration: 0.3 }, 0.12)
+          break
+        case "cruz":
+          tl.fromTo(parte("aro"), { drawSVG: "0% 0%" }, { drawSVG: "0% 100%", duration: 0.4 })
+            .fromTo([parte("raya1"), parte("raya2")], { drawSVG: "0% 0%" }, { drawSVG: "0% 100%", duration: 0.25, stagger: 0.1 }, 0.2)
           break
         case "pico":
           break

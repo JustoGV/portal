@@ -51,7 +51,7 @@ export function ComboGrupo({ grupos, texto, alCambiar, error }: { grupos: Grupo[
         <Icono nombre="carpeta" className="ui-campo__icono" />
         <Input className="ui-campo__entrada" placeholder=" " maxLength={NOMBRE_GRUPO_MAX} />
         <Label className="ui-campo__etiqueta">{t.grupoCampo}</Label>
-        <Button className="ui-combo__boton" aria-label="Ver los grupos">
+        <Button className="ui-combo__boton" aria-label="Ver los clientes">
           <ChevronDown size={20} strokeWidth={1.75} aria-hidden="true" />
         </Button>
       </div>

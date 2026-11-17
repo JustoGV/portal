@@ -53,7 +53,7 @@ export async function guardarProyecto(_: EstadoFormulario<{ id: string; nombre: 
     })
     if (!fila) return { ok: false, mensaje: "Ese servicio ya no existe. Cerrá el formulario y volvé a buscarlo." }
     revalidatePath("/")
-    revalidatePath("/grupos")
+    revalidatePath("/clientes")
     return { ok: true, datos: fila }
   } catch (e) {
     if (codigoPg(e) === "23505") {
@@ -108,7 +108,7 @@ async function cambiarArchivo(id: string, archivar: boolean): Promise<Resultado<
   })
   if (!fila) return { ok: false, mensaje: archivar ? "Ese servicio ya estaba archivado." : "Ese servicio ya estaba activo." }
   revalidatePath("/")
-  revalidatePath("/grupos")
+  revalidatePath("/clientes")
   return { ok: true, datos: { nombre: fila.nombre } }
 }
 

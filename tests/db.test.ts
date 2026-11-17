@@ -42,6 +42,21 @@ describe.skipIf(!url)("invariantes en la base", () => {
 
   const proyecto = (nombre: string, link: string) => codigo("insert into proyectos (nombre, url, creado_por) values ($1, $2, $3)", [nombre, link, usuarioId])
 
+  it("el responsable de un cliente (D-032): la base frena un mail en mayúsculas o mal escrito, un teléfono con letras y un texto vacío", async () => {
+    const cliente = (col: string, valor: string) => codigo(`insert into grupos (nombre, ${col}) values ('Prueba responsable', $1)`, [valor])
+    expect(await cliente("responsable_mail", "ana@sanatorio.com.ar")).toBe("ok")
+    expect(await cliente("responsable_mail", "Ana@sanatorio.com.ar")).toBe("23514")
+    expect(await cliente("responsable_mail", "ana@sanatorio")).toBe("23514")
+    expect(await cliente("responsable_telefono", "+5493424551234")).toBe("ok")
+    expect(await cliente("responsable_telefono", "(0342) 455-1234")).toBe("23514")
+    expect(await cliente("responsable_dni", "30123456")).toBe("ok")
+    expect(await cliente("responsable_dni", "30.123.456")).toBe("23514")
+    expect(await cliente("responsable_dni", "123")).toBe("23514")
+    expect(await cliente("responsable_telefono", "llamar tarde")).toBe("23514")
+    expect(await cliente("responsable_nombre", "")).toBe("23514")
+    expect(await cliente("responsable_cargo", " Director ")).toBe("23514")
+  })
+
   it("el rol de la app no puede borrar proyectos, grupos, usuarios ni auditoría", async () => {
     for (const t of ["proyectos", "grupos", "usuarios", "auditoria"]) expect(await codigo(`delete from ${t}`), t).toBe("42501")
   })

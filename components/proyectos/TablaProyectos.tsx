@@ -226,7 +226,7 @@ export function TablaProyectos({ filas, total, pagina, porPagina, actuales, filt
             pagina={pagina}
             porPagina={porPagina}
             etiquetaFilas={t.filas}
-            href={({ pagina: n, por }) => conParametros("/", actuales, { pagina: n && n > 1 ? n : null, ...(por ? { por: por === 25 ? null : por } : {}) })}
+            href={({ pagina: n, por }) => conParametros("/", actuales, { pagina: n && n > 1 ? n : null, ...(por ? { por: por === 10 ? null : por } : {}) })}
           />
         </div>
       </CajaTabla>

@@ -9,8 +9,8 @@ export const MENSAJES_PROYECTO = {
   nombreFalta: "Escribí el nombre del servicio",
   nombreLargo: `El nombre tiene hasta ${NOMBRE_PROYECTO_MAX} letras`,
   descripcionLarga: `La descripción tiene hasta ${DESCRIPCION_MAX} letras`,
-  grupoLargo: `El nombre del grupo tiene hasta ${NOMBRE_GRUPO_MAX} letras`,
-  grupoInvalido: "Elegí un grupo de la lista",
+  grupoLargo: `El nombre del cliente tiene hasta ${NOMBRE_GRUPO_MAX} letras`,
+  grupoInvalido: "Elegí un cliente de la lista",
   nombreRepetido: "Ya existe un servicio con ese nombre",
   urlRepetida: "Ya existe un servicio con ese link",
 } as const

@@ -21,7 +21,7 @@ const condEstado = (estado: FiltroProyectos["estado"]) => (estado === "activos" 
 /** Un grupo, los que no tienen grupo, o todos. */
 const condGrupo = (grupo: string | null): SQL | undefined => (grupo === SIN_GRUPO ? isNull(proyectos.grupoId) : grupo ? eq(proyectos.grupoId, grupo) : undefined)
 /** La columna de orden sale de una lista cerrada (lib/parametros), nunca del texto del pedido. Siempre con desempate único (07 §3). */
-const ordenDe = (orden: Orden = "nombre", dir: "asc" | "desc" = "asc") => {
+export const ordenDe = (orden: Orden = "nombre", dir: "asc" | "desc" = "asc") => {
   const hacia = dir === "desc" ? desc : asc
   if (orden === "actualizado") return [hacia(proyectos.actualizadoEn), ordenNombre, proyectos.id]
   if (orden === "grupo") return [sql`lower(${grupos.nombre}) collate "es-x-icu" ${sql.raw(dir === "desc" ? "desc" : "asc")} nulls last`, ordenNombre, proyectos.id]
