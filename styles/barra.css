@@ -218,28 +218,57 @@
     padding-top: var(--sys-esp-3);
     border-top: 1px solid var(--sys-barra-borde);
   }
-  .bl__usuario {
-    display: flex;
-    align-items: center;
-    gap: var(--sys-esp-3);
-    min-height: var(--sys-toque);
-    padding: 0 var(--sys-esp-2);
-    color: var(--sys-barra-texto-1);
-    font-weight: 700;
+  /* El pie: la entrada a Mi cuenta (D-035). Iniciales, nombre y mail; abre «Mi cuenta» y «Salir». */
+  .bl__cuenta {
+    min-height: 3.5rem;
+    padding: var(--sys-esp-2);
   }
   .bl__avatar {
     display: grid;
     place-items: center;
     flex: none;
-    width: 2rem;
-    height: 2rem;
+    width: 2.25rem;
+    height: 2.25rem;
     border-radius: var(--sys-radio-full);
     background: var(--sys-marca);
-    --duo-1: #fdfdff;
-    --duo-2: #bcd2ff;
+    color: #fdfdff;
+    font-size: var(--sys-tipo-s);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .bl__cuenta-textos {
+    display: grid;
+    flex: 1;
+    line-height: 1.25;
+  }
+  .bl__cuenta-nombre {
+    overflow: hidden;
+    color: var(--sys-barra-texto-1);
+    font-weight: 700;
+    text-overflow: ellipsis;
+  }
+  .bl__cuenta-mail {
+    overflow: hidden;
+    color: var(--sys-barra-texto-2);
+    font-size: var(--sys-tipo-s);
+    font-weight: 500;
+    text-overflow: ellipsis;
+  }
+  .bl__cuenta-pico {
+    flex: none;
+    color: var(--sys-barra-texto-2);
+  }
+  .bl__cuenta[data-pressed],
+  .bl__cuenta[aria-expanded="true"] {
+    background: var(--sys-barra-capa);
   }
   @media (hover: hover) and (pointer: fine) {
-    .bl__salir:hover { background: var(--sys-barra-capa); }
+    .bl__cuenta[data-hovered] { background: var(--sys-barra-capa); }
+  }
+  .bl__cuenta-esqueleto {
+    display: block;
+    height: 3.5rem;
+    border-radius: var(--sys-radio-m);
   }
 
   /* ---------- Achicada: una columna de íconos; el nombre aparece al pasar el mouse ---------- */
@@ -256,7 +285,9 @@
   .bl-marco[data-cerrada] .bl__item--sub[aria-current="page"]::before { left: -0.75rem; border-radius: 0 3px 3px 0; }
   .bl-marco[data-cerrada] .bl__buscar,
   .bl-marco[data-cerrada] .bl__item,
-  .bl-marco[data-cerrada] .bl__usuario { position: relative; justify-content: center; padding: 0; }
+  .bl-marco[data-cerrada] .bl__cuenta { position: relative; justify-content: center; padding: 0; }
+  .bl-marco[data-cerrada] .bl__cuenta { min-height: var(--sys-toque); }
+  .bl-marco[data-cerrada] :is(.bl__cuenta-mail, .bl__cuenta-pico) { display: none; }
   .bl-marco[data-cerrada] .bl__texto {
     position: absolute;
     left: calc(100% + var(--sys-esp-3));
@@ -273,7 +304,7 @@
     transform: translate(-4px, -50%);
     transition: opacity var(--sys-dur-1) var(--sys-ease), transform var(--sys-dur-1) var(--sys-ease);
   }
-  .bl-marco[data-cerrada] :is(.bl__item, .bl__buscar, .bl__usuario):is(:hover, :focus-visible) .bl__texto {
+  .bl-marco[data-cerrada] :is(.bl__item, .bl__buscar):is(:hover, :focus-visible) .bl__texto {
     opacity: 1;
     transform: translate(0, -50%);
   }
@@ -644,5 +675,25 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .bq__ficha { animation: none; }
+  }
+}
+
+/* La tarjeta del pie (D-035): crece hacia arriba desde la cuenta. Vive en otra capa, con los colores claros. */
+@layer modulos {
+  .bl-menu {
+    min-width: max(var(--trigger-width), 14rem);
+    box-shadow: var(--sys-sombra);
+  }
+  .bl-menu__item {
+    gap: var(--sys-esp-3);
+    font-weight: 600;
+    text-decoration: none;
+    --duo-1: var(--sys-texto-2);
+    --duo-2: var(--sys-marca);
+  }
+  .bl-menu__salir {
+    margin-top: var(--sys-esp-1);
+    border-top: 1px solid var(--sys-borde);
+    border-radius: 0 0 var(--sys-radio-s) var(--sys-radio-s);
   }
 }

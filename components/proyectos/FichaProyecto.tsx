@@ -1,15 +1,14 @@
 "use client"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { CalendarDays, ChevronDown, ChevronUp, Globe, Users } from "lucide-react"
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react"
 import { Boton } from "@/components/ui/Boton"
 import { BotonIcono } from "@/components/ui/BotonIcono"
-import { Etiqueta } from "@/components/ui/Etiqueta"
 import { Pista } from "@/components/ui/Pista"
 import { useResultado } from "@/components/ui/Resultado"
 import { TarjetaModal } from "@/components/ui/TarjetaModal"
 import { comun } from "@/i18n/es/comun"
 import { proyectos as t } from "@/i18n/es/proyectos"
-import { formatDia } from "@/lib/fecha"
+import { formatDia, haceCuanto } from "@/lib/fecha"
 import { gsap, quieto } from "@/lib/gsap"
 import type { FilaProyecto } from "@/lib/proyecto"
 import { pegar } from "@/lib/texto"
@@ -29,14 +28,17 @@ type Props = {
 }
 
 /**
- * La ficha de un servicio (D-030): una tarjeta al centro que crece desde la fila que se tocó, con todos
- * sus datos y sus acciones. Nunca un panel lateral (rechazado por Mateo, D-029). ↑ ↓ pasan al servicio
+ * La ficha de un servicio (D-030, rehecha en D-037): una tarjeta al centro que crece desde la fila que se
+ * tocó. Arriba la banda azul con el nombre grande y el estado y el cliente en vidrio; abajo la descripción y
+ * los datos en recuadros: el link partido (el sitio grande, el resto de la dirección en chico, «Copiar
+ * link»), el cliente y la fecha. Nunca un panel lateral (rechazado por Mateo, D-029). ↑ ↓ pasan al servicio
  * anterior o siguiente de la tabla sin cerrar, como el legajo de EDV; el contenido se cruza de costado.
  */
 export function FichaProyecto({ filas, id, archivados, origen, alCambiar, alCerrar, alEditar, alArchivo }: Props) {
   const idTitulo = useId()
   const mostrar = useResultado()
   const cuerpo = useRef<HTMLDivElement>(null)
+  const cabeza = useRef<HTMLDivElement>(null)
   const sentido = useRef(0)
   // Mientras la tarjeta se cierra sigue mostrando el último servicio.
   const [ultimo, setUltimo] = useState<FilaProyecto | null>(null)
@@ -70,7 +72,8 @@ export function FichaProyecto({ filas, id, archivados, origen, alCambiar, alCerr
     const lado = sentido.current
     sentido.current = 0
     if (!c || !lado || quieto()) return
-    gsap.fromTo(c.children, { opacity: 0, y: 16 * lado }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.03, ease: "power3.out", clearProps: "opacity,transform", overwrite: "auto" })
+    const piezas = [...(cabeza.current?.children ?? []), c.querySelector(".pr-ficha2__descripcion"), ...c.querySelectorAll(".pr-recuadro")].filter(Boolean)
+    gsap.fromTo(piezas, { opacity: 0, y: 16 * lado }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.03, ease: "power3.out", clearProps: "opacity,transform", overwrite: "auto" })
   }, [id])
 
   const copiar = async () => {
@@ -83,72 +86,115 @@ export function FichaProyecto({ filas, id, archivados, origen, alCambiar, alCerr
     }
   }
 
+  // El link partido: el sitio grande, legible, y el resto de la dirección aparte, en chico.
+  const partes = (() => {
+    if (!p) return { host: "", resto: "" }
+    try {
+      const u = new URL(p.url)
+      const resto = `${u.pathname === "/" ? "" : u.pathname}${u.search}${u.hash}`
+      return { host: u.host, resto }
+    } catch {
+      return { host: p.url, resto: "" }
+    }
+  })()
+
   return (
-    <TarjetaModal abierto={id !== null && i >= 0} alPedirCierre={alCerrar} idTitulo={idTitulo} ancho="40rem" origen={origen}>
+    <TarjetaModal abierto={id !== null && i >= 0} alPedirCierre={alCerrar} idTitulo={idTitulo} ancho="62rem" origen={origen}>
       {p && (
         <>
-          <div className="ui-dialogo__cabecera pr-ficha__cabecera">
-            <div>
-              <p className="pr-ficha__sobre">
-                {t.fichaTitulo}
-                {i >= 0 && <span className="pr-ficha__cuenta"> · {t.fichaDe(i + 1, filas.length)}</span>}
-              </p>
-              <p className="pr-ficha__ayuda">{t.fichaAyuda}</p>
+          {/* Arriba, la banda azul de las pantallas (D-036): el nombre grande y el estado y el cliente en vidrio. */}
+          <div className="pr-ficha2__banda">
+            <div className="pr-ficha2__barra" data-cascada="">
+              <div>
+                <p className="pr-ficha2__sobre">
+                  {pegar(t.fichaTitulo)}
+                  {i >= 0 && <span className="pr-ficha2__cuenta"> · {t.fichaDe(i + 1, filas.length)}</span>}
+                </p>
+                <p className="pr-ficha2__ayuda">{t.fichaAyuda}</p>
+              </div>
+              <div className="pr-ficha2__mandos">
+                <Pista texto={t.anterior}>
+                  <Button className="ui-boton-icono" aria-label={t.anterior} isDisabled={filas.length < 2} onPress={() => mover(-1)}>
+                    <ChevronUp size={20} strokeWidth={1.75} aria-hidden="true" />
+                  </Button>
+                </Pista>
+                <Pista texto={t.siguiente}>
+                  <Button className="ui-boton-icono" aria-label={t.siguiente} isDisabled={filas.length < 2} onPress={() => mover(1)}>
+                    <ChevronDown size={20} strokeWidth={1.75} aria-hidden="true" />
+                  </Button>
+                </Pista>
+                <BotonIcono icono="cerrar" etiqueta={comun.cerrar} onPress={alCerrar} />
+              </div>
             </div>
-            <div className="pr-ficha__mandos">
-              <Pista texto={t.anterior}>
-                <Button className="ui-boton-icono" aria-label={t.anterior} isDisabled={filas.length < 2} onPress={() => mover(-1)}>
-                  <ChevronUp size={20} strokeWidth={1.75} aria-hidden="true" />
-                </Button>
-              </Pista>
-              <Pista texto={t.siguiente}>
-                <Button className="ui-boton-icono" aria-label={t.siguiente} isDisabled={filas.length < 2} onPress={() => mover(1)}>
-                  <ChevronDown size={20} strokeWidth={1.75} aria-hidden="true" />
-                </Button>
-              </Pista>
-              <BotonIcono icono="cerrar" etiqueta={comun.cerrar} onPress={alCerrar} />
-            </div>
-          </div>
-          <div ref={cuerpo} className="pr-ficha__cuerpo">
-            <div className="pr-ficha__titular" data-cascada="">
-              <h2 id={idTitulo} className="pr-ficha__nombre">
+            <div ref={cabeza} className="pr-ficha2__cabeza">
+              <h2 id={idTitulo} className="pr-ficha2__nombre" data-cascada="">
                 {pegar(p.nombre)}
               </h2>
-              <div className="pr-ficha__etiquetas">
-                <Etiqueta tono={p.archivadoEn ? "neutro" : "ok"}>{p.archivadoEn ? t.estadoArchivado : t.estadoActivo}</Etiqueta>
-                {p.grupoNombre ? <span className="pr-grupo">{p.grupoNombre}</span> : <span className="pr-grupo pr-grupo--sin">{t.sinGrupo}</span>}
+              <div className="pr-ficha2__pastillas" data-cascada="">
+                <span className="pr-pastilla" data-tono={p.archivadoEn ? "neutro" : "ok"}>
+                  <span className="pr-pastilla__punto" aria-hidden="true" />
+                  {p.archivadoEn ? t.estadoArchivado : t.estadoActivo}
+                </span>
+                <span className="pr-pastilla">
+                  <Users size={16} strokeWidth={1.75} aria-hidden="true" />
+                  {p.grupoNombre ?? t.sinGrupo}
+                </span>
               </div>
             </div>
-            <p className="pr-ficha__descripcion" data-cascada="" data-vacio={p.descripcion ? undefined : ""}>
+          </div>
+
+          <div ref={cuerpo} className="pr-ficha2__cuerpo">
+            <p className="pr-ficha2__descripcion" data-cascada="" data-vacio={p.descripcion ? undefined : ""}>
               {p.descripcion ? pegar(p.descripcion) : t.sinDescripcion}
             </p>
-            <dl className="ui-resumen" data-cascada="">
-              <div className="ui-resumen__fila">
-                <dt>{t.link}</dt>
-                <dd>{p.url}</dd>
-              </div>
-              <div className="ui-resumen__fila">
-                <dt>{t.fichaSitio}</dt>
-                <dd>{sitioDe(p.url)}</dd>
-              </div>
-              <div className="ui-resumen__fila">
-                <dt>{t.grupo}</dt>
-                <dd data-vacio={p.grupoNombre ? undefined : ""}>{p.grupoNombre ?? t.sinGrupo}</dd>
-              </div>
-              <div className="ui-resumen__fila">
-                <dt>{t.colActualizado}</dt>
-                <dd>{formatDia(p.actualizadoEn)}</dd>
-              </div>
-            </dl>
+            <div className="pr-ficha2__grilla">
+              <section className="pr-recuadro pr-recuadro--link" data-cascada="" aria-label={t.link}>
+                <span className="pr-recuadro__icono" aria-hidden="true">
+                  <Globe size={24} strokeWidth={1.75} />
+                </span>
+                <div className="pr-recuadro__textos">
+                  <span className="pr-recuadro__rotulo">{t.link}</span>
+                  <span className="pr-recuadro__sitio">{partes.host}</span>
+                  {partes.resto && (
+                    <span className="pr-recuadro__ruta" title={p.url}>
+                      {partes.resto}
+                    </span>
+                  )}
+                </div>
+                <div className="pr-recuadro__acciones">
+                  <Boton variante="secundaria" icono="copiar" onPress={copiar}>
+                    {t.copiar}
+                  </Boton>
+                </div>
+              </section>
+              <section className="pr-recuadro" data-cascada="" aria-label={t.grupo}>
+                <span className="pr-recuadro__icono" aria-hidden="true">
+                  <Users size={22} strokeWidth={1.75} />
+                </span>
+                <div className="pr-recuadro__textos">
+                  <span className="pr-recuadro__rotulo">{t.grupo}</span>
+                  <span className="pr-recuadro__valor" data-vacio={p.grupoNombre ? undefined : ""}>
+                    {p.grupoNombre ?? t.sinGrupo}
+                  </span>
+                </div>
+              </section>
+              <section className="pr-recuadro" data-cascada="" aria-label={t.colActualizado}>
+                <span className="pr-recuadro__icono" aria-hidden="true">
+                  <CalendarDays size={22} strokeWidth={1.75} />
+                </span>
+                <div className="pr-recuadro__textos">
+                  <span className="pr-recuadro__rotulo">{t.colActualizado}</span>
+                  <span className="pr-recuadro__valor">{formatDia(p.actualizadoEn)}</span>
+                  <span className="pr-recuadro__nota">{t.fichaActualizadoHace(haceCuanto(p.actualizadoEn))}</span>
+                </div>
+              </section>
+            </div>
           </div>
           <div className="ui-dialogo__acciones pr-ficha__acciones">
             <Boton variante={archivados ? "secundaria" : "peligro"} icono={archivados ? "restaurar" : "archivar"} onPress={() => alArchivo(p)}>
               {archivados ? t.restaurar : t.archivar}
             </Boton>
             <span className="pr-ficha__resto">
-              <Boton variante="secundaria" icono="copiar" onPress={copiar}>
-                {t.copiar}
-              </Boton>
               <Boton variante="secundaria" icono="editar" onPress={() => alEditar(p)}>
                 {t.editar}
               </Boton>

@@ -1,11 +1,10 @@
 "use client"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode, type TransitionEvent } from "react"
 import { Icono } from "@/components/iconos/Icono"
 import { IconoDuo, type IconoDuoApi, type NombreDuo } from "@/components/iconos/IconoDuo"
 import { navegacion as t } from "@/i18n/es/navegacion"
-import { authClient } from "@/lib/auth-client"
 import { EASE, gsap, quieto } from "@/lib/gsap"
 import { EMPRESA, PRODUCTO } from "@/lib/marca"
 import { Pista } from "./Pista"
@@ -35,12 +34,10 @@ export const abrirBusqueda = () => window.dispatchEvent(new Event("portal:buscar
  * una línea y lo otro un sub link"). Un solo resaltado se desliza de una fila a otra siguiendo el mouse
  * y vuelve a la página actual. Se achica a íconos con una curva.
  */
-export function BarraLateral({ usuario, children }: { usuario: ReactNode; children: ReactNode }) {
+export function BarraLateral({ cuenta, children }: { cuenta: ReactNode; children: ReactNode }) {
   const ruta = usePathname()
-  const router = useRouter()
   const [cerrada, setCerrada] = useState(false)
   const [movil, setMovil] = useState(false)
-  const [saliendo, setSaliendo] = useState(false)
   // Todas las secciones arrancan abiertas; cada una se cierra con su fila.
   const [plegadas, setPlegadas] = useState<Record<string, boolean>>({})
   const nav = useRef<HTMLElement>(null)
@@ -50,7 +47,6 @@ export function BarraLateral({ usuario, children }: { usuario: ReactNode; childr
   const encima = useRef<HTMLElement | null>(null)
   const panel = useRef<IconoDuoApi>(null)
   const lupa = useRef<IconoDuoApi>(null)
-  const salida = useRef<IconoDuoApi>(null)
 
   // En el teléfono, navegar cierra la barra.
   const [rutaVista, setRutaVista] = useState(ruta)
@@ -144,12 +140,6 @@ export function BarraLateral({ usuario, children }: { usuario: ReactNode; childr
     if (e.propertyName === "width" || e.propertyName === "grid-template-rows") reposar()
   }
 
-  const salir = async () => {
-    setSaliendo(true)
-    await authClient.signOut()
-    router.replace("/ingresar")
-  }
-
   const alternar = () => {
     panel.current?.animar("alternar")
     setCerrada((c) => !c)
@@ -198,18 +188,8 @@ export function BarraLateral({ usuario, children }: { usuario: ReactNode; childr
           ))}
         </nav>
 
-        <div className="bl__pie">
-          <div className="bl__usuario">
-            <span className="bl__avatar" aria-hidden="true">
-              <IconoDuo nombre="persona" tamano={18} />
-            </span>
-            <span className="bl__texto">{usuario}</span>
-          </div>
-          <button type="button" className="bl__item bl__salir" onClick={salir} disabled={saliendo} onPointerEnter={() => salida.current?.animar()}>
-            <IconoDuo ref={salida} nombre="salir" tamano={20} />
-            <span className="bl__texto">{saliendo ? t.saliendo : t.salir}</span>
-          </button>
-        </div>
+        {/* La cuenta: la entrada a Mi cuenta y «Salir» (D-024, D-035). */}
+        <div className="bl__pie">{cuenta}</div>
       </aside>
       {movil && <div className="bl-velo" aria-hidden="true" onClick={() => setMovil(false)} />}
       <div className="bl-contenido">{children}</div>

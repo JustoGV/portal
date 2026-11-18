@@ -115,6 +115,10 @@ export const usuarios = {
     "usuario.desactivar": "Se desactivó",
     "usuario.clave-inicial": "Se le dio una contraseña inicial nueva",
     "usuario.cerrar-sesiones": "Se cerraron sus sesiones",
+    // Desde Mi cuenta (D-035): lo hizo la misma persona.
+    "usuario.cambiar-clave": "Cambió su contraseña",
+    "usuario.cerrar-sesion": "Cerró una de sus sesiones",
+    "usuario.cerrar-otras-sesiones": "Cerró sus otras sesiones",
   } as Record<string, string>,
   movimientoOtro: "Otro cambio",
   por: (n: string) => `por ${n}`,

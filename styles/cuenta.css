@@ -1,0 +1,581 @@
+/* Mi cuenta (WU-06 pantalla 6, D-035 y D-036). Arriba la banda (banda.css), debajo la tarjeta con secciones.
+   La primera composición (bloques sueltos sobre el gris) la rechazó Mateo: «no se notan las divisiones, todo
+   muy insulso». Eligió «Secciones» y pidió que no sea «todo muy blanco»: cada sección tiene sus recuadros con
+   color, su medidor, sus dispositivos y su línea de tiempo, y todo se mueve al entrar. */
+@layer modulos {
+  .cu-pagina {
+    padding-bottom: var(--sys-esp-9);
+  }
+
+  /* ---------- En la banda: tus iniciales y tres datos ---------- */
+  .cu-banda__iniciales {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 6rem;
+    height: 6rem;
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-marca);
+    box-shadow: 0 0 0 6px color-mix(in oklab, var(--sys-marca) 30%, transparent);
+    color: #fdfdff;
+    font-size: var(--sys-tipo-3xl);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+  .cu-datos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0;
+  }
+  .cu-dato {
+    display: grid;
+    gap: var(--sys-esp-1);
+    padding: 0 var(--sys-esp-5);
+  }
+  .cu-dato:first-child {
+    padding-left: 0;
+  }
+  .cu-dato + .cu-dato {
+    border-left: 1px solid color-mix(in oklab, #fff 14%, transparent);
+  }
+  .cu-dato dt {
+    color: var(--sys-barra-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+  .cu-dato dd {
+    margin: 0;
+    font-size: var(--sys-tipo-xl);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- La tarjeta: menú a la izquierda, la sección a la derecha ---------- */
+  .cu-tarjeta {
+    display: grid;
+    grid-template-columns: minmax(0, 18.5rem) minmax(0, 1fr);
+    min-height: 32rem;
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-xl);
+    background: var(--sys-capa);
+    box-shadow: var(--sys-sombra);
+    overflow: hidden;
+  }
+  .cu-menu {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: var(--sys-esp-1);
+    padding: var(--sys-esp-5) var(--sys-esp-4);
+    border-right: 1px solid var(--sys-borde);
+    background:
+      linear-gradient(180deg, color-mix(in oklab, var(--sys-marca-suave) 70%, transparent), transparent 18rem),
+      var(--sys-capa-2);
+  }
+  .cu-menu__sobre {
+    margin: 0 0 var(--sys-esp-2);
+    padding: 0 var(--sys-esp-3);
+    color: var(--sys-marca-tinta);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .cu-menu__resaltado {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 1px solid var(--sys-marca-borde);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa);
+    box-shadow: var(--sys-sombra);
+    pointer-events: none;
+  }
+  /* La barra de color a la izquierda de la sección elegida. */
+  .cu-menu__resaltado::before {
+    content: "";
+    position: absolute;
+    top: 22%;
+    bottom: 22%;
+    left: -1px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--sys-marca);
+  }
+  .cu-menu__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    min-height: 4.25rem;
+    padding: var(--sys-esp-2) var(--sys-esp-3);
+    border: 0;
+    border-radius: var(--sys-radio-m);
+    background: transparent;
+    color: var(--sys-texto-1);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+  .cu-menu__item:focus-visible {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+  }
+  .cu-menu__icono {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa-3);
+    --duo-1: var(--sys-texto-2);
+    --duo-2: var(--sys-texto-3);
+    transition: background var(--sys-dur-2) var(--sys-ease);
+  }
+  .cu-menu__item[aria-selected="true"] .cu-menu__icono {
+    background: var(--sys-marca);
+    --duo-1: #fff;
+    --duo-2: #bcd2ff;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .cu-menu__item[aria-selected="false"]:hover .cu-menu__icono {
+      background: var(--sys-marca-suave);
+      --duo-1: var(--sys-marca-tinta);
+      --duo-2: var(--sys-marca);
+    }
+  }
+  .cu-menu__textos {
+    display: grid;
+    min-width: 0;
+    line-height: 1.3;
+  }
+  .cu-menu__titulo {
+    font-weight: 700;
+  }
+  .cu-menu__texto {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+
+  .cu-panel {
+    display: grid;
+    align-content: start;
+    gap: var(--sys-esp-6);
+    min-width: 0;
+    padding: var(--sys-esp-7);
+  }
+  .cu-panel__cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--sys-esp-3) var(--sys-esp-5);
+    padding-bottom: var(--sys-esp-5);
+    border-bottom: 1px solid var(--sys-borde);
+  }
+  .cu-panel__titulo {
+    margin: 0;
+    font-size: var(--sys-tipo-2xl);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .cu-panel__bajada {
+    margin: var(--sys-esp-1) 0 0;
+    color: var(--sys-texto-2);
+  }
+  .cu-nota {
+    margin: 0;
+    color: var(--sys-texto-2);
+  }
+
+  /* ---------- Recuadros: cada dato en su pieza, con su ícono en color ---------- */
+  .cu-recuadros {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+    gap: var(--sys-esp-4);
+  }
+  .cu-recuadro {
+    --chip: var(--sys-marca-suave);
+    --chip-txt: var(--sys-marca-tinta);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-content: start;
+    gap: var(--sys-esp-3) var(--sys-esp-4);
+    padding: var(--sys-esp-5);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-l);
+    background: var(--sys-capa);
+    transition:
+      transform var(--sys-dur-2) var(--sys-ease),
+      border-color var(--sys-dur-2) var(--sys-ease),
+      box-shadow var(--sys-dur-2) var(--sys-ease);
+  }
+  .cu-recuadro[data-tono="ok"] {
+    --chip: var(--sys-ok-bg);
+    --chip-txt: var(--sys-ok);
+  }
+  .cu-recuadro[data-tono="neutro"] {
+    --chip: var(--sys-capa-3);
+    --chip-txt: var(--sys-texto-2);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .cu-recuadro:hover {
+      border-color: var(--sys-marca-borde);
+      box-shadow: var(--sys-sombra);
+      transform: translateY(-2px);
+    }
+  }
+  .cu-recuadro__icono {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--sys-radio-m);
+    background: var(--chip);
+    color: var(--chip-txt);
+  }
+  .cu-recuadro__textos {
+    display: grid;
+    align-content: start;
+    gap: var(--sys-esp-1);
+    min-width: 0;
+  }
+  .cu-recuadro__rotulo {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .cu-recuadro__valor {
+    font-size: var(--sys-tipo-l);
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: break-word;
+  }
+  .cu-recuadro__nota {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+  .cu-recuadro__accion {
+    grid-column: 2;
+  }
+
+  /* ---------- Seguridad: el medidor ---------- */
+  .cu-seguridad {
+    display: grid;
+    gap: var(--sys-esp-5);
+  }
+  .cu-medidor {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sys-esp-4) var(--sys-esp-6);
+    padding: var(--sys-esp-5) var(--sys-esp-6);
+    border: 1px solid var(--sys-marca-borde);
+    border-radius: var(--sys-radio-l);
+    background:
+      radial-gradient(28rem 10rem at 0% 50%, var(--sys-marca-suave), transparent 70%),
+      var(--sys-capa);
+  }
+  .cu-medidor__svg {
+    flex: none;
+    width: 7.5rem;
+    height: 7.5rem;
+    transform: rotate(-90deg);
+  }
+  .cu-medidor__pista,
+  .cu-medidor__arco {
+    fill: none;
+    stroke-width: 10;
+  }
+  .cu-medidor__pista {
+    stroke: var(--sys-capa-3);
+  }
+  .cu-medidor__arco {
+    stroke: var(--sys-marca);
+    stroke-linecap: round;
+  }
+  .cu-medidor[data-completo] .cu-medidor__arco {
+    stroke: var(--sys-ok);
+  }
+  .cu-medidor__centro {
+    position: absolute;
+    top: 50%;
+    left: calc(var(--sys-esp-6) + 3.75rem);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .cu-medidor__numero {
+    font-size: var(--sys-tipo-2xl);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .cu-medidor__de {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+    font-weight: 600;
+  }
+  .cu-medidor__textos {
+    display: grid;
+    flex: 1 1 14rem;
+    gap: var(--sys-esp-1);
+    min-width: 0;
+  }
+  .cu-medidor__titulo {
+    margin: 0;
+    font-size: var(--sys-tipo-l);
+    font-weight: 700;
+  }
+  .cu-medidor__texto {
+    margin: 0;
+    color: var(--sys-texto-2);
+  }
+
+  /* ---------- Sesiones: cada dispositivo en su recuadro ---------- */
+  .cu-dispositivos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    gap: var(--sys-esp-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .cu-dispositivo {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-content: start;
+    gap: var(--sys-esp-3) var(--sys-esp-4);
+    padding: var(--sys-esp-5);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-l);
+    background: var(--sys-capa);
+  }
+  .cu-dispositivo[data-esta] {
+    border-color: var(--sys-ok-borde);
+    background:
+      radial-gradient(18rem 8rem at 100% 0%, var(--sys-ok-bg), transparent 70%),
+      var(--sys-capa);
+  }
+  .cu-dispositivo__icono {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa-3);
+    color: var(--sys-texto-1);
+  }
+  .cu-dispositivo[data-esta] .cu-dispositivo__icono {
+    background: var(--sys-ok-bg);
+    color: var(--sys-ok);
+  }
+  .cu-dispositivo__textos {
+    display: grid;
+    align-content: start;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+  .cu-dispositivo__nombre {
+    font-size: var(--sys-tipo-l);
+    font-weight: 700;
+  }
+  .cu-dispositivo__vivo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sys-esp-2);
+    color: var(--sys-ok);
+    font-size: var(--sys-tipo-s);
+    font-weight: 700;
+  }
+  .cu-dispositivo__cuando {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+  .cu-dispositivo > .ui-boton {
+    grid-column: 2;
+    justify-self: start;
+  }
+  /* El punto de «este dispositivo» late: una onda que se abre y se apaga cada 2 s. */
+  .cu-latido {
+    position: relative;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-ok);
+  }
+  .cu-latido::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--sys-ok);
+    animation: cu-latido 2s var(--sys-ease) infinite;
+  }
+  @keyframes cu-latido {
+    from {
+      opacity: 0.6;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(3);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cu-latido::after {
+      animation: none;
+    }
+  }
+
+  /* ---------- Actividad: línea de tiempo con un hilo que se dibuja ---------- */
+  .cu-tiempo-caja {
+    position: relative;
+  }
+  .cu-tiempo__hilo {
+    position: absolute;
+    top: 1.5rem;
+    bottom: 1.5rem;
+    left: calc(0.5rem - 1px);
+    width: 2px;
+    border-radius: 2px;
+    background: var(--sys-marca-suave-2);
+  }
+  .cu-tiempo {
+    display: grid;
+    gap: var(--sys-esp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .cu-tiempo__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1rem minmax(0, 1fr);
+    align-items: center;
+    gap: var(--sys-esp-4);
+  }
+  .cu-tiempo__punto {
+    width: 1rem;
+    height: 1rem;
+    border: 3px solid var(--sys-capa);
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-marca);
+    box-shadow: 0 0 0 2px var(--sys-marca-suave-2);
+  }
+  .cu-tiempo__item:first-child .cu-tiempo__punto {
+    background: var(--sys-ok);
+    box-shadow: 0 0 0 2px var(--sys-ok-borde);
+  }
+  .cu-tiempo__cuerpo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sys-esp-1) var(--sys-esp-4);
+    padding: var(--sys-esp-3) var(--sys-esp-4);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa-2);
+  }
+  .cu-tiempo__texto {
+    font-weight: 600;
+  }
+  .cu-tiempo__quien {
+    color: var(--sys-texto-2);
+    font-weight: 400;
+  }
+  .cu-tiempo__cuando {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+}
+
+/* ====================== Tamaños ====================== */
+@layer modulos {
+  @media (max-width: 63.99rem) {
+    .cu-tarjeta {
+      grid-template-columns: minmax(0, 1fr);
+      min-height: 0;
+    }
+    /* El menú pasa a una fila arriba que se desliza de costado. */
+    .cu-menu {
+      display: flex;
+      gap: var(--sys-esp-1);
+      padding: var(--sys-esp-2);
+      border-right: 0;
+      border-bottom: 1px solid var(--sys-borde);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .cu-menu__sobre,
+    .cu-menu__texto {
+      display: none;
+    }
+    .cu-menu__item {
+      flex: none;
+      min-height: var(--sys-toque);
+      padding: var(--sys-esp-1) var(--sys-esp-3) var(--sys-esp-1) var(--sys-esp-1);
+    }
+    .cu-menu__icono {
+      width: 2.25rem;
+      height: 2.25rem;
+    }
+    .cu-menu__resaltado::before {
+      top: auto;
+      right: 22%;
+      bottom: -1px;
+      left: 22%;
+      width: auto;
+      height: 3px;
+      border-radius: 3px 3px 0 0;
+    }
+    .cu-panel {
+      padding: var(--sys-esp-5);
+    }
+  }
+  @media (max-width: 47.99rem) {
+    .cu-banda__iniciales {
+      width: 4.5rem;
+      height: 4.5rem;
+      font-size: var(--sys-tipo-2xl);
+    }
+    .cu-datos {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--sys-esp-3);
+    }
+    .cu-dato {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: baseline;
+      padding: 0;
+    }
+    .cu-dato + .cu-dato {
+      padding-top: var(--sys-esp-3);
+      border-top: 1px solid color-mix(in oklab, #fff 14%, transparent);
+      border-left: 0;
+    }
+    .cu-dato dd {
+      font-size: var(--sys-tipo-l);
+    }
+    .cu-panel__cabecera .ui-boton {
+      width: 100%;
+    }
+    .cu-recuadro,
+    .cu-dispositivo {
+      padding: var(--sys-esp-4);
+    }
+    .cu-medidor {
+      justify-content: center;
+      padding: var(--sys-esp-5) var(--sys-esp-4);
+      text-align: center;
+    }
+    .cu-medidor__centro {
+      top: calc(var(--sys-esp-5) + 3.75rem);
+      left: 50%;
+    }
+  }
+}

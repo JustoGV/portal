@@ -42,6 +42,9 @@ export const proyectos = {
   anterior: "Servicio anterior (↑)",
   siguiente: "Servicio siguiente (↓)",
   fichaSitio: "Sitio",
+  // La ficha rehecha (D-037): la banda arriba y los datos en recuadros.
+  fichaDireccion: "Dirección completa",
+  fichaActualizadoHace: (h: string) => `Último cambio ${h}`,
   nuevo: "Nuevo servicio",
   buscar: "Buscar por nombre, link o descripción",
   estado: "Estado",

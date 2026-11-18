@@ -22,6 +22,8 @@ type Props = Omit<ButtonProps, "children" | "className"> & {
 export function Boton({ variante = "secundaria", icono, cargando, textoCargando, children, className, isDisabled, ...resto }: Props) {
   const ref = useRef<HTMLButtonElement>(null)
   const liquido = variante !== "sutil"
+  // El llenado en curso: al salir se corta entero, también la parte que todavía no había arrancado.
+  const llenado = useRef<gsap.core.Timeline | null>(null)
 
   // Al desmontar no queda ningún tween colgado del botón.
   useEffect(() => {
@@ -38,14 +40,20 @@ export function Boton({ variante = "secundaria", icono, cargando, textoCargando,
     const linea = b.querySelector(".ui-boton__linea")
     if (lleno) b.setAttribute("data-lleno", "")
     else b.removeAttribute("data-lleno")
+    // Antes el relleno arrancaba 0,12 s después de la línea: si el mouse salía antes, vaciar no lo
+    // encontraba en curso y el relleno subía igual y quedaba pintado (corrección de Mateo, 2026-11-18).
+    llenado.current?.kill()
+    llenado.current = null
+    gsap.killTweensOf([relleno, linea])
     if (quieto()) {
       gsap.set(relleno, { scaleY: lleno ? 1 : 0 })
       return
     }
     if (lleno) {
-      gsap.timeline({ overwrite: "auto" })
-        .to(linea, { scaleX: 1, duration: 0.3, ease: "power2.out", overwrite: "auto" })
-        .to(relleno, { scaleY: 1, duration: 0.3, ease: "power2.out", overwrite: "auto" }, 0.12)
+      llenado.current = gsap
+        .timeline()
+        .to(linea, { scaleX: 1, duration: 0.3, ease: "power2.out" })
+        .to(relleno, { scaleY: 1, duration: 0.3, ease: "power2.out" }, 0.12)
       gsap.to(b, { scale: 1.05, duration: 0.3, ease: "power2.out", overwrite: "auto" })
     } else {
       gsap.to(relleno, { scaleY: 0, duration: 0.25, ease: "power2.inOut", overwrite: "auto" })
@@ -60,6 +68,12 @@ export function Boton({ variante = "secundaria", icono, cargando, textoCargando,
   }
 
   const deshabilitado = isDisabled || cargando
+
+  // Un botón que se apaga (guardando, o deshabilitado) no recibe la salida del mouse: se vacía solo.
+  useEffect(() => {
+    if (deshabilitado && ref.current?.hasAttribute("data-lleno")) llenar(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- llenar solo lee refs
+  }, [deshabilitado])
 
   return (
     <Button

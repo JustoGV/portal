@@ -6,11 +6,13 @@ import { CifrasProyectos } from "@/components/proyectos/CifrasProyectos"
 import { EditorProyecto } from "@/components/proyectos/EditorProyecto"
 import { TablaProyectos } from "@/components/proyectos/TablaProyectos"
 import { FiltroMenu } from "@/components/ui/FiltroMenu"
+import { Banda } from "@/components/ui/Banda"
 import { LimiteError } from "@/components/ui/LimiteError"
 import { Llegada } from "@/components/ui/Llegada"
 import { NavegacionLista } from "@/components/ui/NavegacionLista"
 import { listarGruposActivos } from "@/dal/grupos"
 import { exigirPagina } from "@/dal/guard"
+import { navegacion as tn } from "@/i18n/es/navegacion"
 import { cifrasProyectos, contarProyectos, listarProyectos, type FiltroProyectos } from "@/dal/proyectos"
 import { proyectos as t } from "@/i18n/es/proyectos"
 import { pegar } from "@/lib/texto"
@@ -46,27 +48,28 @@ export default async function PaginaProyectos({ searchParams }: { searchParams: 
     <EditorProyecto grupos={grupos}>
       <NavegacionLista>
         <Llegada como="main" className="ui-pagina">
-          <header className="ui-pagina__cabecera" data-llega="" style={{ "--llega-i": 0 } as React.CSSProperties}>
-            <div>
-              <h1 className="ui-pagina__titulo pr-titulo">
+          {/* La cabecera en la banda azul, con las cifras que filtran adentro (D-036). */}
+          <Banda
+            sobre={tn.seccionPortal}
+            titulo={
+              <>
                 {t.titulo}
                 <LimiteError>
                   <Suspense fallback={null}>
                     <Contador cifras={cifras} />
                   </Suspense>
                 </LimiteError>
-              </h1>
-              <p className="ui-pagina__bajada">{pegar(t.bajada)}</p>
-            </div>
-            <BotonNuevoProyecto />
-          </header>
-          <div data-llega="" style={{ "--llega-i": 1 } as React.CSSProperties}>
+              </>
+            }
+            bajada={pegar(t.bajada)}
+            accion={<BotonNuevoProyecto />}
+          >
             <LimiteError>
               <Suspense fallback={<CifrasEsqueleto />}>
                 <Cifras cifras={cifras} f={f} actuales={actuales} />
               </Suspense>
             </LimiteError>
-          </div>
+          </Banda>
           <div className="ui-herramientas" data-llega="" style={{ "--llega-i": 2 } as React.CSSProperties}>
             <div className="ui-herramientas__busqueda">
               <BusquedaProyectos q={f.q} actuales={actuales} />

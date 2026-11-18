@@ -4,11 +4,13 @@ import { BarraClientes, PaginasClientes } from "@/components/grupos/BarraCliente
 import { CifrasGrupos } from "@/components/grupos/CifrasGrupos"
 import { BotonNuevoGrupo, EditorGrupo } from "@/components/grupos/EditorGrupo"
 import { GrillaGrupos } from "@/components/grupos/GrillaGrupos"
+import { Banda } from "@/components/ui/Banda"
 import { LimiteError } from "@/components/ui/LimiteError"
 import { Llegada } from "@/components/ui/Llegada"
 import { NavegacionLista } from "@/components/ui/NavegacionLista"
 import { cifrasGrupos, listarGrupos, listarServiciosElegibles, type FiltroGrupos } from "@/dal/grupos"
 import { exigirPagina } from "@/dal/guard"
+import { navegacion as tn } from "@/i18n/es/navegacion"
 import { grupos as t } from "@/i18n/es/grupos"
 import { conParametros, leerBusqueda, leerOrdenGrupos, leerPagina, leerSiNo, leerVistaGrupos, POR_PAGINA_CLIENTES, SIN_GRUPO, type ParametrosLista } from "@/lib/parametros"
 import { pegar } from "@/lib/texto"
@@ -51,27 +53,28 @@ export default async function PaginaClientes({ searchParams }: { searchParams: P
     <EditorGrupo servicios={servicios}>
       <NavegacionLista>
         <Llegada como="main" className="ui-pagina">
-          <header className="ui-pagina__cabecera" data-llega="" style={{ "--llega-i": 0 } as React.CSSProperties}>
-            <div>
-              <h1 className="ui-pagina__titulo pr-titulo">
+          {/* La cabecera en la banda azul, con las cifras que filtran adentro (D-036). */}
+          <Banda
+            sobre={tn.administracion}
+            titulo={
+              <>
                 {t.titulo}
                 <LimiteError>
                   <Suspense fallback={null}>
                     <Contador cifras={cifras} />
                   </Suspense>
                 </LimiteError>
-              </h1>
-              <p className="ui-pagina__bajada">{pegar(t.bajada)}</p>
-            </div>
-            <BotonNuevoGrupo />
-          </header>
-          <div data-llega="" style={{ "--llega-i": 1 } as React.CSSProperties}>
+              </>
+            }
+            bajada={pegar(t.bajada)}
+            accion={<BotonNuevoGrupo />}
+          >
             <LimiteError>
               <Suspense fallback={<CifrasEsqueleto />}>
                 <Cifras cifras={cifras} f={f} actuales={actuales} />
               </Suspense>
             </LimiteError>
-          </div>
+          </Banda>
           <div data-llega="" style={{ "--llega-i": 2 } as React.CSSProperties}>
             <BarraClientes
               q={f.q}

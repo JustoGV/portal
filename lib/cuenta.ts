@@ -43,6 +43,9 @@ export const esquemaEditarCuenta = z.object({
   nombre: esquemaCuenta.shape.nombre,
 })
 
+/** Mi cuenta (D-035): la persona cambia solo su nombre; la cuenta es la de su sesión, no viaja en el pedido. */
+export const esquemaMiNombre = z.object({ nombre: esquemaCuenta.shape.nombre })
+
 export const esquemaClaveNueva = z
   .object({
     actual: z.string().min(1, MENSAJES_CUENTA.claveActualMal).max(CONTRASENA_MAX),
@@ -93,3 +96,5 @@ export type SesionAbierta = { id: string; dispositivo: string; movil: boolean; a
 /** Un movimiento de la auditoría sobre la cuenta: qué pasó, cuándo y quién lo hizo. */
 export type MovimientoCuenta = { id: string; accion: string; cuando: string; quien: string | null }
 export type DetalleUsuario = { sesiones: SesionAbierta[]; movimientos: MovimientoCuenta[] }
+/** Lo que muestra Mi cuenta (D-035): la persona, su acceso, sus sesiones y sus movimientos. */
+export type MiCuenta = { id: string; nombre: string; email: string; segundoFactor: boolean; creadoEn: string } & DetalleUsuario

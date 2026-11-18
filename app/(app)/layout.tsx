@@ -2,6 +2,7 @@ import { Suspense, type ReactNode } from "react"
 import { BarraLateral } from "@/components/ui/BarraLateral"
 import { BusquedaRapida } from "@/components/ui/BusquedaRapida"
 import { Inactividad } from "@/components/ui/Inactividad"
+import { MenuCuenta } from "@/components/ui/MenuCuenta"
 import { Proveedores } from "@/components/ui/Proveedores"
 import { leerConfiguracion } from "@/dal/configuracion"
 import { exigir } from "@/dal/guard"
@@ -16,9 +17,9 @@ export default function LayoutApp({ children }: { children: ReactNode }) {
   return (
     <Proveedores>
       <BarraLateral
-        usuario={
-          <Suspense fallback={<span className="ui-skeleton" style={{ width: "7rem", height: "1rem" }} />}>
-            <NombreUsuario />
+        cuenta={
+          <Suspense fallback={<span className="ui-skeleton bl__cuenta-esqueleto" aria-hidden="true" />}>
+            <Cuenta />
           </Suspense>
         }
       >
@@ -32,13 +33,16 @@ export default function LayoutApp({ children }: { children: ReactNode }) {
   )
 }
 
-async function NombreUsuario() {
+/** El pie de la barra: tus iniciales, tu nombre y tu mail, que abren Mi cuenta y «Salir» (D-035). */
+async function Cuenta() {
+  let datos: { nombre: string; email: string }
   try {
     const { usuario } = await exigir("proyectos.ver")
-    return usuario.nombre
+    datos = { nombre: usuario.nombre, email: usuario.email }
   } catch {
     return null
   }
+  return <MenuCuenta nombre={datos.nombre} email={datos.email} />
 }
 
 async function Vigilante() {

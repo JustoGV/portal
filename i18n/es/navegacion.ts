@@ -41,4 +41,6 @@ export const navegacion = {
   fichaProyectos: "Todos los servicios del portal: buscarlos, filtrarlos por cliente, sumar uno nuevo o archivarlo.",
   fichaGrupos: "Los clientes de la consultora: quién está a cargo de cada uno y qué servicios tiene.",
   fichaUsuarios: "Quién puede entrar al portal: dar de alta una cuenta, desactivarla y fijar el tiempo de inactividad.",
+  cuenta: "Mi cuenta",
+  fichaCuenta: "Tu nombre, tu contraseña y los dispositivos donde tenés el portal abierto.",
 } as const

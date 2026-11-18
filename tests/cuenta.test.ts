@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { esquemaCuenta, esquemaEditarCuenta, MENSAJES_CUENTA, validarEmail, validarNombreCuenta } from "@/lib/cuenta"
+import { esquemaClaveNueva, esquemaCuenta, esquemaEditarCuenta, esquemaMiNombre, MENSAJES_CUENTA, validarEmail, validarNombreCuenta } from "@/lib/cuenta"
 import { nombreDispositivo } from "@/lib/dispositivo"
 import { haceCuanto } from "@/lib/fecha"
 import { dominioDe, mailValido, normalizarMail, sugerirMail } from "@/lib/mail"
@@ -23,6 +23,22 @@ describe("cuentas (D-034)", () => {
     expect(esquemaEditarCuenta.safeParse({ id: "x", nombre: "Ana" }).success).toBe(false)
     const r = esquemaEditarCuenta.parse({ id: "6f1d2c3b-4a5e-4f60-8a7b-9c0d1e2f3a4b", nombre: " Ana ", email: "otro@gmail.com" })
     expect(r).toEqual({ id: "6f1d2c3b-4a5e-4f60-8a7b-9c0d1e2f3a4b", nombre: "Ana" })
+  })
+  it("en Mi cuenta solo se cambia el nombre, y la cuenta no viaja en el pedido (D-035)", () => {
+    expect(esquemaMiNombre.parse({ nombre: "  Mateo  Gaviraghi ", id: "6f1d2c3b-4a5e-4f60-8a7b-9c0d1e2f3a4b", email: "otro@gmail.com" })).toEqual({ nombre: "Mateo Gaviraghi" })
+    expect(esquemaMiNombre.safeParse({ nombre: "   " }).success).toBe(false)
+    expect(esquemaMiNombre.safeParse({ nombre: "a".repeat(81) }).success).toBe(false)
+  })
+  it("la contraseña nueva pide la actual, 8 caracteres, repetirla igual y que no sea la misma", () => {
+    const ok = { actual: "vieja-123", nueva: "nueva-1234", repetida: "nueva-1234" }
+    expect(esquemaClaveNueva.safeParse(ok).success).toBe(true)
+    expect(esquemaClaveNueva.safeParse({ ...ok, actual: "" }).success).toBe(false)
+    expect(esquemaClaveNueva.safeParse({ ...ok, nueva: "corta", repetida: "corta" }).success).toBe(false)
+    expect(esquemaClaveNueva.safeParse({ ...ok, repetida: "otra-1234" }).success).toBe(false)
+    expect(esquemaClaveNueva.safeParse({ ...ok, nueva: "vieja-123", repetida: "vieja-123" }).success).toBe(false)
+    // Se puede pegar una larga de un gestor (ASVS 6.2.9: al menos 64).
+    const larga = "x".repeat(64)
+    expect(esquemaClaveNueva.safeParse({ ...ok, nueva: larga, repetida: larga }).success).toBe(true)
   })
   it("reglas del mail comunes", () => {
     expect(normalizarMail(" Ana @Gmail.com")).toBe("ana@gmail.com")

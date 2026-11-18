@@ -1,10 +1,10 @@
 import "server-only"
-import { and, asc, desc, eq, ilike, or, sql, type SQL } from "drizzle-orm"
+import { and, asc, desc, eq, ilike, ne, or, sql, type SQL } from "drizzle-orm"
 import { db } from "@/db"
 import { auditoria, authAccount, authSession, authTwoFactor, authUser, usuarios } from "@/db/schema"
 import { auth } from "@/lib/auth"
 import { contrasenaInicial } from "@/lib/contrasena"
-import type { DetalleUsuario, FilaUsuario } from "@/lib/cuenta"
+import type { DetalleUsuario, FilaUsuario, MiCuenta } from "@/lib/cuenta"
 import { leerDispositivo, nombreDispositivo } from "@/lib/dispositivo"
 import { POR_PAGINA_USUARIOS, type OrdenUsuarios, type VistaUsuarios } from "@/lib/parametros"
 import { escaparLike } from "@/lib/texto"
@@ -175,6 +175,52 @@ export const detalleUsuario = async (usuarioId: string, miSesion: string | null)
     }),
     movimientos,
   }
+}
+
+// ---------- Mi cuenta (WU-06 pantalla 6, D-035). La cuenta sale siempre de la sesión de quien pide. ----------
+
+export const miCuenta = async (usuarioId: string, miSesion: string): Promise<MiCuenta | null> => {
+  const [[u], d] = await Promise.all([
+    db
+      .select({ id: usuarios.id, nombre: usuarios.nombre, email: usuarios.email, segundoFactor: conFactor, creadoEn: sql<string>`${usuarios.creadoEn}::text` })
+      .from(usuarios)
+      .innerJoin(authUser, eq(authUser.id, usuarios.authUserId))
+      .where(eq(usuarios.id, usuarioId))
+      .limit(1),
+    detalleUsuario(usuarioId, miSesion),
+  ])
+  if (!u || !d) return null
+  // La sesión en uso va primero; las demás, de la usada más recién a la más vieja.
+  const sesiones = [...d.sesiones].sort((a, b) => Number(b.esEsta) - Number(a.esEsta))
+  return { ...u, sesiones, movimientos: d.movimientos }
+}
+
+/**
+ * Cierra una sesión propia (ASVS 7.4.1): se borra de la base y deja de servir en el próximo pedido (sin caché
+ * en la cookie, lib/auth.ts). Solo si es de esta cuenta y no es la que está en uso. Devuelve cuántas cerró.
+ */
+export const cerrarSesionPropia = async (authUserId: string, sesionId: string, miSesion: string) => {
+  if (sesionId === miSesion) return 0
+  const r = await db
+    .delete(authSession)
+    .where(and(eq(authSession.id, sesionId), eq(authSession.userId, authUserId), vigente))
+    .returning({ id: authSession.id })
+  return r.length
+}
+
+/** Cierra todas las sesiones propias menos la que está en uso. Devuelve cuántas cerró. */
+export const cerrarOtrasSesiones = async (authUserId: string, miSesion: string) => {
+  const r = await db
+    .delete(authSession)
+    .where(and(eq(authSession.userId, authUserId), ne(authSession.id, miSesion), vigente))
+    .returning({ id: authSession.id })
+  return r.length
+}
+
+/** Cuántas sesiones abiertas tiene una cuenta además de la que está en uso. */
+export const otrasSesiones = async (authUserId: string, miSesion: string) => {
+  const [c] = await db.select({ n: sql<number>`count(*)::int` }).from(authSession).where(and(eq(authSession.userId, authUserId), ne(authSession.id, miSesion), vigente))
+  return c?.n ?? 0
 }
 
 /** Cierra todas las sesiones de una cuenta (ASVS 7.4.2 y 7.4.5). Devuelve cuántas cerró. */
