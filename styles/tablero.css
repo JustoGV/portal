@@ -1,0 +1,1034 @@
+/* El tablero de trabajo (WU-07, D-038). Tarjeta «Franja», mezcla de cult/ui · Kanban Board y 7Ovr · Task
+   Board Kanban; movimiento de Mohamed Uvaish · Kanban Board (elegidos por Mateo el 2026-11-18). */
+@layer modulos {
+  /* Tonos que comparten etiquetas, caras, listas y franjas. */
+  [data-tono="marca"] { --tb-solido: var(--sys-marca); --tb-suave: var(--sys-marca-suave); --tb-tinta: var(--sys-marca-tinta); }
+  [data-tono="info"] { --tb-solido: var(--sys-info-solido); --tb-suave: var(--sys-info-bg); --tb-tinta: var(--sys-info); }
+  [data-tono="ok"] { --tb-solido: var(--sys-ok-solido); --tb-suave: var(--sys-ok-bg); --tb-tinta: var(--sys-ok); }
+  [data-tono="warn"] { --tb-solido: var(--sys-warn-solido); --tb-suave: var(--sys-warn-bg); --tb-tinta: var(--sys-warn); }
+  [data-tono="danger"] { --tb-solido: var(--sys-danger-solido); --tb-suave: var(--sys-danger-bg); --tb-tinta: var(--sys-danger); }
+  [data-tono="violeta"] { --tb-solido: #6d3fd1; --tb-suave: #f1ebff; --tb-tinta: #5a2fb8; }
+
+  .tb-tablero {
+    display: grid;
+    gap: var(--sys-esp-4);
+  }
+
+  /* ---- Las listas ---- */
+  .tb-listas {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(15rem, 1fr));
+    gap: var(--sys-esp-4);
+    align-items: start;
+  }
+  .tb-lista {
+    display: grid;
+    gap: var(--sys-esp-3);
+    padding: var(--sys-esp-4);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-l);
+    background: var(--sys-capa-2);
+    transition: background-color var(--sys-dur-2) var(--sys-ease), border-color var(--sys-dur-2) var(--sys-ease);
+  }
+  .tb-lista[data-destino] {
+    border-color: color-mix(in oklab, var(--tb-solido) 55%, transparent);
+    background: color-mix(in oklab, var(--tb-suave) 70%, var(--sys-capa-2));
+  }
+  .tb-lista__cabeza {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-2);
+    min-width: 0;
+  }
+  .tb-lista__icono {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: var(--sys-radio-s);
+    background: var(--tb-suave);
+    color: var(--tb-tinta);
+  }
+  .tb-lista__titulo {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    color: var(--sys-texto-1);
+    font-size: var(--sys-tipo-m);
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tb-lista__contador {
+    min-width: 1.5rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-capa);
+    border: 1px solid var(--sys-borde);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .tb-lista__pista {
+    margin: calc(var(--sys-esp-2) * -1) 0 0;
+    color: var(--sys-texto-3);
+    font-size: var(--sys-tipo-xs);
+  }
+  .tb-lista__cuerpo {
+    display: grid;
+    gap: var(--sys-esp-3);
+    min-height: 4rem;
+  }
+  .tb-lista__vacia {
+    margin: 0;
+    padding: var(--sys-esp-5);
+    border: 1px dashed var(--sys-borde-2);
+    border-radius: var(--sys-radio-m);
+    color: var(--sys-texto-3);
+    font-size: var(--sys-tipo-s);
+    text-align: center;
+  }
+
+  /* ---- La tarjeta, lo común ---- */
+  .tb-tarjeta {
+    position: relative;
+    display: grid;
+    gap: var(--sys-esp-3);
+    padding: var(--sys-esp-4);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa);
+    box-shadow: 0 1px 2px rgb(17 24 58 / 0.06);
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    transition: border-color var(--sys-dur-1) var(--sys-ease), box-shadow var(--sys-dur-2) var(--sys-ease);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .tb-tarjeta:hover {
+      border-color: var(--sys-borde-2);
+      box-shadow: 0 6px 16px -8px rgb(17 24 58 / 0.22);
+    }
+  }
+  .tb-tarjeta--esperando {
+    transform: scale(0.98);
+    transition: transform 280ms var(--sys-ease);
+  }
+  /* El hueco que deja la tarjeta levantada. */
+  .tb-tarjeta[data-hueco] {
+    border-style: dashed;
+    border-color: var(--sys-marca-borde);
+    background: var(--sys-marca-suave);
+    box-shadow: none;
+  }
+  .tb-tarjeta[data-hueco] > * {
+    visibility: hidden;
+  }
+  .tb-fantasma {
+    cursor: grabbing;
+    box-shadow: 0 22px 44px -14px rgb(17 24 58 / 0.4), 0 4px 10px -4px rgb(17 24 58 / 0.2);
+    border-color: var(--sys-marca-borde);
+    will-change: transform;
+  }
+  .tb-tablero[data-arrastrando] {
+    cursor: grabbing;
+  }
+  .tb-tablero[data-arrastrando] .tb-tarjeta:not([data-hueco]):hover {
+    box-shadow: 0 1px 2px rgb(17 24 58 / 0.06);
+  }
+
+  .tb-titulo {
+    margin: 0;
+    color: var(--sys-texto-1);
+    font-size: var(--sys-tipo-m);
+    font-weight: 650;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    /* `pretty` cortaba una línea que entraba (198 de 200 px); la última palabra ya la cuida pegar(). */
+    text-wrap: wrap;
+  }
+  .tb-punto {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-right: 0.45rem;
+    border-radius: 50%;
+    background: var(--sys-danger-solido);
+    vertical-align: 0.1em;
+  }
+  .tb-etq {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--sys-radio-s);
+    background: var(--tb-suave);
+    color: var(--tb-tinta);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tb-clave {
+    color: var(--sys-texto-3);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .tb-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--sys-texto-3);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .tb-av {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--tb-solido);
+    color: #fff;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    box-shadow: 0 0 0 2px var(--sys-capa);
+  }
+
+  /* El botón «Mover a…»: 44 px tocables aunque se vea chico. */
+  .tb-mover {
+    position: relative;
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin: -0.25rem -0.25rem -0.25rem auto;
+    border: 0;
+    border-radius: var(--sys-radio-s);
+    background: transparent;
+    color: var(--sys-texto-3);
+    cursor: pointer;
+    transition: background-color var(--sys-dur-1) var(--sys-ease), color var(--sys-dur-1) var(--sys-ease);
+  }
+  .tb-mover::before {
+    content: "";
+    position: absolute;
+    inset: -0.5rem;
+  }
+  .tb-mover[data-hovered],
+  .tb-mover[data-pressed],
+  .tb-mover[aria-expanded="true"] {
+    background: var(--sys-capa-3);
+    color: var(--sys-texto-1);
+  }
+  .tb-mover[data-focus-visible] {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+  }
+  .tb-menu {
+    min-width: 14rem;
+  }
+  .tb-menu__opcion {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-2);
+  }
+  .tb-menu__punto {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--tb-solido);
+  }
+
+  /* ---- La franja con el color del servicio ---- */
+  .tb-tarjeta {
+    padding-left: calc(var(--sys-esp-4) + 0.375rem);
+    overflow: hidden;
+  }
+  .tb-t3__franja {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0.3125rem;
+    background: var(--tb-solido);
+  }
+  .tb-t3__arriba {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-2);
+  }
+  .tb-t3__fecha {
+    color: var(--sys-texto-3);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .tb-t3__pie {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    min-width: 0;
+  }
+  .tb-t3__pie .tb-av {
+    margin-left: auto;
+  }
+
+  /* ---- El pie del tablero ---- */
+  .tb-pie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sys-esp-3) var(--sys-esp-6);
+    padding-top: var(--sys-esp-4);
+    border-top: 1px solid var(--sys-borde);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+  .tb-pie__caras {
+    display: flex;
+  }
+  .tb-pie__caras .tb-av {
+    width: 2rem;
+    height: 2rem;
+    font-size: var(--sys-tipo-s);
+  }
+  .tb-pie__caras .tb-av + .tb-av {
+    margin-left: -0.5rem;
+  }
+  .tb-pie__dato strong {
+    color: var(--sys-texto-1);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- La barra de avance: solo cuando las listas no entran ---- */
+  .tb-avance {
+    display: none;
+  }
+
+  /* ---- Pantallas medianas: las listas se recorren de costado ---- */
+  @media (max-width: 1180px) {
+    .tb-listas {
+      display: flex;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x proximity;
+      scrollbar-width: none;
+      margin-inline: calc(var(--sys-esp-4) * -1);
+      padding-inline: var(--sys-esp-4);
+      scroll-padding-inline: var(--sys-esp-4);
+    }
+    .tb-listas::-webkit-scrollbar {
+      display: none;
+    }
+    /* Mientras se arrastra, sin imán: el imán devolvía el tablero al principio en cada paso del corrimiento (G-015). */
+    .tb-tablero[data-arrastrando] .tb-listas {
+      scroll-snap-type: none;
+    }
+    .tb-lista {
+      flex: 0 0 min(20rem, 84%);
+      scroll-snap-align: start;
+    }
+    .tb-avance {
+      display: block;
+      height: 4px;
+      border-radius: var(--sys-radio-full);
+      background: var(--sys-capa-3);
+      overflow: hidden;
+    }
+    .tb-avance__barra {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--sys-marca);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tb-tarjeta,
+    .tb-lista,
+    .tb-mover {
+      transition: none;
+    }
+  }
+}
+
+/* ---------- La ficha de una tarjeta, la conversación y el alta (D-038) ---------- */
+@layer modulos {
+  .tb-tarjeta:focus-visible {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+  }
+  /* Una duda resuelta: el tilde verde delante de la fecha. */
+  .tb-tarjeta[data-resuelta] .tb-t3__fecha::before {
+    content: "✓ Resuelta · ";
+    color: var(--sys-ok);
+    font-weight: 700;
+  }
+
+  /* La ficha: la banda arriba y dos columnas abajo (la elegida, «Al costado»). */
+  .tb-ficha__nombre {
+    font-size: var(--sys-tipo-2xl);
+  }
+  .tb-ficha__lista-punto,
+  .tb-ficha__servicio {
+    display: inline-block;
+    width: 0.625rem;
+    height: 0.625rem;
+    margin-right: 0.5rem;
+    border-radius: 3px;
+    background: var(--tb-solido);
+    vertical-align: 0.05em;
+  }
+  .tb-ficha__servicio {
+    margin-right: 0;
+    border-radius: 50%;
+  }
+  .tb-ficha .pr-pastilla .tb-av {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-left: calc(var(--sys-esp-2) * -1);
+    box-shadow: none;
+  }
+  .tb-ficha__cuando {
+    align-self: center;
+    margin-left: var(--sys-esp-2);
+    color: var(--sys-barra-texto-2);
+    font-size: var(--sys-tipo-s);
+    white-space: nowrap;
+  }
+  .tb-ficha__mover .tb-mover {
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: 0;
+    color: var(--sys-barra-texto-1);
+  }
+  .tb-ficha__mover .tb-mover[data-hovered],
+  .tb-ficha__mover .tb-mover[aria-expanded="true"] {
+    background: color-mix(in oklab, #fff 12%, transparent);
+    color: #fff;
+  }
+  .tb-ficha__cuerpo {
+    display: grid;
+    gap: var(--sys-esp-6);
+  }
+  .tb-ficha__datos {
+    display: grid;
+    gap: var(--sys-esp-3);
+    align-content: start;
+  }
+  .tb-ficha__subtitulo {
+    margin: 0;
+    color: var(--sys-texto-3);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 750;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .tb-ficha__texto {
+    margin: 0 0 var(--sys-esp-4);
+    color: var(--sys-texto-1);
+    font-size: var(--sys-tipo-l);
+    line-height: 1.6;
+  }
+  .tb-ficha__texto--vacio {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+  }
+  .tb-ficha__respuestas {
+    display: grid;
+    margin: 0;
+  }
+  .tb-ficha__respuestas > div {
+    display: grid;
+    gap: 0.25rem;
+    padding: var(--sys-esp-3) 0;
+    border-top: 1px solid var(--sys-borde);
+  }
+  .tb-ficha__respuestas > div:last-child {
+    border-bottom: 1px solid var(--sys-borde);
+  }
+  .tb-ficha__respuestas dt {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+  .tb-ficha__respuestas dd {
+    margin: 0;
+    color: var(--sys-texto-1);
+    font-weight: 650;
+  }
+  /* En escritorio, dos columnas de alto fijo: la izquierda scrollea sola; a la derecha, el hilo scrollea y el
+     campo para escribir queda al pie. */
+  @container (min-width: 52rem) {
+    .tb-ficha__cuerpo {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+      gap: 0;
+      height: clamp(22rem, calc(100dvh - 19rem), 38rem);
+      margin-bottom: calc(var(--sys-esp-6) * -1);
+    }
+    .tb-ficha__datos {
+      overflow: auto;
+      padding: 0 var(--sys-esp-6) var(--sys-esp-6) 0;
+    }
+    .tb-ficha__lado {
+      display: flex;
+      min-height: 0;
+      padding-left: var(--sys-esp-6);
+      border-left: 1px solid var(--sys-borde);
+    }
+    .tb-ficha__lado .tb-conv {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .tb-ficha__lado .tb-conv__hilo {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      overscroll-behavior: contain;
+      margin-right: calc(var(--sys-esp-3) * -1);
+      padding-right: var(--sys-esp-3);
+    }
+    .tb-ficha__lado .tb-conv__pie {
+      padding: var(--sys-esp-3) 0 var(--sys-esp-5);
+      border-top: 1px solid var(--sys-borde);
+    }
+  }
+  /* En el teléfono, una columna: el campo para escribir queda pegado al pie de la ficha. */
+  @container (max-width: 51.99rem) {
+    .tb-conv__pie {
+      position: sticky;
+      bottom: calc(var(--sys-esp-6) * -1);
+      z-index: 1;
+      margin: 0 calc(var(--sys-esp-6) * -1) calc(var(--sys-esp-6) * -1);
+      padding: var(--sys-esp-3) var(--sys-esp-6) var(--sys-esp-5);
+      border-top: 1px solid var(--sys-borde);
+      background: var(--sys-capa);
+    }
+  }
+
+  /* La conversación (referencia F4, con el hilo de Linear y GitHub) */
+  .tb-conv {
+    display: grid;
+    gap: var(--sys-esp-3);
+  }
+  .tb-conv__cabeza {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sys-esp-3);
+    padding-bottom: var(--sys-esp-2);
+  }
+  .tb-conv__titulo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sys-esp-2);
+    margin: 0;
+    font-size: var(--sys-tipo-m);
+    font-weight: 750;
+  }
+  .tb-resolver {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2rem;
+    padding: 0 var(--sys-esp-3);
+    border: 1px solid var(--sys-ok-borde);
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-ok-bg);
+    color: var(--sys-ok);
+    font: inherit;
+    font-size: var(--sys-tipo-s);
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .tb-resolver[data-resuelta] {
+    border-color: var(--sys-borde-2);
+    background: var(--sys-capa);
+    color: var(--sys-texto-2);
+  }
+  .tb-resolver:focus-visible {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+  }
+  .tb-conv__hilo {
+    display: grid;
+    gap: var(--sys-esp-4);
+    align-content: start;
+  }
+  .tb-conv__aviso {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-2);
+    margin: 0;
+    padding: var(--sys-esp-2) var(--sys-esp-3);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-ok-bg);
+    color: var(--sys-ok);
+    font-size: var(--sys-tipo-s);
+    font-weight: 650;
+  }
+  .tb-conv__vacia {
+    margin: 0;
+    padding: var(--sys-esp-5);
+    border: 1px dashed var(--sys-borde-2);
+    border-radius: var(--sys-radio-m);
+    color: var(--sys-texto-2);
+    text-align: center;
+  }
+  .tb-conv__vacia > span {
+    display: inline-block;
+  }
+  .tb-conv__lista,
+  .tb-coment__respuestas {
+    display: grid;
+    gap: var(--sys-esp-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tb-coment {
+    --tb-cara: 2rem;
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--tb-cara) minmax(0, 1fr);
+    gap: var(--sys-esp-3);
+    align-items: start;
+  }
+  .tb-coment[data-respuesta] {
+    --tb-cara: 1.5rem;
+  }
+  .tb-coment .tb-av {
+    width: var(--tb-cara);
+    height: var(--tb-cara);
+    font-size: var(--sys-tipo-xs);
+    box-shadow: none;
+  }
+  /* La línea del hilo: sale de la cara y baja hasta la última respuesta. */
+  .tb-coment[data-hilo]::before {
+    content: "";
+    position: absolute;
+    top: calc(var(--tb-cara) + 0.375rem);
+    bottom: 0.25rem;
+    left: calc(var(--tb-cara) / 2 - 1px);
+    width: 2px;
+    border-radius: 1px;
+    background: var(--sys-borde);
+  }
+  .tb-coment__cuerpo {
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+  .tb-coment__quien {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--sys-esp-2);
+    min-height: var(--tb-cara);
+    margin: 0;
+    padding-top: 0.25rem;
+    font-size: var(--sys-tipo-s);
+    line-height: 1.4;
+  }
+  .tb-coment__hace {
+    color: var(--sys-texto-3);
+  }
+  .tb-coment__texto {
+    margin: 0;
+    color: var(--sys-texto-1);
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+  }
+  .tb-mencion {
+    padding: 0 0.2em;
+    border-radius: 4px;
+    background: var(--sys-marca-suave-2);
+    color: var(--sys-marca-tinta);
+    font-weight: 700;
+  }
+  .tb-coment__accion {
+    margin-left: auto;
+    padding: 0.125rem var(--sys-esp-2);
+    border: 0;
+    border-radius: var(--sys-radio-s);
+    background: transparent;
+    color: var(--sys-texto-3);
+    font: inherit;
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .tb-coment__accion:hover,
+  .tb-coment__accion[aria-expanded="true"] {
+    background: var(--sys-capa-3);
+    color: var(--sys-texto-1);
+  }
+  .tb-coment__accion:focus-visible {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+  }
+  .tb-coment__respuestas {
+    gap: var(--sys-esp-4);
+    margin-top: var(--sys-esp-3);
+  }
+  .tb-coment__nuevo {
+    padding-left: 0;
+  }
+
+  /* El campo para escribir */
+  .tb-escribir {
+    display: grid;
+    gap: 0.375rem;
+  }
+  .tb-escribir__caja {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: var(--sys-esp-1);
+    padding: 0.3125rem 0.3125rem 0.3125rem var(--sys-esp-4);
+    border: 1px solid var(--sys-borde-control);
+    border-radius: var(--sys-radio-l);
+    background: var(--sys-capa);
+    transition: border-color var(--sys-dur-1) var(--sys-ease), box-shadow var(--sys-dur-1) var(--sys-ease);
+  }
+  .tb-escribir__caja:focus-within {
+    border-color: var(--sys-marca);
+    box-shadow: 0 0 0 3px var(--sys-marca-suave-2);
+  }
+  .tb-escribir__campo {
+    flex: 1;
+    min-width: 0;
+    min-height: 2.25rem;
+    padding: 0.4375rem 0;
+    border: 0;
+    background: transparent;
+    color: var(--sys-texto-1);
+    font: inherit;
+    line-height: 1.4;
+    resize: none;
+    outline: 0;
+  }
+  .tb-escribir__botones {
+    display: flex;
+    gap: 0.25rem;
+  }
+  .tb-escribir__boton {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 0;
+    border-radius: var(--sys-radio-m);
+    background: transparent;
+    color: var(--sys-texto-2);
+    cursor: pointer;
+    transition: background-color var(--sys-dur-1) var(--sys-ease), color var(--sys-dur-1) var(--sys-ease);
+  }
+  .tb-escribir__boton:hover {
+    background: var(--sys-capa-3);
+    color: var(--sys-texto-1);
+  }
+  .tb-escribir__mandar {
+    background: var(--sys-marca);
+    color: var(--sys-marca-texto);
+  }
+  .tb-escribir__mandar:hover {
+    background: var(--sys-marca);
+    color: var(--sys-marca-texto);
+    filter: brightness(1.08);
+  }
+  .tb-escribir__mandar:disabled {
+    background: var(--sys-capa-3);
+    color: var(--sys-texto-3);
+    filter: none;
+    cursor: default;
+  }
+  .tb-escribir__boton:focus-visible,
+  .tb-escribir__cancelar:focus-visible {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+  }
+  .tb-escribir__ayuda {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sys-esp-3);
+    margin: 0;
+    padding: 0 var(--sys-esp-1);
+    color: var(--sys-texto-3);
+    font-size: var(--sys-tipo-xs);
+  }
+  .tb-escribir__ayuda kbd {
+    padding: 0 0.3em;
+    border: 1px solid var(--sys-borde);
+    border-radius: 4px;
+    background: var(--sys-capa-2);
+    font: inherit;
+    font-weight: 650;
+  }
+  @media (pointer: coarse) {
+    .tb-escribir__ayuda > span {
+      visibility: hidden;
+    }
+  }
+  .tb-escribir__cancelar {
+    margin-left: auto;
+    padding: 0.125rem var(--sys-esp-2);
+    border: 0;
+    border-radius: var(--sys-radio-s);
+    background: transparent;
+    color: var(--sys-texto-2);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  /* La lista de «@»: arriba del campo, con la cara de cada socio. */
+  .tb-escribir__lista {
+    position: absolute;
+    bottom: calc(100% + 0.375rem);
+    left: 0;
+    z-index: 2;
+    display: grid;
+    min-width: 12rem;
+    margin: 0;
+    padding: 0.25rem;
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa);
+    box-shadow: var(--sys-sombra);
+    list-style: none;
+  }
+  .tb-escribir__opcion {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-2);
+    min-height: 2.5rem;
+    padding: 0 var(--sys-esp-3);
+    border-radius: var(--sys-radio-s);
+    font-weight: 650;
+    cursor: pointer;
+  }
+  .tb-escribir__opcion[aria-selected="true"] {
+    background: var(--sys-marca-suave-2);
+    color: var(--sys-marca-tinta);
+  }
+  .tb-escribir__opcion .tb-av {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: var(--sys-tipo-xs);
+    box-shadow: none;
+  }
+
+  /* El alta (referencia A3): preguntas a la izquierda, resumen a la derecha */
+  .tb-alta {
+    display: grid;
+    gap: var(--sys-esp-6);
+  }
+  @container (min-width: 46rem) {
+    .tb-alta {
+      grid-template-columns: minmax(0, 1fr) 16rem;
+    }
+  }
+  .tb-alta__preguntas {
+    display: grid;
+    gap: var(--sys-esp-5);
+    min-width: 0;
+  }
+  /* Con ocho pasos el indicador no entra en el teléfono: se corre de costado adentro suyo, no la tarjeta. */
+  .tb-alta .ui-pasos {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tb-alta .ui-pasos::-webkit-scrollbar {
+    display: none;
+  }
+  /* Con muchos pasos, también en escritorio solo el actual muestra su nombre (como en el teléfono): si no,
+     los ocho nombres quedaban cortados («C…», «Q…»). */
+  .tb-alta .ui-pasos__item {
+    flex: 0 0 auto;
+  }
+  /* El actual ocupa lo que sobra, pero nunca menos que su contenido: con siete u ocho pasos en el teléfono
+     quedaba aplastado y cortado contra el borde; ahora el indicador se corre adentro suyo. */
+  .tb-alta .ui-pasos__item[data-actual] {
+    flex: 1 0 auto;
+  }
+  .tb-alta .ui-pasos__paso {
+    padding: 0 var(--sys-esp-2);
+  }
+  .tb-alta .ui-pasos__paso:not([data-estado="actual"]) {
+    min-width: var(--sys-toque);
+  }
+  .tb-alta .ui-pasos__paso:not([data-estado="actual"]) .ui-pasos__nombre {
+    display: none;
+  }
+  /* Los clientes pueden ser muchos: la lista tiene su propio scroll y la tarjeta no crece por ella. */
+  /* Con alto acotado, las filas se achicaban al mínimo de la opción (3,5 rem) y cortaban la línea de abajo:
+     cada fila mide lo que pide su contenido. */
+  .tb-alta__opciones[data-desplaza] {
+    grid-auto-rows: max-content;
+    align-content: start;
+    max-height: 19rem;
+    overflow-y: auto;
+    padding: 2px;
+    overscroll-behavior: contain;
+  }
+  .tb-alta__panel {
+    display: grid;
+    gap: var(--sys-esp-2);
+  }
+  .tb-alta__de {
+    margin: 0;
+    color: var(--sys-texto-3);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .tb-alta__titulo {
+    display: block;
+    margin: 0;
+    color: var(--sys-texto-1);
+    font-size: var(--sys-tipo-xl);
+    font-weight: 750;
+  }
+  .tb-alta__ayuda {
+    margin: 0 0 var(--sys-esp-2);
+    color: var(--sys-texto-2);
+  }
+  .tb-alta__grupo {
+    display: grid;
+    gap: var(--sys-esp-2);
+  }
+  .tb-alta__opciones {
+    display: grid;
+    gap: var(--sys-esp-3);
+  }
+  @container (min-width: 46rem) {
+    .tb-alta__opciones:not([data-pocas]) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .tb-opcion {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--sys-esp-3);
+    align-items: start;
+    min-height: 3.5rem;
+    padding: var(--sys-esp-4);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa);
+    cursor: pointer;
+    transition: border-color var(--sys-dur-1) var(--sys-ease), background-color var(--sys-dur-1) var(--sys-ease), box-shadow var(--sys-dur-2) var(--sys-ease);
+  }
+  .tb-opcion[data-hovered] {
+    border-color: var(--sys-borde-2);
+    box-shadow: 0 6px 16px -10px rgb(17 24 58 / 0.3);
+  }
+  .tb-opcion[data-selected] {
+    border-color: var(--sys-marca);
+    background: var(--sys-marca-suave);
+    box-shadow: 0 0 0 1px var(--sys-marca);
+  }
+  .tb-opcion[data-focus-visible] {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+  }
+  .tb-alta__grupo[data-invalid] .tb-opcion:not([data-selected]) {
+    border-color: var(--sys-danger-borde);
+  }
+  .tb-opcion__marca {
+    display: grid;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.1rem;
+    border: 1.5px solid var(--sys-borde-control);
+    border-radius: 50%;
+    color: transparent;
+    transition: background-color var(--sys-dur-1) var(--sys-ease), border-color var(--sys-dur-1) var(--sys-ease);
+  }
+  .tb-opcion[data-selected] .tb-opcion__marca {
+    border-color: var(--sys-marca);
+    background: var(--sys-marca);
+    color: #fff;
+  }
+  .tb-opcion__textos {
+    display: grid;
+    gap: 0.125rem;
+  }
+  .tb-opcion__titulo {
+    color: var(--sys-texto-1);
+    font-weight: 700;
+  }
+  .tb-opcion__detalle {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    line-height: 1.4;
+  }
+  .tb-alta__falta {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-2);
+    margin: var(--sys-esp-2) 0 0;
+    color: var(--sys-danger);
+    font-weight: 650;
+  }
+  .tb-alta__resumen {
+    align-self: start;
+    padding: var(--sys-esp-5);
+    border-radius: var(--sys-radio-l);
+    background: var(--sys-barra-fondo);
+    color: var(--sys-barra-texto-1);
+  }
+  .tb-alta__resumen-titulo {
+    margin: 0 0 var(--sys-esp-4);
+    color: var(--sys-barra-acento);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .tb-alta__resumen dl {
+    display: grid;
+    gap: var(--sys-esp-3);
+    margin: 0;
+  }
+  .tb-alta__resumen dl > div {
+    display: grid;
+    gap: 0.125rem;
+    padding-left: var(--sys-esp-3);
+    border-left: 2px solid color-mix(in oklab, #fff 18%, transparent);
+    transition: border-color var(--sys-dur-2) var(--sys-ease);
+  }
+  .tb-alta__resumen dl > div[data-actual] {
+    border-left-color: var(--sys-barra-acento);
+  }
+  .tb-alta__resumen dt {
+    color: var(--sys-barra-texto-2);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+  }
+  .tb-alta__resumen dd {
+    margin: 0;
+    font-weight: 650;
+    overflow-wrap: anywhere;
+  }
+  .tb-alta__resumen dl > div[data-vacio] dd {
+    color: color-mix(in oklab, var(--sys-barra-texto-2) 70%, transparent);
+    font-weight: 500;
+  }
+}
