@@ -36,6 +36,27 @@
       "when": 1794925106172,
       "tag": "0004_responsable_dni",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795091359933,
+      "tag": "0005_tablero",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795091366007,
+      "tag": "0006_tablero_permisos",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1795092627844,
+      "tag": "0007_respuestas_libres",
+      "breakpoints": true
     }
   ]
 }

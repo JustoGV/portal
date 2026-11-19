@@ -40,7 +40,7 @@ const cuenta = async (nombre: string, email: string) => {
 }
 
 const yo = await cuenta("Cuenta de prueba", "prueba@example.com")
-await cuenta("Socio de prueba", "socio@example.com")
+const socio = await cuenta("Socio de prueba", "socio@example.com")
 
 const nombresGrupos = ["Clientes", "Internos", "Paneles de admin", "Muestra archivado"]
 for (const nombre of nombresGrupos) await db.insert(s.grupos).values({ nombre }).onConflictDoNothing({ target: s.grupos.nombreClave })
@@ -63,6 +63,26 @@ if ((ya[0]?.n ?? 0) === 0) {
     }
   })
   await db.insert(s.proyectos).values(filas)
+}
+
+// Tablero (D-040): tarjetas de muestra en las cuatro listas, creadas por la cuenta de prueba (así se borran
+// juntas). Los títulos salen de la cola del cerebro; los comentarios son ilustrativos.
+const yaTarjetas = await db.select({ n: sql<number>`count(*)`.mapWith(Number) }).from(s.tarjetas)
+if ((yaTarjetas[0]?.n ?? 0) === 0) {
+  const servicios = await db.select({ id: s.proyectos.id }).from(s.proyectos).limit(3)
+  const sv = (i: number) => servicios[i]?.id ?? null
+  const muestra: (typeof s.tarjetas.$inferInsert)[] = [
+    { lista: "dudas", posicion: 0, titulo: "Leer y corregir los seis formularios de diagnóstico", descripcion: "No hay preguntas: que los lea y corrija lo que le parezca.", proyectoId: sv(0), prioridad: true, creadoPor: yo.id },
+    { lista: "dudas", posicion: 1, titulo: "Las alertas del portal: ¿juntan las de cada sistema o son propias?", proyectoId: sv(1), creadoPor: yo.id },
+    { lista: "servicios", posicion: 0, titulo: "Administración del relevamiento institucional de entidades de medicina privada", grupoId: id("Clientes"), responsableId: yo.id, creadoPor: yo.id, respuestas: [{ pregunta: "¿Quién lo va a usar?", respuesta: "El cliente" }] },
+    { lista: "tareas", posicion: 0, titulo: "Cargar el IR‑03 en producción", proyectoId: sv(0), responsableId: yo.id, creadoPor: yo.id },
+    { lista: "tareas", posicion: 1, titulo: "Acordar con Justo el reparto y el nombre visible", proyectoId: sv(2), responsableId: socio.id, creadoPor: yo.id },
+    { lista: "correcciones", posicion: 0, titulo: "Cambiar «SSN» por «SSS» en seis archivos", responsableId: socio.id, creadoPor: yo.id },
+  ]
+  const creadas = await db.insert(s.tarjetas).values(muestra).returning({ id: s.tarjetas.id, titulo: s.tarjetas.titulo })
+  const duda = creadas[0]!.id
+  const [c1] = await db.insert(s.comentarios).values({ tarjetaId: duda, autorId: yo.id, texto: "Te los dejé en el portal. Cuando puedas, marcá lo que no te cierre." }).returning({ id: s.comentarios.id })
+  await db.insert(s.comentarios).values({ tarjetaId: duda, autorId: socio.id, respuestaA: c1!.id, texto: "Los empiezo esta semana." })
 }
 
 // Sesión de la cuenta de prueba, con la cookie firmada como la firma better-auth (HMAC-SHA256, base64).

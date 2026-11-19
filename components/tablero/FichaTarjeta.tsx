@@ -5,7 +5,8 @@ import { TarjetaModal } from "@/components/ui/TarjetaModal"
 import { comun } from "@/i18n/es/comun"
 import { pegar } from "@/lib/texto"
 import { Conversacion } from "./Conversacion"
-import { DESCRIPCIONES, SERVICIOS, type Comentario, type ListaId, type Persona, type Tarjeta } from "./muestra"
+import { fechaCorta, type Comentario, type ListaId, type Persona, type Tarjeta } from "./listas"
+import { quienLaTiene } from "./TarjetaTablero"
 
 type Props = {
   tarjeta: Tarjeta | null
@@ -13,15 +14,17 @@ type Props = {
   abierta: boolean
   alCerrar: () => void
   origen: () => DOMRect | null
-  comentarios: Comentario[]
+  /** undefined mientras se trae del servidor. */
+  comentarios: Comentario[] | undefined
+  errorConversacion: string | null
+  alReintentar: () => void
+  personas: Persona[]
   yo: Persona
-  alComentar: (texto: string, respuestaA?: string) => void
+  /** Devuelve si se guardó. */
+  alComentar: (texto: string, respuestaA?: string) => Promise<boolean>
   resuelta?: boolean
   alResolver?: () => void
   mover: ReactNode
-  /** Para una tarjeta creada con el alta: su texto y lo que se respondió. */
-  descripcion?: string
-  respuestas?: { pregunta: string; respuesta: string }[]
 }
 
 /** El título de la columna izquierda, según la lista. */
@@ -39,11 +42,13 @@ const QUE: Record<ListaId, string> = {
  * Mateo, «Al costado»): a la izquierda qué hay que resolver, a la derecha la conversación (F4). En el teléfono,
  * una columna.
  */
-export function FichaTarjeta({ tarjeta: t, lista, abierta, alCerrar, origen, comentarios, yo, alComentar, resuelta, alResolver, mover, descripcion, respuestas }: Props) {
+export function FichaTarjeta({ tarjeta: t, lista, abierta, alCerrar, origen, comentarios, errorConversacion, alReintentar, personas, yo, alComentar, resuelta, alResolver, mover }: Props) {
   const idTitulo = useId()
-  const texto = t ? descripcion || DESCRIPCIONES[t.id] : undefined
+  const texto = t?.descripcion ?? undefined
   // La respuesta «en una línea» ya es el texto de arriba: no se repite en la lista.
-  const otras = (respuestas ?? []).filter((x) => x.respuesta !== texto)
+  const otras = (t?.respuestas ?? []).filter((x) => x.respuesta !== texto)
+  const p = t && lista ? quienLaTiene(t, lista.id) : null
+  const cuando = t ? fechaCorta(t.creada) : ""
 
   return (
     <TarjetaModal abierto={abierta && !!t} alPedirCierre={alCerrar} idTitulo={idTitulo} ancho="68rem" origen={origen}>
@@ -54,7 +59,6 @@ export function FichaTarjeta({ tarjeta: t, lista, abierta, alCerrar, origen, com
               <p className="pr-ficha2__sobre">
                 <span className="tb-ficha__lista-punto" data-tono={lista.tono} aria-hidden="true" />
                 {pegar(lista.titulo)}
-                {t.clave && <span className="pr-ficha2__cuenta"> · {t.clave}</span>}
               </p>
               <div className="pr-ficha2__mandos">
                 <span className="tb-ficha__mover">{mover}</span>
@@ -68,22 +72,24 @@ export function FichaTarjeta({ tarjeta: t, lista, abierta, alCerrar, origen, com
               </h2>
               <div className="pr-ficha2__pastillas">
                 <span className="pr-pastilla">
-                  <span className="tb-ficha__servicio" data-tono={SERVICIOS[t.servicio] ?? "marca"} aria-hidden="true" />
+                  <span className="tb-ficha__servicio" data-tono={t.tono} aria-hidden="true" />
                   {t.servicio}
                 </span>
-                <span className="pr-pastilla">
-                  <span className="tb-av" data-tono={t.responsable.tono} aria-hidden="true">
-                    {t.responsable.iniciales}
+                {p && (
+                  <span className="pr-pastilla">
+                    <span className="tb-av" data-tono={p.tono} aria-hidden="true">
+                      {p.iniciales}
+                    </span>
+                    {p.nombre}
                   </span>
-                  {t.responsable.nombre}
-                </span>
+                )}
                 {resuelta && (
                   <span className="pr-pastilla" data-tono="ok">
                     <span className="pr-pastilla__punto" aria-hidden="true" />
                     Resuelta
                   </span>
                 )}
-                <span className="tb-ficha__cuando">{t.fecha === "hoy" ? "Abierta hoy" : `Abierta el ${t.fecha}`}</span>
+                <span className="tb-ficha__cuando">{cuando === "hoy" || cuando === "ayer" ? `Abierta ${cuando}` : `Abierta el ${cuando}`}</span>
               </div>
             </div>
           </div>
@@ -107,7 +113,7 @@ export function FichaTarjeta({ tarjeta: t, lista, abierta, alCerrar, origen, com
               )}
             </div>
             <div className="tb-ficha__lado" data-cascada="">
-              <Conversacion comentarios={comentarios} yo={yo} alComentar={alComentar} resuelta={resuelta} alResolver={alResolver} />
+              <Conversacion comentarios={comentarios} error={errorConversacion} alReintentar={alReintentar} personas={personas} yo={yo} alComentar={alComentar} resuelta={resuelta} alResolver={alResolver} />
             </div>
           </div>
         </div>

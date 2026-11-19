@@ -1,31 +1,21 @@
 "use client"
 import type { ReactNode } from "react"
-import { CalendarDays, MessageSquare } from "lucide-react"
+import { MessageSquare } from "lucide-react"
 import { pegar } from "@/lib/texto"
-import { SERVICIOS, type Persona, type Tarjeta } from "./muestra"
+import { CLAUDIO, fechaCorta, type ListaId, type Persona, type Tarjeta } from "./listas"
 
 // La tarjeta del tablero (WU-07, D-038): mezcla de cult/ui · Kanban Board (etiqueta de color por servicio) y
 // 7Ovr · Task Board Kanban (punto de prioridad, título, la persona). De tres versiones, Mateo eligió «Franja».
 
-type Props = { t: Tarjeta; mover: ReactNode }
+type Props = { t: Tarjeta; lista: ListaId; mover: ReactNode }
 
-const Etq = ({ servicio }: { servicio: string }) => (
-  <span className="tb-etq" data-tono={SERVICIOS[servicio] ?? "marca"}>
-    {servicio}
-  </span>
-)
+/** Quién la tiene: las dudas, Claudio (es la lista de sus dudas); el resto, la persona guardada. */
+export const quienLaTiene = (t: Tarjeta, lista: ListaId): Persona | null => t.responsable ?? (lista === "dudas" ? CLAUDIO : null)
 
 const Av = ({ p }: { p: Persona }) => (
   <span className="tb-av" data-tono={p.tono} title={p.nombre} aria-hidden="true">
     {p.iniciales}
   </span>
-)
-
-const Titulo = ({ t }: { t: Tarjeta }) => (
-  <p className="tb-titulo">
-    {t.prioridad && <span className="tb-punto" title="Prioridad alta" aria-label="Prioridad alta" />}
-    {pegar(t.titulo)}
-  </p>
 )
 
 const Comentarios = ({ n }: { n: number }) =>
@@ -37,22 +27,25 @@ const Comentarios = ({ n }: { n: number }) =>
   ) : null
 
 /** La versión «Franja» (Mateo, 2026-11-18): el color del servicio como franja al costado; una sola fila con todo lo demás. */
-export function TarjetaTablero({ t, mover }: Props) {
+export function TarjetaTablero({ t, lista, mover }: Props) {
+  const p = quienLaTiene(t, lista)
   return (
     <>
-      <span className="tb-t3__franja" data-tono={SERVICIOS[t.servicio] ?? "marca"} aria-hidden="true" />
+      <span className="tb-t3__franja" data-tono={t.tono} aria-hidden="true" />
       <div className="tb-t3__arriba">
-        <span className="tb-t3__fecha">
-          {t.clave ? `${t.clave} · ` : ""}
-          {t.fecha}
-        </span>
+        <span className="tb-t3__fecha">{fechaCorta(t.creada)}</span>
         {mover}
       </div>
-      <Titulo t={t} />
+      <p className="tb-titulo">
+        {t.prioridad && <span className="tb-punto" title="Prioridad alta" aria-label="Prioridad alta" />}
+        {pegar(t.titulo)}
+      </p>
       <div className="tb-t3__pie">
-        <Etq servicio={t.servicio} />
+        <span className="tb-etq" data-tono={t.tono}>
+          {t.servicio}
+        </span>
         <Comentarios n={t.comentarios} />
-        <Av p={t.responsable} />
+        {p && <Av p={p} />}
       </div>
     </>
   )

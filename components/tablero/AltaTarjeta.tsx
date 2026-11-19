@@ -7,19 +7,28 @@ import { Campo } from "@/components/ui/Campo"
 import { Dialogo } from "@/components/ui/Dialogo"
 import { IndicadorPasos, PanelesPasos } from "@/components/ui/Pasos"
 import { comun } from "@/i18n/es/comun"
+import type { NuevaTarjeta } from "@/lib/tablero"
 import { pegar } from "@/lib/texto"
-import { LISTAS, SERVICIOS, SOCIOS, type ListaId, type Persona } from "./muestra"
+import { LISTAS, type ListaId, type Persona } from "./listas"
 import { PREGUNTAS, type Opcion, type Pregunta } from "./preguntas"
 
-export type Nueva = { lista: ListaId; titulo: string; servicio: string; responsable: Persona; descripcion: string; respuestas: { pregunta: string; respuesta: string }[]; prioridad: boolean }
-
-type Props = { abierta: boolean; alCerrar: () => void; origen: () => DOMRect | null; clientes: string[]; yo: Persona; alCrear: (n: Nueva) => void }
+type Elegible = { id: string; nombre: string }
+type Props = {
+  abierta: boolean
+  alCerrar: () => void
+  origen: () => DOMRect | null
+  /** Los servicios activos del portal: la pregunta «¿De qué sistema es?». */
+  sistemas: Elegible[]
+  clientes: Elegible[]
+  personas: Persona[]
+  yo: Persona
+  /** Guarda en el servidor; devuelve si se guardó (el alta se cierra solo entonces). */
+  alCrear: (n: NuevaTarjeta) => Promise<boolean>
+}
+const OTRO = "otro"
 
 /** El paso de la lista y el del título valen para todas; después, las preguntas de esa lista (`preguntas.ts`). */
 const PREG_LISTA: Pregunta = { id: "lista", paso: "Lista", titulo: "¿En qué lista va?", ayuda: "Si es un servicio, después vienen unas preguntas para entenderlo mejor.", tipo: "opciones", opciones: LISTAS.map((l) => ({ valor: l.id, titulo: l.titulo, detalle: l.pista })) }
-/** Las opciones que no están escritas en `preguntas.ts`: los sistemas del tablero y los socios. */
-const SISTEMAS: Opcion[] = [...Object.keys(SERVICIOS).map((s) => ({ valor: s, titulo: s })), { valor: "Otro", titulo: "Otro", detalle: "No es de ningún sistema" }]
-const PERSONAS: Opcion[] = SOCIOS.map((p) => ({ valor: p.nombre, titulo: p.nombre, detalle: p.nombre === "Claudio" ? "Las dudas del modelo y los instrumentos" : "Socio de la consultora" }))
 const PREG_TITULO: Pregunta = { id: "titulo", paso: "Título", titulo: "¿Cómo la llamamos?", ayuda: "El título que se ve en la tarjeta.", tipo: "texto", max: 90, ejemplo: "Formulario de admisión de la clínica" }
 
 /**
@@ -27,8 +36,12 @@ const PREG_TITULO: Pregunta = { id: "titulo", paso: "Título", titulo: "¿Cómo 
  * por paso, opciones con título y una línea que las explica, aviso si se quiere seguir sin responder, y el
  * resumen que se va armando al costado (abajo en el teléfono). Los pasos son los del portal (D-026).
  */
-export function AltaTarjeta({ abierta, alCerrar, origen, clientes, yo, alCrear }: Props) {
+export function AltaTarjeta({ abierta, alCerrar, origen, sistemas, clientes, personas, yo, alCrear }: Props) {
   const [r, setR] = useState<Record<string, string>>({})
+  const [guardando, setGuardando] = useState(false)
+  // Las opciones que no están escritas en `preguntas.ts`: los servicios del portal y las cuentas activas.
+  const SISTEMAS: Opcion[] = [...sistemas.map((x) => ({ valor: x.id, titulo: x.nombre })), { valor: OTRO, titulo: "Otro", detalle: "No es de ningún sistema" }]
+  const PERSONAS: Opcion[] = personas.map((p) => ({ valor: p.id, titulo: p.nombre, detalle: p.id === yo.id ? "Vos" : "Socio de la consultora" }))
   const [paso, setPaso] = useState(0)
   const [alcanzado, setAlcanzado] = useState(0)
   const [falta, setFalta] = useState(false)
@@ -48,7 +61,7 @@ export function AltaTarjeta({ abierta, alCerrar, origen, clientes, yo, alCrear }
   const ultimo = r.lista !== undefined && paso === preguntas.length - 1
 
   const opcionesDe = (p: Pregunta): Opcion[] =>
-    p.tipo === "opciones" ? p.opciones : p.tipo === "cliente" ? clientes.map((c) => ({ valor: c, titulo: c, detalle: "Cliente del portal" })) : p.tipo === "sistema" ? SISTEMAS : p.tipo === "persona" ? PERSONAS : []
+    p.tipo === "opciones" ? p.opciones : p.tipo === "cliente" ? clientes.map((c) => ({ valor: c.id, titulo: c.nombre, detalle: "Cliente del portal" })) : p.tipo === "sistema" ? SISTEMAS : p.tipo === "persona" ? PERSONAS : []
   const legible = (p: Pregunta) => {
     const v = r[p.id]
     if (!v) return null
@@ -70,7 +83,8 @@ export function AltaTarjeta({ abierta, alCerrar, origen, clientes, yo, alCrear }
     setFalta(false)
     setPaso(n)
   }
-  const seguir = () => {
+  const seguir = async () => {
+    if (guardando) return
     if (!r[actual.id]?.trim()) {
       setFalta(true)
       return
@@ -83,21 +97,25 @@ export function AltaTarjeta({ abierta, alCerrar, origen, clientes, yo, alCrear }
     const lista = r.lista as ListaId
     const con = (rol: Pregunta["rol"]) => deLaLista.find((p) => p.rol === rol)
     const quien = con("responsable")
-    // Las dudas las tiene siempre Claudio; si la lista no pregunta quién, la tiene quien la crea.
-    const responsable = quien ? (SOCIOS.find((p) => p.nombre === r[quien.id]) ?? yo) : lista === "dudas" ? (SOCIOS.find((p) => p.nombre === "Claudio") ?? yo) : yo
+    // Las dudas no tienen persona (son para Claudio: D-040); si la lista no pregunta quién, la tiene quien la crea.
+    const responsableId = lista === "dudas" ? null : quien ? (r[quien.id] ?? yo.id) : yo.id
     const servicio = con("servicio")
+    const elegido = servicio ? r[servicio.id] : undefined
     const texto = con("texto")
-    alCrear({
+    setGuardando(true)
+    const ok = await alCrear({
       lista,
       titulo: r.titulo!.trim(),
-      servicio: (servicio && legible(servicio)) || "Portal",
-      responsable,
+      proyectoId: servicio?.tipo === "sistema" && elegido && elegido !== OTRO ? elegido : null,
+      grupoId: servicio?.tipo === "cliente" && elegido ? elegido : null,
+      responsableId,
       descripcion: (texto && r[texto.id]?.trim()) || "",
       // El sistema, la persona y el texto ya se ven en la ficha: la lista lleva el resto.
       respuestas: deLaLista.filter((p) => !p.rol).map((p) => ({ pregunta: p.titulo, respuesta: legible(p) ?? "" })),
       prioridad: deLaLista.some((p) => p.tipo === "opciones" && p.opciones.some((o) => o.urgente && o.valor === r[p.id])),
     })
-    cerrar()
+    setGuardando(false)
+    if (ok) cerrar()
   }
   const responder = (id: string, valor: string) => {
     setFalta(false)
@@ -114,7 +132,7 @@ export function AltaTarjeta({ abierta, alCerrar, origen, clientes, yo, alCrear }
   const tecla = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter" && (e.target as HTMLElement).tagName === "INPUT") {
       e.preventDefault()
-      seguir()
+      void seguir()
     }
   }
 
@@ -150,7 +168,7 @@ export function AltaTarjeta({ abierta, alCerrar, origen, clientes, yo, alCrear }
                   <RadioGroup className="tb-alta__grupo" value={r[p.id] ?? null} onChange={(v) => responder(p.id, v)} isInvalid={falta && p === actual}>
                     <Label className="tb-alta__titulo">{p.titulo}</Label>
                     <p className="tb-alta__ayuda">{pegar(p.ayuda)}</p>
-                    <div className="tb-alta__opciones" data-pocas={opcionesDe(p).length <= 3 || undefined} data-desplaza={p.tipo === "cliente" || undefined}>
+                    <div className="tb-alta__opciones" data-pocas={opcionesDe(p).length <= 3 || undefined} data-desplaza={p.tipo === "cliente" || p.tipo === "sistema" || undefined}>
                       {opcionesDe(p).length === 0 && <p className="tb-alta__ayuda">No hay clientes cargados en el portal.</p>}
                       {opcionesDe(p).map((o) => (
                         <Radio key={o.valor} value={o.valor} className="tb-opcion">
@@ -200,11 +218,11 @@ export function AltaTarjeta({ abierta, alCerrar, origen, clientes, yo, alCrear }
           </Boton>
         )}
         {ultimo ? (
-          <Boton key="crear" variante="primaria" icono="tilde" onPress={seguir}>
+          <Boton key="crear" variante="primaria" icono="tilde" onPress={() => void seguir()} cargando={guardando} textoCargando={comun.guardando}>
             Crear tarjeta
           </Boton>
         ) : (
-          <Boton key="siguiente" variante="primaria" onPress={seguir}>
+          <Boton key="siguiente" variante="primaria" onPress={() => void seguir()}>
             {comun.siguiente}
           </Boton>
         )}

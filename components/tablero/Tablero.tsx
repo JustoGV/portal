@@ -1,15 +1,19 @@
 "use client"
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent as PE } from "react"
+import { useRouter } from "next/navigation"
 import { Button, Menu, MenuItem, MenuTrigger, Popover } from "react-aria-components"
 import { ArrowLeftRight, CircleHelp, Layers, ListTodo, Wrench } from "lucide-react"
 import { Banda } from "@/components/ui/Banda"
 import { Boton } from "@/components/ui/Boton"
-import { AltaTarjeta, type Nueva } from "./AltaTarjeta"
-import { contar } from "./Conversacion"
+import { useResultado } from "@/components/ui/Resultado"
+import { comentar as comentarEn, crearTarjeta, leerConversacion, moverTarjeta, resolverDuda } from "@/acciones/tablero"
+import { comun } from "@/i18n/es/comun"
+import type { NuevaTarjeta } from "@/lib/tablero"
+import { AltaTarjeta } from "./AltaTarjeta"
 import { FichaTarjeta } from "./FichaTarjeta"
 import { gsap, quieto } from "@/lib/gsap"
 import { pegar } from "@/lib/texto"
-import { COMENTARIOS, LISTAS, ORDEN_INICIAL, RESUELTAS, SOCIOS, TARJETAS, type Comentario, type ListaId, type Persona, type Tarjeta } from "./muestra"
+import { LISTAS, type Comentario, type ListaId, type Persona, type Tarjeta } from "./listas"
 import { TarjetaTablero } from "./TarjetaTablero"
 
 const ICONO = { dudas: CircleHelp, servicios: Layers, tareas: ListTodo, correcciones: Wrench } as const
@@ -61,14 +65,45 @@ function MenuMover({ titulo, actual, alMover }: { titulo: string; actual: ListaI
   )
 }
 
-export function Tablero({ clientes, yo }: { clientes: string[]; yo: Persona }) {
-  const [orden, setOrden] = useState(ORDEN_INICIAL)
+type Opcion = { id: string; nombre: string }
+type Props = {
+  inicial: { tarjetas: Record<string, Tarjeta>; orden: Record<ListaId, string[]>; masDe: Record<ListaId, boolean> }
+  personas: Persona[]
+  sistemas: Opcion[]
+  clientes: Opcion[]
+  yo: Persona
+}
+
+/** Una acción que no llegó al servidor (sin conexión, servidor caído) se trata como un «no se guardó». */
+const seguro = async <T,>(f: () => Promise<T>, mensaje: string): Promise<T | { ok: false; mensaje: string; sesion?: undefined }> => {
+  try {
+    return await f()
+  } catch {
+    return { ok: false, mensaje }
+  }
+}
+
+/** Una copia del orden, para volver atrás si el servidor no guardó. */
+const copia = (o: Record<ListaId, string[]>) => Object.fromEntries((Object.keys(o) as ListaId[]).map((l) => [l, [...o[l]]])) as Record<ListaId, string[]>
+
+export function Tablero({ inicial, personas, sistemas, clientes, yo }: Props) {
+  const [orden, setOrden] = useState(inicial.orden)
   const [arrastrando, setArrastrando] = useState<string | null>(null)
   const [destino, setDestino] = useState<ListaId | null>(null)
-  const [tarjetas, setTarjetas] = useState<Record<string, Tarjeta>>(TARJETAS)
-  const [conv, setConv] = useState<Record<string, Comentario[]>>(COMENTARIOS)
-  const [resueltas, setResueltas] = useState<string[]>(RESUELTAS)
-  const [extras, setExtras] = useState<Record<string, { descripcion: string; respuestas: { pregunta: string; respuesta: string }[] }>>({})
+  const [tarjetas, setTarjetas] = useState<Record<string, Tarjeta>>(inicial.tarjetas)
+  // La conversación de cada tarjeta se trae al abrir su ficha (undefined: todavía no se trajo).
+  const [conv, setConv] = useState<Record<string, Comentario[] | undefined>>({})
+  const [errorConv, setErrorConv] = useState<string | null>(null)
+  const mostrar = useResultado()
+  const router = useRouter()
+  /** Lo que contesta una acción que no salió: la sesión vencida va al ingreso, el resto a la tarjeta de error. */
+  const fallo = useCallback(
+    (r: { ok: false; mensaje: string; sesion?: "vencida" }) => {
+      if (r.sesion === "vencida") router.replace("/ingresar?motivo=expirado")
+      else mostrar({ tipo: "error", titulo: comun.noGuardadoTitulo, texto: r.mensaje })
+    },
+    [mostrar, router],
+  )
   const [abierta, setAbierta] = useState(false)
   const [fichaId, setFichaId] = useState<string | null>(null)
   const [alta, setAlta] = useState(false)
@@ -78,6 +113,8 @@ export function Tablero({ clientes, yo }: { clientes: string[]; yo: Persona }) {
   const avance = useRef<HTMLSpanElement>(null)
   const ordenRef = useRef(orden)
   const antes = useRef<Map<string, DOMRect> | null>(null)
+  /** El orden de antes de arrastrar: si el servidor no guarda, la tarjeta vuelve ahí. */
+  const previo = useRef<Record<ListaId, string[]> | null>(null)
   const llegada = useRef<string | null>(null)
   const arr = useRef<Arrastre | null>(null)
   useLayoutEffect(() => {
@@ -163,7 +200,24 @@ export function Tablero({ clientes, yo }: { clientes: string[]; yo: Persona }) {
     return () => document.removeEventListener("touchmove", frenar)
   }, [])
 
+  /** Guarda dónde quedó una tarjeta. Si el servidor no guardó, vuelve a donde estaba y se avisa. */
+  const guardarLugar = async (id: string, antesDe: Record<ListaId, string[]>) => {
+    const o = ordenRef.current
+    const l = listaDe(id, o)
+    const deAntes = listaDe(id, antesDe)
+    if (l === deAntes && o[l].indexOf(id) === antesDe[l].indexOf(id)) return
+    const r = await seguro(() => moverTarjeta(id, l, o[l].indexOf(id)), comun.errorGuardar)
+    if (r.ok) {
+      // Una duda resuelta que sale de «Dudas» deja de estar resuelta (lo mismo hace la base).
+      if (l !== "dudas") setTarjetas((t) => (t[id]?.resuelta ? { ...t, [id]: { ...t[id]!, resuelta: false } } : t))
+      return
+    }
+    setOrden(antesDe)
+    fallo(r)
+  }
+
   const levantar = (a: Arrastre) => {
+    previo.current = copia(ordenRef.current)
     a.activo = true
     const f = a.el.cloneNode(true) as HTMLElement
     f.classList.add("tb-fantasma")
@@ -240,6 +294,8 @@ export function Tablero({ clientes, yo }: { clientes: string[]; yo: Persona }) {
     const f = a.fantasma
     const lugar = raiz.current?.querySelector<HTMLElement>(`[data-flip-id="${a.id}"]`)?.getBoundingClientRect()
     setDestino(null)
+    if (previo.current) void guardarLugar(a.id, previo.current)
+    previo.current = null
     const fin = () => {
       f.remove()
       setArrastrando(null)
@@ -293,31 +349,64 @@ export function Tablero({ clientes, yo }: { clientes: string[]; yo: Persona }) {
   }
 
   const moverA = (id: string, a: ListaId) => {
+    const antesDe = copia(ordenRef.current)
     llegada.current = id
     mover(id, a, 0)
+    // Después del render, para guardar el orden ya actualizado.
+    requestAnimationFrame(() => void guardarLugar(id, antesDe))
   }
 
+  const traerConversacion = async (id: string) => {
+    setErrorConv(null)
+    const r = await seguro(() => leerConversacion(id), comun.errorCarga)
+    if (r.ok) setConv((c) => ({ ...c, [id]: r.datos }))
+    else if (r.sesion === "vencida") router.replace("/ingresar?motivo=expirado")
+    else setErrorConv(r.mensaje)
+  }
   const abrir = (id: string) => {
     setFichaId(id)
     setAbierta(true)
+    if (!conv[id]) void traerConversacion(id)
   }
   const origenFicha = () => (fichaId ? (raiz.current?.querySelector(`[data-flip-id="${fichaId}"]`)?.getBoundingClientRect() ?? null) : null)
 
-  const comentar = (id: string, texto: string, respuestaA?: string) => {
-    const nuevo: Comentario = { id: `n${Date.now()}`, autor: yo, texto, hace: "recién", respuestas: [] }
-    setConv((c) => {
-      const lista = c[id] ?? []
-      return { ...c, [id]: respuestaA ? lista.map((x) => (x.id === respuestaA ? { ...x, respuestas: [...x.respuestas, nuevo] } : x)) : [...lista, nuevo] }
-    })
+  /** Guarda un comentario; si salió, aparece en la conversación. Devuelve si se guardó (el campo se vacía solo entonces). */
+  const comentar = async (id: string, texto: string, respuestaA?: string) => {
+    const r = await seguro(() => comentarEn(id, texto, respuestaA ?? null), comun.errorGuardar)
+    if (!r.ok) {
+      fallo(r)
+      return false
+    }
+    const nuevo = r.datos
+    setConv((c) => ({ ...c, [id]: [...(c[id] ?? []), nuevo] }))
+    setTarjetas((t) => (t[id] ? { ...t, [id]: { ...t[id]!, comentarios: t[id]!.comentarios + 1 } } : t))
+    return true
   }
-  const resolver = (id: string) => setResueltas((r) => (r.includes(id) ? r.filter((x) => x !== id) : [...r, id]))
+  /** Marca resuelta o reabre al toque; si el servidor no guardó, vuelve como estaba. */
+  const resolver = async (id: string) => {
+    const nueva = !tarjetas[id]?.resuelta
+    const poner = (v: boolean) => setTarjetas((t) => (t[id] ? { ...t, [id]: { ...t[id]!, resuelta: v } } : t))
+    poner(nueva)
+    const r = await seguro(() => resolverDuda(id, nueva), comun.errorGuardar)
+    if (!r.ok) {
+      poner(!nueva)
+      fallo(r)
+    }
+  }
 
-  const crear = (n: Nueva) => {
-    const id = `x${Date.now()}`
-    setTarjetas((t) => ({ ...t, [id]: { id, titulo: n.titulo, servicio: n.servicio, responsable: n.responsable, fecha: "hoy", comentarios: 0, ...(n.prioridad ? { prioridad: "alta" as const } : {}) } }))
-    setExtras((e) => ({ ...e, [id]: { descripcion: n.descripcion, respuestas: n.respuestas } }))
-    llegada.current = id
-    mover(id, n.lista, 0)
+  /** Crea la tarjeta en el servidor; si salió, entra arriba de su lista. Devuelve si se guardó. */
+  const crear = async (n: NuevaTarjeta) => {
+    const r = await seguro(() => crearTarjeta(n), comun.errorGuardar)
+    if (!r.ok) {
+      fallo(r)
+      return false
+    }
+    const t = r.datos
+    setTarjetas((x) => ({ ...x, [t.id]: t }))
+    setConv((c) => ({ ...c, [t.id]: [] }))
+    llegada.current = t.id
+    mover(t.id, n.lista, 0)
+    return true
   }
 
   const menuMover = (id: string, t: Tarjeta) => <MenuMover titulo={t.titulo} actual={listaDe(id, orden)} alMover={(l) => moverA(id, l)} />
@@ -331,7 +420,7 @@ export function Tablero({ clientes, yo }: { clientes: string[]; yo: Persona }) {
 
   return (
     <>
-      <Banda sobre="Portal" titulo="Tablero" idTitulo="tb-titulo" bajada={pegar("Lo que hay que hacer, lo que espera respuesta y quién lo tiene. Por ahora, con datos de muestra.")}
+      <Banda sobre="Portal" titulo="Tablero" idTitulo="tb-titulo" bajada={pegar("Lo que hay que hacer, lo que espera respuesta y quién lo tiene.")}
         accion={
           <Boton
             variante="primaria"
@@ -388,7 +477,7 @@ export function Tablero({ clientes, yo }: { clientes: string[]; yo: Persona }) {
                         data-flip-id={id}
                         className="tb-tarjeta"
                         data-hueco={arrastrando === id || undefined}
-                        data-resuelta={resueltas.includes(id) || undefined}
+                        data-resuelta={t.resuelta || undefined}
                         aria-label={t.titulo}
                         tabIndex={0}
                         onKeyDown={(e) => {
@@ -398,11 +487,12 @@ export function Tablero({ clientes, yo }: { clientes: string[]; yo: Persona }) {
                           }
                         }}
                       >
-                        <TarjetaTablero t={{ ...t, comentarios: contar(conv[id]) }} mover={menuMover(id, t)} />
+                        <TarjetaTablero t={t} lista={l.id} mover={menuMover(id, t)} />
                       </article>
                     )
                   })}
                   {orden[l.id].length === 0 && <p className="tb-lista__vacia">Soltá una tarjeta acá</p>}
+                  {inicial.masDe[l.id] && <p className="tb-lista__vacia">{pegar("Hay más tarjetas en esta lista: se ven las primeras 200.")}</p>}
                 </div>
               </section>
             )
@@ -413,14 +503,14 @@ export function Tablero({ clientes, yo }: { clientes: string[]; yo: Persona }) {
         </div>
         <footer className="tb-pie">
           <span className="tb-pie__caras">
-            {SOCIOS.map((p) => (
-              <span key={p.nombre} className="tb-av" data-tono={p.tono} title={p.nombre}>
+            {personas.map((p) => (
+              <span key={p.id} className="tb-av" data-tono={p.tono} title={p.nombre}>
                 {p.iniciales}
               </span>
             ))}
           </span>
           <span className="tb-pie__dato">
-            <strong>{SOCIOS.length}</strong> socios
+            <strong>{personas.length}</strong> {personas.length === 1 ? "socio" : "socios"}
           </span>
           <span className="tb-pie__dato">
             <strong>{total}</strong> tarjetas
@@ -437,16 +527,17 @@ export function Tablero({ clientes, yo }: { clientes: string[]; yo: Persona }) {
         abierta={abierta}
         alCerrar={() => setAbierta(false)}
         origen={origenFicha}
-        comentarios={fichaId ? (conv[fichaId] ?? []) : []}
+        comentarios={fichaId ? conv[fichaId] : undefined}
+        errorConversacion={errorConv}
+        alReintentar={() => fichaId && void traerConversacion(fichaId)}
+        personas={personas}
         yo={yo}
-        alComentar={(texto, respuestaA) => fichaId && comentar(fichaId, texto, respuestaA)}
-        resuelta={!!fichaId && resueltas.includes(fichaId)}
-        alResolver={fichaLista?.id === "dudas" && fichaId ? () => resolver(fichaId) : undefined}
+        alComentar={(texto, respuestaA) => (fichaId ? comentar(fichaId, texto, respuestaA) : Promise.resolve(false))}
+        resuelta={!!fichaT?.resuelta}
+        alResolver={fichaLista?.id === "dudas" && fichaId ? () => void resolver(fichaId) : undefined}
         mover={fichaId && fichaT ? menuMover(fichaId, fichaT) : null}
-        descripcion={fichaId ? extras[fichaId]?.descripcion : undefined}
-        respuestas={fichaId ? extras[fichaId]?.respuestas : undefined}
       />
-      <AltaTarjeta abierta={alta} alCerrar={() => setAlta(false)} origen={() => (botonAlta.current?.isConnected ? botonAlta.current.getBoundingClientRect() : null)} clientes={clientes} yo={yo} alCrear={crear} />
+      <AltaTarjeta abierta={alta} alCerrar={() => setAlta(false)} origen={() => (botonAlta.current?.isConnected ? botonAlta.current.getBoundingClientRect() : null)} sistemas={sistemas} clientes={clientes} personas={personas} yo={yo} alCrear={crear} />
     </>
   )
 }

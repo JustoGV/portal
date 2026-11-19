@@ -90,6 +90,45 @@ describe.skipIf(!url)("invariantes en la base", () => {
     expect(await codigo("update usuarios set activo = false where id = $1", [usuarioId])).toBe("P0001")
   })
 
+  // El tablero (D-040).
+  const tarjeta = async (lista = "tareas") => (await c.query("insert into tarjetas (lista, titulo, creado_por) values ($1, 'Prueba', $2) returning id", [lista, usuarioId])).rows[0].id as string
+  const comentario = async (tarjetaId: string, respuestaA: string | null = null) =>
+    (await c.query("insert into comentarios (tarjeta_id, autor_id, respuesta_a, texto) values ($1, $2, $3, 'Hola') returning id", [tarjetaId, usuarioId, respuestaA])).rows[0].id as string
+
+  it("una tarjeta va en una de las cuatro listas, con título sin espacios en los bordes", async () => {
+    expect(await codigo("insert into tarjetas (lista, titulo, creado_por) values ('dudas', 'Una duda', $1)", [usuarioId])).toBe("ok")
+    expect(await codigo("insert into tarjetas (lista, titulo, creado_por) values ('otra', 'Una duda', $1)", [usuarioId])).toBe("23514")
+    expect(await codigo("insert into tarjetas (lista, titulo, creado_por) values ('dudas', ' Una duda', $1)", [usuarioId])).toBe("23514")
+    expect(await codigo("insert into tarjetas (lista, titulo, creado_por) values ('dudas', '', $1)", [usuarioId])).toBe("23514")
+    expect(await codigo("insert into tarjetas (lista, titulo, creado_por, respuestas) values ('dudas', 'Una', $1, '{}'::jsonb)", [usuarioId])).toBe("23514")
+  })
+
+  it("solo una duda puede estar resuelta, y siempre con quién y cuándo", async () => {
+    const duda = await tarjeta("dudas")
+    const otra = await tarjeta("tareas")
+    expect(await codigo("update tarjetas set resuelta_en = now(), resuelta_por = $2 where id = $1", [duda, usuarioId])).toBe("ok")
+    expect(await codigo("update tarjetas set resuelta_en = now() where id = $1", [duda])).toBe("23514")
+    expect(await codigo("update tarjetas set resuelta_en = now(), resuelta_por = $2 where id = $1", [otra, usuarioId])).toBe("23514")
+  })
+
+  it("una respuesta es de la misma tarjeta, y puede responder a otra respuesta (D-041)", async () => {
+    const a = await tarjeta()
+    const b = await tarjeta()
+    const raiz = await comentario(a)
+    const respuesta = await comentario(a, raiz)
+    expect(await codigo("insert into comentarios (tarjeta_id, autor_id, respuesta_a, texto) values ($1, $2, $3, 'x')", [b, usuarioId, raiz])).toBe("23514")
+    expect(await codigo("insert into comentarios (tarjeta_id, autor_id, respuesta_a, texto) values ($1, $2, $3, 'x')", [a, usuarioId, respuesta])).toBe("ok")
+    expect(await codigo("insert into comentarios (tarjeta_id, autor_id, texto) values ($1, $2, ' ')", [a, usuarioId])).toBe("23514")
+  })
+
+  it("el rol de la app no borra tarjetas, y los comentarios no se editan ni se borran", async () => {
+    const t = await tarjeta()
+    await comentario(t)
+    expect(await codigo("delete from tarjetas")).toBe("42501")
+    expect(await codigo("update comentarios set texto = 'cambiado'")).toBe("42501")
+    expect(await codigo("delete from comentarios")).toBe("42501")
+  })
+
   it("la configuración es una sola fila", async () => {
     expect(await codigo("insert into configuracion (id) values (false)")).toBe("23514")
     expect(await codigo("update configuracion set inactividad_minutos = 7")).toBe("23514")

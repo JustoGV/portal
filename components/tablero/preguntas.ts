@@ -5,7 +5,7 @@
 // tablero), «persona» (los socios) y «texto». `rol` dice qué parte de la tarjeta sale de esa respuesta, y una
 // opción `urgente` la crea con prioridad alta.
 
-import type { ListaId } from "./muestra"
+import type { ListaId } from "./listas"
 
 export type Opcion = { valor: string; titulo: string; detalle?: string; urgente?: boolean }
 type Base = { id: string; paso: string; titulo: string; ayuda: string; rol?: "servicio" | "responsable" | "texto" }
@@ -15,7 +15,7 @@ export type Pregunta =
   | (Base & { tipo: "texto"; max: number; ejemplo: string })
 
 const SISTEMA = (titulo: string): Pregunta => ({ id: "sistema", paso: "Sistema", titulo, ayuda: "El sistema o la parte del portal. Si no es de ninguno, elegí «Otro».", tipo: "sistema", rol: "servicio" })
-const QUIEN_LA_TIENE: Pregunta = { id: "persona", paso: "La tiene", titulo: "¿Quién la tiene?", ayuda: "La persona que se ocupa. Se puede cambiar después.", tipo: "persona", rol: "responsable" }
+const QUIEN_LA_TIENE: Pregunta = { id: "persona", paso: "La tiene", titulo: "¿Quién la tiene?", ayuda: "La persona que se ocupa.", tipo: "persona", rol: "responsable" }
 
 export const PREGUNTAS: Record<ListaId, Pregunta[]> = {
   dudas: [

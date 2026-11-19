@@ -590,67 +590,196 @@
   .tb-conv__vacia > span {
     display: inline-block;
   }
-  .tb-conv__lista,
-  .tb-coment__respuestas {
+  /* Los mensajes, como chat (D-041; referencia WhatsApp en grupos): el hilo sobre un fondo apenas teñido,
+     lo propio a la derecha en el color de la marca, lo de los demás a la izquierda en blanco con su nombre. */
+  .tb-conv__hilo:has(.tb-conv__lista) {
+    padding: var(--sys-esp-3) var(--sys-esp-3) var(--sys-esp-4);
+    border-radius: var(--sys-radio-l);
+    background:
+      radial-gradient(circle at 1px 1px, color-mix(in oklab, var(--sys-marca) 9%, transparent) 1px, transparent 0) 0 0 / 18px 18px,
+      color-mix(in oklab, var(--sys-marca) 4%, var(--sys-capa-2));
+  }
+  .tb-conv__lista {
     display: grid;
-    gap: var(--sys-esp-5);
+    gap: 0.5rem;
     margin: 0;
     padding: 0;
     list-style: none;
   }
-  .tb-coment {
-    --tb-cara: 2rem;
-    position: relative;
-    display: grid;
-    grid-template-columns: var(--tb-cara) minmax(0, 1fr);
-    gap: var(--sys-esp-3);
-    align-items: start;
+  .tb-msj-dia {
+    display: flex;
+    justify-content: center;
+    margin: var(--sys-esp-2) 0 0.25rem;
   }
-  .tb-coment[data-respuesta] {
-    --tb-cara: 1.5rem;
+  .tb-msj-dia > span {
+    padding: 0.1875rem 0.625rem;
+    border-radius: var(--sys-radio-s);
+    background: var(--sys-capa);
+    box-shadow: 0 1px 1px rgb(17 24 58 / 0.08);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
   }
-  .tb-coment .tb-av {
-    width: var(--tb-cara);
-    height: var(--tb-cara);
+  .tb-msj {
+    --tb-cola: 0.5rem;
+    display: flex;
+    align-items: flex-end;
+    gap: 0.375rem;
+    min-width: 0;
+  }
+  .tb-msj[data-seguido] {
+    margin-top: -0.3125rem;
+  }
+  .tb-msj[data-mio] {
+    flex-direction: row-reverse;
+  }
+  .tb-msj__cara {
+    flex: none;
+    align-self: flex-start;
+    width: 1.75rem;
+  }
+  .tb-msj__cara .tb-av {
+    width: 1.75rem;
+    height: 1.75rem;
     font-size: var(--sys-tipo-xs);
     box-shadow: none;
   }
-  /* La línea del hilo: sale de la cara y baja hasta la última respuesta. */
-  .tb-coment[data-hilo]::before {
+  .tb-msj__burbuja {
+    position: relative;
+    display: grid;
+    gap: 0.125rem;
+    /* Deja lugar a la cara y al botón de responder; en pantallas anchas, un renglón cómodo de leer. */
+    max-width: min(calc(100% - 2.75rem), 34rem);
+    min-width: 0;
+    padding: 0.375rem 0.625rem 0.3125rem;
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa);
+    box-shadow: 0 1px 1.5px rgb(17 24 58 / 0.13);
+    color: var(--sys-texto-1);
+  }
+  .tb-msj[data-mio] .tb-msj__burbuja {
+    max-width: min(calc(100% - 1.5rem), 34rem);
+    margin-left: auto;
+    background: color-mix(in oklab, var(--sys-marca) 13%, var(--sys-capa));
+  }
+  /* La colita del primer mensaje de cada tanda, como en WhatsApp. */
+  .tb-msj:not([data-seguido]) .tb-msj__burbuja::before {
     content: "";
     position: absolute;
-    top: calc(var(--tb-cara) + 0.375rem);
-    bottom: 0.25rem;
-    left: calc(var(--tb-cara) / 2 - 1px);
-    width: 2px;
-    border-radius: 1px;
-    background: var(--sys-borde);
+    top: 0;
+    left: calc(var(--tb-cola) * -1 + 1px);
+    width: var(--tb-cola);
+    height: 0.8125rem;
+    background: inherit;
+    clip-path: polygon(100% 0, 0 0, 100% 100%);
   }
-  .tb-coment__cuerpo {
-    display: grid;
-    gap: 0.25rem;
-    min-width: 0;
+  .tb-msj:not([data-seguido]) .tb-msj__burbuja {
+    border-top-left-radius: 0;
   }
-  .tb-coment__quien {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0 var(--sys-esp-2);
-    min-height: var(--tb-cara);
+  .tb-msj[data-mio]:not([data-seguido]) .tb-msj__burbuja {
+    border-top-left-radius: var(--sys-radio-m);
+    border-top-right-radius: 0;
+  }
+  .tb-msj[data-mio]:not([data-seguido]) .tb-msj__burbuja::before {
+    left: auto;
+    right: calc(var(--tb-cola) * -1 + 1px);
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+  }
+  .tb-msj__quien {
     margin: 0;
-    padding-top: 0.25rem;
+    color: var(--tb-tinta, var(--sys-marca-tinta));
     font-size: var(--sys-tipo-s);
-    line-height: 1.4;
+    font-weight: 750;
+    line-height: 1.35;
   }
-  .tb-coment__hace {
-    color: var(--sys-texto-3);
-  }
-  .tb-coment__texto {
+  .tb-msj__texto {
     margin: 0;
-    color: var(--sys-texto-1);
-    line-height: 1.55;
-    overflow-wrap: anywhere;
+    line-height: 1.45;
+    /* Corta una palabra solo si sola no entra en el renglón (un link largo), nunca para achicar la burbuja. */
+    overflow-wrap: break-word;
     white-space: pre-line;
+  }
+  /* El hueco del final deja lugar a la hora en el último renglón; si no entra, la hora baja sola. */
+  .tb-msj__lugar {
+    display: inline-block;
+    width: 4.25rem;
+  }
+  /* Abajo a la derecha, adentro de la burbuja: responder y la hora. */
+  .tb-msj__meta {
+    position: absolute;
+    right: 0.375rem;
+    bottom: 0.125rem;
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+  }
+  .tb-msj__hora {
+    color: var(--sys-texto-3);
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  /* Se ve chico pero se toca en 32 px: el área sale del botón. */
+  .tb-msj__responder {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 1.375rem;
+    height: 1.375rem;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--sys-texto-3);
+    cursor: pointer;
+    transition: background-color var(--sys-dur-1) var(--sys-ease), color var(--sys-dur-1) var(--sys-ease);
+  }
+  .tb-msj__responder::after {
+    content: "";
+    position: absolute;
+    inset: -0.3125rem;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .tb-msj__responder:hover {
+      background: color-mix(in oklab, var(--sys-texto-1) 8%, transparent);
+      color: var(--sys-texto-1);
+    }
+  }
+  .tb-msj__responder:focus-visible,
+  .tb-cita:focus-visible,
+  .tb-conv__reintentar:focus-visible {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+  }
+  /* La cita de una respuesta: una barra del color de quien escribió el original, su nombre y un renglón. */
+  .tb-cita {
+    display: grid;
+    gap: 0.0625rem;
+    min-width: 0;
+    margin: 0.125rem 0 0.25rem;
+    padding: 0.3125rem 0.5rem 0.375rem 0.625rem;
+    border: 0;
+    border-left: 3px solid var(--tb-solido, var(--sys-marca));
+    border-radius: var(--sys-radio-s);
+    background: color-mix(in oklab, var(--sys-texto-1) 6%, transparent);
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .tb-cita__quien {
+    color: var(--tb-tinta, var(--sys-marca-tinta));
+    font-size: var(--sys-tipo-xs);
+    font-weight: 750;
+  }
+  .tb-cita__texto {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    line-height: 1.35;
+    overflow-wrap: anywhere;
   }
   .tb-mencion {
     padding: 0 0.2em;
@@ -659,33 +788,15 @@
     color: var(--sys-marca-tinta);
     font-weight: 700;
   }
-  .tb-coment__accion {
-    margin-left: auto;
+  .tb-conv__reintentar {
     padding: 0.125rem var(--sys-esp-2);
     border: 0;
     border-radius: var(--sys-radio-s);
     background: transparent;
-    color: var(--sys-texto-3);
+    color: var(--sys-marca-tinta);
     font: inherit;
-    font-size: var(--sys-tipo-xs);
     font-weight: 700;
     cursor: pointer;
-  }
-  .tb-coment__accion:hover,
-  .tb-coment__accion[aria-expanded="true"] {
-    background: var(--sys-capa-3);
-    color: var(--sys-texto-1);
-  }
-  .tb-coment__accion:focus-visible {
-    outline: 2px solid var(--sys-foco);
-    outline-offset: 2px;
-  }
-  .tb-coment__respuestas {
-    gap: var(--sys-esp-4);
-    margin-top: var(--sys-esp-3);
-  }
-  .tb-coment__nuevo {
-    padding-left: 0;
   }
 
   /* El campo para escribir */
@@ -695,9 +806,8 @@
   }
   .tb-escribir__caja {
     position: relative;
-    display: flex;
-    align-items: flex-end;
-    gap: var(--sys-esp-1);
+    display: grid;
+    gap: 0.25rem;
     padding: 0.3125rem 0.3125rem 0.3125rem var(--sys-esp-4);
     border: 1px solid var(--sys-borde-control);
     border-radius: var(--sys-radio-l);
@@ -707,6 +817,23 @@
   .tb-escribir__caja:focus-within {
     border-color: var(--sys-marca);
     box-shadow: 0 0 0 3px var(--sys-marca-suave-2);
+  }
+  .tb-escribir__fila {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--sys-esp-1);
+  }
+  /* La cita del mensaje al que se responde, arriba del campo, con su cruz. */
+  .tb-escribir__cita {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sys-esp-1);
+    margin-left: calc(var(--sys-esp-4) * -1 + 0.3125rem);
+  }
+  .tb-escribir__cita .tb-cita {
+    flex: 1;
+    margin: 0;
+    cursor: default;
   }
   .tb-escribir__campo {
     flex: 1;
