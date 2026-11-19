@@ -473,3 +473,9 @@ Dos secciones. **§1 ESTADO** se sobrescribe completa cada vez que se cierra una
 - **Abierto:** `pnpm dev` en el puerto 3000 (tarea `b9sfx9obx`) y el contenedor `portal-cess-pg-55442`, corriendo. Nada sin subir en el código.
 - **Gates:** los de la entrada D-041 (`typecheck`, `lint`, `test` 143 + 1 salteado); no se volvieron a correr: no hubo código nuevo.
 - **Sigue:** `/retomar` con Fable y el plan de Mateo.
+
+### 2026-11-19 · PR a `main` para publicar · Mateo
+- **Pedido:** «¿podemos dejar esto en producción con la base limpia y el usuario para mí, Justo y Claudio?»; al plan: «Arrancá».
+- **Hecho:** la CI pasa de Node 22 a 24 (`85a8a9f`, como pide `engines`, D-039). Revisión de seguridad del diff contra `main` (reglas 10 §10): toda acción y página nueva arranca por el guard; `sql.raw` solo con `asc`/`desc` fijos; sin secretos en el diff ni en `.next/static` (la única coincidencia es el nombre `BETTER_AUTH_SECRET` dentro de better-auth, sin valor). **PR abierto: https://github.com/JustoGV/portal/pull/2** (24 commits), con lo que cambia de las decisiones de Justo, los riesgos abiertos (OQ-010) y los pasos para publicar.
+- **Verificado:** `typecheck` y `lint` limpios; `test` 143 pasan y 1 salteado; `pnpm build` OK por primera vez en esta rama.
+- **Sigue (no lo hace Claude):** Justo aprueba el PR; `pnpm db:migrate` en Neon (`0003` a `0007`); variables en Vercel marcadas como sensibles; segundo factor en Vercel, Neon y GitHub; rotar `neondb_owner`. Apenas publica, Mateo crea su cuenta en `/configurar` y después las de Justo y Claudio. La CI del PR necesita `NEON_API_KEY`, `NEON_PROJECT_ID` y la rama `ci-vacia` (OQ-008): sin eso, el paso de tests falla.
