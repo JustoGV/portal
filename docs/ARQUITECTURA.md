@@ -88,6 +88,8 @@ Un rol, `admin`, guardado en la fila `usuarios.rol` (`D-002`). La matriz vive en
 | `grupos.gestionar` (clientes: crear, editar con su responsable, archivar) | ✓ |
 | `usuarios.gestionar` (alta, desactivar, contraseña inicial nueva) | ✓ |
 | `configuracion.editar` (cierre por inactividad) | ✓ |
+| `tablero.ver` (el tablero, sus tarjetas y sus conversaciones) | ✓ |
+| `tablero.editar` (crear y mover tarjetas, comentar, resolver una duda) | ✓ |
 
 Reglas sobre la fila:
 - Nadie se desactiva a sí mismo, y nunca queda cero cuentas activas (lo frena un trigger, `docs/DATOS.md`).
@@ -107,6 +109,8 @@ Reglas sobre la fila:
 | Un socio borra proyectos por error | Media | Medio | No hay borrado: archivar y restaurar; el rol de la app no tiene `DELETE` sobre `proyectos`; auditoría que solo acepta inserciones |
 | Llamar una Server Action sin sesión | Media | Alto | Guard al principio de toda acción y toda página; test con `curl` sin sesión antes de publicar |
 | Paquete comprometido | Baja | Alto | Página del registro abierta antes de instalar; lockfile con versiones exactas; `pnpm audit` en CI |
+| Alguien escribe datos de pacientes de un cliente en una tarjeta o un comentario del tablero | Media | Alto | El tablero es para el trabajo de los socios, no para casos (D-040); los casos van al registro de `WU-08`, que se diseña con su protección. Los comentarios no se editan ni se borran: si pasa, se corrige en la base con el dueño |
+| Un comentario con HTML o un script (XSS guardado) | Baja | Alto | Se dibuja como texto de React, nunca como HTML; las menciones se resaltan partiendo el texto, sin interpretarlo |
 
 ## 6. Variables de entorno (solo nombres)
 

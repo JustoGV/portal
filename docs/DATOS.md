@@ -7,7 +7,7 @@ Postgres (Neon) con Drizzle. Convenciones de `docs/reglas/11`: `snake_case`, cla
 | Rol | Puede |
 |---|---|
 | dueño (el de la consola de Neon) | Solo migraciones |
-| `portal_app` | `SELECT`, `INSERT`, `UPDATE` en sus tablas. **Sin `DELETE`** en `proyectos`, `grupos`, `usuarios` y `auditoria`. **Sin `UPDATE`** en `auditoria`. `DELETE` solo en las tablas de sesión y de límites de better-auth |
+| `portal_app` | `SELECT`, `INSERT`, `UPDATE` en sus tablas. **Sin `DELETE`** en `proyectos`, `grupos`, `usuarios`, `tarjetas`, `comentarios` y `auditoria`. **Sin `UPDATE`** en `auditoria` ni en `comentarios`. `DELETE` solo en las tablas de sesión y de límites de better-auth |
 
 ## 2. Entidades
 
@@ -72,13 +72,49 @@ Postgres (Neon) con Drizzle. Convenciones de `docs/reglas/11`: `snake_case`, cla
 - Los únicos valen también contra los archivados. Si el nombre o el link ya están en un proyecto archivado, el aviso lo dice y ofrece restaurarlo.
 - Al chocar con un único, la acción captura `23505` y devuelve *"Ya existe el proyecto {nombre} con ese link"*, nunca el error técnico.
 
+### `tarjetas` (el tablero de trabajo: D-038, D-040)
+
+| Campo | Tipo | Regla |
+|---|---|---|
+| `id` | uuid | PK |
+| `lista` | text | `check (lista in ('dudas', 'servicios', 'tareas', 'correcciones'))` |
+| `posicion` | integer | Su lugar en la lista, de 0 en adelante (`check >= 0`). Lo reescribe la acción de mover para toda la lista |
+| `titulo` | text | 1 a 120, sin espacios en los bordes |
+| `descripcion` | text, null | 1 a 2.000 |
+| `proyecto_id` | uuid, null | FK a `proyectos`: el sistema de la tarjeta |
+| `grupo_id` | uuid, null | FK a `grupos`: el cliente, en la lista «Servicios». La app no deja poner los dos |
+| `responsable_id` | uuid, null | FK a `usuarios`. **Las dudas no tienen**: son para Claudio, y la pantalla lo muestra por la lista |
+| `prioridad` | boolean | default `false` |
+| `respuestas` | jsonb | Lo que se respondió al crearla, copiado: lista de `{ pregunta, respuesta }`, hasta 12 (`check`) |
+| `resuelta_en`, `resuelta_por` | timestamptz, uuid, null | Los dos o ninguno (`check`); solo en la lista `dudas` (`check`) |
+| `creado_por` | uuid | FK a `usuarios` |
+| `creado_en`, `actualizado_en` | timestamptz | `actualizado_en` lo mantiene un trigger |
+
+- **No se borra** (sin `DELETE` para la app). Índice `(lista, posicion, id)`.
+- Las escrituras del tablero se hacen de a una con `pg_advisory_xact_lock(hashtext('tablero'))`: así el orden de una lista nunca queda a medias con dos personas moviendo a la vez.
+- Una duda resuelta que sale de «Dudas» deja de estar resuelta (lo hace la acción; el `check` frena lo contrario).
+
+### `comentarios` (la conversación de una tarjeta, solo inserciones)
+
+| Campo | Tipo | Regla |
+|---|---|---|
+| `id` | uuid | PK |
+| `tarjeta_id` | uuid | FK a `tarjetas` |
+| `autor_id` | uuid | FK a `usuarios`: la cuenta de la sesión, nunca un dato del pedido |
+| `respuesta_a` | uuid, null | FK a `comentarios`: el mensaje que se cita. **Trigger** `exigir_respuesta_valida`: tiene que ser de la misma tarjeta (`23514`). Desde la migración `0007` (D-041) se puede responder también a una respuesta, como en WhatsApp |
+| `texto` | text | 1 a 2.000, sin espacios en los bordes. Se dibuja como texto, nunca como HTML |
+| `creado_en` | timestamptz | |
+
+- La app tiene `SELECT` e `INSERT`: no se editan ni se borran. Índice `(tarjeta_id, creado_en, id)`.
+- **Riesgo aceptado (D-040):** es texto libre. No es el lugar para datos de pacientes de un cliente (eso es el registro de casos, `WU-08`).
+
 ### `auditoria` (solo inserciones)
 
 | Campo | Tipo |
 |---|---|
 | `id` | uuid |
 | `usuario_id` | uuid, FK a `usuarios` |
-| `accion` | text (`proyecto.crear`, `proyecto.editar`, `proyecto.archivar`, `proyecto.restaurar`, `grupo.*`, `usuario.*`, `configuracion.editar`) |
+| `accion` | text (`proyecto.crear`, `proyecto.editar`, `proyecto.archivar`, `proyecto.restaurar`, `grupo.*`, `usuario.*`, `configuracion.editar`, `tarjeta.crear`, `tarjeta.mover`, `tarjeta.resolver`) |
 | `tabla`, `fila_id` | text, uuid |
 | `detalle` | jsonb (lo que cambió, sin contraseñas) |
 | `creado_en` | timestamptz |
@@ -102,6 +138,10 @@ Límite de intentos por cuenta (5 cada 15 minutos): `email_clave`, `creado_en`, 
 | `0000_extensiones_roles.sql` | `pg_trgm`; el rol `portal_app` **sin login y sin contraseña** (la pone el dueño con `pnpm clave-rol-app`); `REVOKE ALL ON SCHEMA public FROM PUBLIC` |
 | `0001_tablas.sql` | Generada por drizzle-kit y revisada: tablas, únicos, checks, índices (incluidos los GIN de trigramas) |
 | `0002_permisos_triggers.sql` | Los permisos de la tabla de §1, `actualizado_en` automático, el trigger de "al menos una cuenta activa" y la fila única de `configuracion` |
+| `0003_responsable.sql`, `0004_responsable_dni.sql` | El responsable de cada cliente (D-032, D-033) |
+| `0005_tablero.sql` | Generada y revisada: `tarjetas` y `comentarios` con sus checks, FK e índices (D-040) |
+| `0006_tablero_permisos.sql` | Permisos de la app sobre esas dos tablas, `actualizado_en` de `tarjetas` y el trigger de las respuestas |
+| `0007_respuestas_libres.sql` | El trigger de las respuestas deja responder a cualquier mensaje de la misma tarjeta (D-041) |
 
 ## 3. Consultas principales
 
@@ -113,9 +153,11 @@ Límite de intentos por cuenta (5 cada 15 minutos): `email_clave`, `creado_en`, 
 | ¿Existe ya este nombre o este link? (aviso en vivo) | `where nombre_clave = lower(:nombre) and id <> :propio` / `where url = :url and id <> :propio` | Los índices únicos |
 | Grupos para el formulario | `where archivado_en is null order by nombre_clave` | Excepción acotada: un catálogo de decenas de filas |
 | Usuarios | Sin paginar | Excepción acotada: dos filas |
+| El tablero | Las cuatro listas en una consulta, con `row_number() over (partition by lista order by posicion, creado_en desc, id)` y tope de 200 por lista (trae 201 para saber si quedaron afuera); la cantidad de comentarios con una subconsulta por tarjeta | `(lista, posicion, id)`; `(tarjeta_id, creado_en, id)` |
+| La conversación de una tarjeta | Al abrir su ficha: los últimos 500 mensajes, en orden | `(tarjeta_id, creado_en, id)` |
 
 El orden alfabético es `nombre_clave collate "es-x-icu"` (ICU, verificado en Postgres 17: «Ábaco, árbol, Banco, nube, ñandú, zeta»). Con la intercalación explícita el índice `(nombre_clave, id)` no sirve el `order by`: con decenas o cientos de proyectos el orden en memoria es despreciable; si algún día son miles, un índice de expresión con la misma intercalación. **Pendiente:** el `EXPLAIN (ANALYZE, BUFFERS)` de cada consulta contra Neon con datos de volumen real (sin hacer: hoy la base de prueba tiene 35 filas).
 
 ## 4. Datos de muestra
 
-Proyectos y grupos marcados con `descripcion = 'Muestra'`, con links a `https://example.com/...` (dominio reservado, no es de nadie). Se borran antes del uso real, con el ok del dueño.
+Las tarjetas de muestra del tablero las crea la cuenta de prueba (`creado_por`), así se borran juntas. Proyectos y grupos marcados con `descripcion = 'Muestra'`, con links a `https://example.com/...` (dominio reservado, no es de nadie). Se borran antes del uso real, con el ok del dueño.

@@ -131,6 +131,8 @@ Unidades en orden. Cada una termina con `typecheck`, `lint` y `test` en verde, l
 
 **Terminado cuando:** los tres entran, ven sus tarjetas y comentan; Claudio contestó una duda desde el portal; el chat responde "¿qué sigo?" leyendo el tablero.
 
+**Estado (2026-11-19):** diseño con OK de Mateo (D-038). **Guardado en la base** (D-040): tablas `tarjetas` y `comentarios` (migraciones `0005` y `0006`), permisos `tablero.ver` y `tablero.editar`, lecturas en `dal/tablero.ts` y acciones en `acciones/tablero.ts`; el tablero, la ficha y el alta leen y escriben ahí. Probado en local. **Falta:** sumarlo a la barra lateral; que el chat lo lea (`T-05`); mudar la cola del cerebro (`T-06`); que Claudio conteste una duda (`T-07`, necesita el portal publicado: `WU-05`).
+
 ## WU-08 · Registro de casos (Mateo, 2026-11-14)
 
 **Objetivo:** guardar cada problema que trae un cliente con las preguntas que se le mandaron, lo que contestó y cómo se resolvió. Hoy ese trabajo no queda en ningún lado.
