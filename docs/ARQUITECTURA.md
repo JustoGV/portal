@@ -90,6 +90,8 @@ Un rol, `admin`, guardado en la fila `usuarios.rol` (`D-002`). La matriz vive en
 | `configuracion.editar` (cierre por inactividad) | ✓ |
 | `tablero.ver` (el tablero, sus tarjetas y sus conversaciones) | ✓ |
 | `tablero.editar` (crear y mover tarjetas, comentar, resolver una duda) | ✓ |
+| `gastos.ver` (la pantalla Gastos, sus cifras y sus fichas; D-043) | ✓ |
+| `gastos.editar` (cargar, editar, archivar y restaurar un gasto) | ✓ |
 
 Reglas sobre la fila:
 - Nadie se desactiva a sí mismo, y nunca queda cero cuentas activas (lo frena un trigger, `docs/DATOS.md`).

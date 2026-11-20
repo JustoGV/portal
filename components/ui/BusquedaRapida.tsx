@@ -17,6 +17,7 @@ const PAGINAS: Pagina[] = [
   { href: "/tablero", texto: t.tablero, icono: "tablero", ficha: t.fichaTablero },
   { href: "/clientes", texto: t.grupos, icono: "grupos", ficha: t.fichaGrupos },
   { href: "/usuarios", texto: t.usuarios, icono: "personas", ficha: t.fichaUsuarios },
+  { href: "/gastos", texto: t.gastos, icono: "billete", ficha: t.fichaGastos },
   { href: "/cuenta", texto: t.cuenta, icono: "persona", ficha: t.fichaCuenta },
 ]
 

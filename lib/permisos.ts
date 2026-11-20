@@ -11,6 +11,8 @@ export const PERMISOS = [
   "configuracion.editar",
   "tablero.ver",
   "tablero.editar",
+  "gastos.ver",
+  "gastos.editar",
 ] as const
 export type Permiso = (typeof PERMISOS)[number]
 
