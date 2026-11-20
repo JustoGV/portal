@@ -6,7 +6,7 @@
 import { forwardRef, useImperativeHandle, useRef } from "react"
 import { EASE, gsap, quieto } from "@/lib/gsap"
 
-export type NombreDuo = "sobre" | "candado" | "ojo" | "flecha" | "tilde" | "carpeta" | "alerta" | "lupa" | "abrir" | "archivo" | "persona" | "llave" | "reloj" | "grupos" | "personas" | "salir" | "panel" | "inicio" | "escudo" | "pico" | "cruz"
+export type NombreDuo = "sobre" | "candado" | "ojo" | "flecha" | "tilde" | "carpeta" | "alerta" | "lupa" | "abrir" | "archivo" | "persona" | "llave" | "reloj" | "grupos" | "personas" | "salir" | "panel" | "tablero" | "inicio" | "escudo" | "pico" | "cruz"
 
 export type IconoDuoApi = { animar: (variante?: "entrar" | "foco" | "alternar") => void }
 
@@ -176,6 +176,16 @@ function Dibujo({ nombre, tachado }: { nombre: NombreDuo; tachado?: boolean }) {
           <path data-parte="columna" style={C2} d="M9 4.5v15" />
         </>
       )
+    // El tablero de trabajo: tres listas con sus tarjetas.
+    case "tablero":
+      return (
+        <>
+          <rect data-parte="marco" style={C1} x="3" y="4" width="18" height="16" rx="2" />
+          <path data-parte="t1" style={C2} d="M6.5 8h2.5M6.5 11h2.5" />
+          <path data-parte="t2" style={C2} d="M11 8h2.5" />
+          <path data-parte="t3" style={C2} d="M15.5 8h2M15.5 11h2M15.5 14h2" />
+        </>
+      )
     // Patrón "wired outline" de lordicon (sin abrir el ícono puntual): el techo se asienta y la puerta se dibuja.
     case "inicio":
       return (
@@ -275,6 +285,9 @@ export const IconoDuo = forwardRef<IconoDuoApi, Props>(function IconoDuo({ nombr
         case "llave":
           tl.fromTo(s, { rotate: 0 }, { rotate: -20, transformOrigin: "30% 70%", duration: 0.2, yoyo: true, repeat: 1, ease: "power2.inOut" })
             .fromTo(parte("dientes"), { drawSVG: "0% 0%" }, { drawSVG: "0% 100%", duration: 0.3 }, 0.1)
+          break
+        case "tablero":
+          tl.fromTo([parte("t1"), parte("t2"), parte("t3")], { y: -3, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, stagger: 0.08 })
           break
         case "reloj":
           tl.fromTo(parte("agujas"), { rotate: -360, transformOrigin: "12px 12px" }, { rotate: 0, duration: 0.8 })

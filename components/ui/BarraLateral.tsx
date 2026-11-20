@@ -13,7 +13,15 @@ type Pagina = { href: string; texto: string; icono: NombreDuo }
 type SeccionDatos = { id: string; titulo: string; icono: NombreDuo; paginas: Pagina[] }
 
 const SECCIONES: SeccionDatos[] = [
-  { id: "portal", titulo: t.seccionPortal, icono: "inicio", paginas: [{ href: "/", texto: t.proyectos, icono: "carpeta" }] },
+  {
+    id: "portal",
+    titulo: t.seccionPortal,
+    icono: "inicio",
+    paginas: [
+      { href: "/", texto: t.proyectos, icono: "carpeta" },
+      { href: "/tablero", texto: t.tablero, icono: "tablero" },
+    ],
+  },
   {
     id: "administracion",
     titulo: t.administracion,
