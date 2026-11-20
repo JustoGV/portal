@@ -259,6 +259,113 @@
   }
   .cu-recuadro__accion {
     grid-column: 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sys-esp-2);
+  }
+
+  /* ---------- Segundo factor (D-044): QR, clave plegada y códigos de respaldo ---------- */
+  .cu-factor {
+    display: grid;
+    gap: var(--sys-esp-5);
+  }
+  .cu-factor__texto {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+  .cu-factor__qr {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: var(--sys-esp-5);
+    margin-bottom: var(--sys-esp-4);
+  }
+  .cu-qr {
+    width: 10.5rem;
+    height: 10.5rem;
+    padding: var(--sys-esp-2);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-m);
+    background: #fff;
+  }
+  .cu-factor__qr-textos {
+    display: grid;
+    align-content: start;
+    gap: var(--sys-esp-3);
+    min-width: 0;
+  }
+  .cu-factor__plegado > summary {
+    width: fit-content;
+    min-height: 2.75rem;
+    display: flex;
+    align-items: center;
+    color: var(--sys-marca-tinta);
+    font-size: var(--sys-tipo-s);
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+  }
+  .cu-factor__plegado > summary::-webkit-details-marker {
+    display: none;
+  }
+  .cu-factor__plegado > summary:focus-visible {
+    outline: 2px solid var(--sys-marca);
+    outline-offset: 2px;
+    border-radius: var(--sys-radio-s);
+  }
+  .cu-factor__plegado[open] {
+    display: grid;
+    gap: var(--sys-esp-2);
+  }
+  .cu-factor__clave {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sys-esp-2);
+  }
+  .cu-factor__clave code,
+  .cu-codigos__lista {
+    font-family: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  .cu-factor__clave code {
+    padding: var(--sys-esp-1) var(--sys-esp-2);
+    border-radius: var(--sys-radio-s);
+    background: var(--sys-capa-3);
+    font-size: var(--sys-tipo-s);
+    letter-spacing: 0.04em;
+    overflow-wrap: anywhere;
+  }
+  .cu-codigos {
+    display: grid;
+    gap: var(--sys-esp-4);
+  }
+  .cu-codigos__lista {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sys-esp-2) var(--sys-esp-4);
+    margin: 0;
+    padding: var(--sys-esp-4) var(--sys-esp-5);
+    border: 1px dashed var(--sys-borde-control);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa-2);
+    list-style: none;
+    font-size: var(--sys-tipo-l);
+    letter-spacing: 0.04em;
+  }
+  .cu-codigos__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sys-esp-2);
+  }
+  @media (max-width: 30rem) {
+    .cu-factor__qr {
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: center;
+    }
+    .cu-factor__qr-textos {
+      justify-self: stretch;
+    }
   }
 
   /* ---------- Seguridad: el medidor ---------- */

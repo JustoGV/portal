@@ -14,6 +14,7 @@ import { gsap, quieto } from "@/lib/gsap"
 import { NOMBRE_PERSONA_MAX } from "@/lib/nombre"
 import { pegar } from "@/lib/texto"
 import { FormClave } from "./FormClave"
+import { FormActivar, FormCodigos, FormQuitar } from "./FormFactor"
 
 // Lo que hace Mi cuenta (D-035, D-036), aparte de cómo se ve: abrir las tarjetas del nombre y la
 // contraseña, cerrar sesiones y el formulario del nombre.
@@ -41,17 +42,36 @@ export function useCuenta(c: MiCuenta) {
   // La lista de sesiones se busca al cerrar: así el hook no reparte una ref a quien dibuja.
   const lista = () => document.querySelector<HTMLUListElement>("[data-lista-sesiones]")
   const desde = useRef<Element | null>(null)
-  const [modo, setModo] = useState<"nombre" | "clave" | null>(null)
+  const [modo, setModo] = useState<Modo | null>(null)
   const [apertura, setApertura] = useState(0)
   const [cambios, setCambios] = useState(false)
 
-  const abrir = (m: "nombre" | "clave") => {
+  // Segundo factor (D-044): si ya se ven los códigos de respaldo, cerrar pregunta si se guardaron.
+  const [codigosAVista, setCodigosAVista] = useState(false)
+  const activadas = useRef<number | null>(null)
+
+  const abrir = (m: Modo) => {
     desde.current = document.activeElement
     setApertura((n) => n + 1)
     setCambios(false)
+    setCodigosAVista(false)
+    activadas.current = null
     setModo(m)
   }
   const cerrar = () => setModo(null)
+  const terminarFactor = () => {
+    const n = activadas.current
+    setCodigosAVista(false)
+    setModo(null)
+    if (n !== null) {
+      mostrar({ tipo: "guardado", titulo: t.factorActivado, texto: t.factorActivadoTexto(n) })
+      router.refresh()
+    }
+  }
+  const cerrarFactor = async () => {
+    if (codigosAVista && !(await confirmar({ titulo: t.sinGuardarTitulo, texto: t.sinGuardarTexto, accion: t.yaGuardados, cancelar: t.volverAVerlos }))) return
+    terminarFactor()
+  }
   const cancelar = async () => {
     if (cambios && !(await confirmar({ titulo: comun.descartarTitulo, texto: comun.descartarTexto, accion: comun.descartar, cancelar: comun.seguirEditando, peligro: true }))) return
     cerrar()
@@ -107,12 +127,52 @@ export function useCuenta(c: MiCuenta) {
       <Dialogo abierto={modo === "clave"} alCerrar={cerrar} titulo={t.claveTitulo} bajada={pegar(t.claveBajada)} hayCambios={cambios} ancho="32rem" origen={origen}>
         <FormClave key={`c${apertura}`} alCambiar={setCambios} alGuardar={cerrar} alCancelar={cancelar} />
       </Dialogo>
+      <Dialogo abierto={modo === "factor"} alCerrar={cerrarFactor} titulo={pegar(t.factorTitulo)} bajada={pegar(t.factorBajada)} hayCambios={cambios} ancho="36rem" origen={origen}>
+        <FormActivar
+          key={`f${apertura}`}
+          email={c.email}
+          alCambiar={setCambios}
+          alActivar={(n) => {
+            activadas.current = n
+            setCodigosAVista(true)
+          }}
+          alTerminar={terminarFactor}
+          alCancelar={cancelar}
+        />
+      </Dialogo>
+      <Dialogo abierto={modo === "codigos"} alCerrar={cerrarFactor} titulo={pegar(t.codigosTitulo)} bajada={pegar(t.codigosBajada)} hayCambios={cambios} ancho="36rem" origen={origen}>
+        <FormCodigos
+          key={`k${apertura}`}
+          email={c.email}
+          alCambiar={setCambios}
+          alCrear={() => setCodigosAVista(true)}
+          alTerminar={() => {
+            setCodigosAVista(false)
+            setModo(null)
+            mostrar({ tipo: "guardado", titulo: t.codigosCreados })
+          }}
+          alCancelar={cancelar}
+        />
+      </Dialogo>
+      <Dialogo abierto={modo === "quitar"} alCerrar={cerrar} titulo={pegar(t.quitarTitulo)} bajada={pegar(t.quitarBajada)} hayCambios={cambios} ancho="32rem" origen={origen}>
+        <FormQuitar
+          key={`q${apertura}`}
+          alCambiar={setCambios}
+          alQuitar={() => {
+            setModo(null)
+            mostrar({ tipo: "guardado", titulo: t.factorDesactivado, texto: t.factorDesactivadoTexto })
+            router.refresh()
+          }}
+          alCancelar={cancelar}
+        />
+      </Dialogo>
     </>
   )
 
   return { abrir, dialogos, otras, cerrarUna, cerrarDemas }
 }
 export type Cuenta = ReturnType<typeof useCuenta>
+type Modo = "nombre" | "clave" | "factor" | "codigos" | "quitar"
 
 /** El nombre propio, en un solo paso: es un solo campo y se ve entero antes de guardar. */
 function FormNombre({ actual, alCambiar, alGuardar, alCancelar }: { actual: string; alCambiar: (c: boolean) => void; alGuardar: () => void; alCancelar: () => void }) {

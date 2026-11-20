@@ -287,6 +287,22 @@ function PanelSeguridad({ c, cuenta }: { c: MiCuenta; cuenta: Cuenta }) {
           rotulo={t.segundoFactor}
           valor={<Etiqueta tono={c.segundoFactor ? "ok" : "neutro"}>{c.segundoFactor ? t.factorActivo : t.factorNo}</Etiqueta>}
           nota={pegar(c.segundoFactor ? t.factorActivoTexto : t.factorNoTexto)}
+          accion={
+            c.segundoFactor ? (
+              <>
+                <Boton variante="secundaria" icono="llave" onPress={() => cuenta.abrir("codigos")}>
+                  {t.codigosNuevos}
+                </Boton>
+                <Boton variante="secundaria" icono="desactivar" onPress={() => cuenta.abrir("quitar")}>
+                  {t.desactivar}
+                </Boton>
+              </>
+            ) : (
+              <Boton variante="primaria" icono="escudo" onPress={() => cuenta.abrir("factor")}>
+                {t.activar}
+              </Boton>
+            )
+          }
         />
       </div>
     </div>

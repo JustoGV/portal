@@ -117,6 +117,9 @@ export const usuarios = {
   movimientosVacio: "Todavía no hay movimientos anotados.",
   movimiento: {
     "usuario.crear": "Se creó la cuenta",
+    "usuario.activar-factor": "Activó el segundo factor",
+    "usuario.desactivar-factor": "Desactivó el segundo factor",
+    "usuario.codigos-nuevos": "Creó códigos de respaldo nuevos",
     "usuario.crear-por-script": "Se creó la cuenta desde la consola",
     "usuario.cambiar-clave-inicial": "Eligió su contraseña",
     "usuario.crear-primera-cuenta": "Se creó como primera cuenta",
