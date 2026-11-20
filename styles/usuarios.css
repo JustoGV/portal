@@ -100,118 +100,163 @@
     }
   }
 
-  /* ---------- Ficha ---------- */
-  .us-titular {
+  /* ---------- Ficha (D-042): la forma de la ficha de Servicios (D-037) ----------
+     Mateo, 2026-11-20: «está toda mal distribuida esta información, lo de cerrar todas sus sesiones… debería
+     estar más ordenada la ficha y no está con el diseño del sistema». La banda y los recuadros salen de
+     styles/proyectos.css (pr-ficha2, pr-recuadro, pr-pastilla); acá va solo lo propio de una cuenta. */
+  .us-ficha2__persona {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: var(--sys-esp-4);
     min-width: 0;
   }
-  .us-titular__iniciales {
-    width: 3.5rem;
-    height: 3.5rem;
-    font-size: var(--sys-tipo-l);
+  .us-ficha2__iniciales {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 4rem;
+    height: 4rem;
+    border: 1px solid color-mix(in oklab, #fff 22%, transparent);
+    border-radius: var(--sys-radio-full);
+    background: color-mix(in oklab, #fff 12%, transparent);
+    color: #fff;
+    font-size: var(--sys-tipo-xl);
+    font-weight: 800;
+    letter-spacing: 0.02em;
   }
-  .us-titular__textos {
+  .us-ficha2__iniciales[data-apagada] {
+    opacity: 0.6;
+  }
+  .us-ficha2__textos {
     display: grid;
     gap: var(--sys-esp-1);
     min-width: 0;
   }
-  .us-titular__mail {
-    color: var(--sys-texto-2);
+  .us-ficha2__mail {
+    margin: 0;
+    color: var(--sys-barra-texto-2);
+    font-size: var(--sys-tipo-l);
     overflow-wrap: anywhere;
   }
-  .us-titular .cf-meta {
-    margin-top: var(--sys-esp-1);
+  .pr-pastilla[data-tono="warn"] .pr-pastilla__punto {
+    background: #fbbf24;
+    box-shadow: 0 0 0 3px color-mix(in oklab, #fbbf24 30%, transparent);
   }
-  .us-filas {
+
+  /* En los recuadros de media columna la acción va debajo del texto, para no apretarlo (a 1440 partía la
+     nota en tres renglones); en los de ancho completo va a la derecha, en la línea del título. */
+  .us-recuadro__accion {
+    display: flex;
+    grid-column: 2;
+    justify-self: start;
+  }
+  .us-ficha2__banda .pr-ficha2__sobre {
+    white-space: nowrap;
+  }
+  /* Sesiones e historial, lado a lado en escritorio: así la ficha entra en 1440 × 900 como la de Servicios. */
+  .us-recuadro--lista {
+    align-items: center;
+  }
+  .us-recuadro__titulo {
+    margin: 0;
+  }
+  .us-recuadro__cuerpo {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+  .us-recuadro__vacio {
+    margin: 0;
+    color: var(--sys-texto-2);
+  }
+  .us-lista {
     display: grid;
     margin: 0;
     padding: 0;
-    border: 1px solid var(--sys-borde);
-    border-radius: var(--sys-radio-m);
     list-style: none;
-    overflow: hidden;
   }
-  .us-fila {
+  .us-lista__fila {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
     gap: var(--sys-esp-3);
-    min-height: 3.75rem;
-    padding: var(--sys-esp-3) var(--sys-esp-4);
+    min-height: 3.25rem;
+    padding: var(--sys-esp-2) 0;
   }
-  /* Un botón en la fila va debajo del texto: el texto no se aprieta para dejarle lugar. */
-  .us-fila:has(> .ui-boton) {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-  .us-fila > .ui-boton {
-    grid-column: 2;
-    justify-self: start;
-  }
-  .us-fila + .us-fila {
+  .us-lista__fila + .us-lista__fila {
     border-top: 1px solid var(--sys-borde);
   }
-  .us-fila__textos {
+  .us-lista__icono {
     display: grid;
-    gap: 0.125rem;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--sys-radio-s);
+    background: var(--sys-capa-2);
+    color: var(--sys-texto-2);
+  }
+  .us-lista__punto {
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-inline: 0.875rem;
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-marca);
+  }
+  .us-lista__texto {
     min-width: 0;
-    line-height: 1.35;
+    font-weight: 600;
+    overflow-wrap: break-word;
   }
-  .us-fila__titulo {
-    font-weight: 700;
+  .us-lista__quien {
+    color: var(--sys-texto-2);
+    font-weight: 400;
   }
-  .us-fila__texto {
+  .us-lista__cuando {
     color: var(--sys-texto-2);
     font-size: var(--sys-tipo-s);
-  }
-  .us-fila__pie {
-    display: flex;
-    justify-content: flex-end;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
   .us-esqueleto {
     display: grid;
     gap: var(--sys-esp-2);
   }
   .us-esqueleto .ui-skeleton {
-    height: 3.75rem;
+    height: 3.25rem;
     border-radius: var(--sys-radio-m);
   }
-  .us-movimientos {
-    display: grid;
-    gap: var(--sys-esp-2);
-  }
-  .us-movimientos__lista {
-    display: grid;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .us-movimiento {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: baseline;
-    gap: var(--sys-esp-3);
-    padding: var(--sys-esp-2) 0;
-  }
-  .us-movimiento + .us-movimiento {
-    border-top: 1px solid var(--sys-borde);
-  }
-  .us-movimiento__punto {
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: var(--sys-radio-full);
-    background: var(--sys-marca);
-    transform: translateY(-0.1rem);
-  }
-  .us-movimiento__quien {
-    color: var(--sys-texto-2);
-  }
-  .us-movimiento__cuando {
-    color: var(--sys-texto-2);
-    font-size: var(--sys-tipo-s);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
+
+  @container (max-width: 40rem) {
+    .us-ficha2__iniciales {
+      width: 3.25rem;
+      height: 3.25rem;
+      font-size: var(--sys-tipo-l);
+    }
+    .us-ficha2__mail {
+      font-size: var(--sys-tipo-m);
+    }
+    /* En el teléfono la acción va abajo, a todo el ancho. */
+    .us-recuadro__accion {
+      grid-column: 1 / -1;
+      justify-self: stretch;
+    }
+    /* «Ficha de la cuenta» entera en un renglón y «2 de 3» abajo, en vez de partir la frase. */
+    .us-ficha2__banda .pr-ficha2__cuenta {
+      display: block;
+      margin-top: var(--sys-esp-1);
+    }
+    .us-ficha2__punto {
+      display: none;
+    }
+    .us-recuadro__accion .ui-boton {
+      width: 100%;
+    }
+    .us-lista__fila {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+    .us-lista__cuando {
+      grid-column: 2;
+      white-space: normal;
+    }
   }
   .us-ficha__nota {
     align-self: center;

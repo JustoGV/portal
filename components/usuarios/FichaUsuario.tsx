@@ -1,12 +1,11 @@
 "use client"
-import { ChevronDown, ChevronUp, KeyRound, Monitor, ShieldCheck, Smartphone } from "lucide-react"
+import { CalendarDays, ChevronDown, ChevronUp, History, KeyRound, LogIn, Monitor, MonitorSmartphone, ShieldCheck, Smartphone } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react"
 import { Button } from "react-aria-components"
 import { verDetalleUsuario } from "@/acciones/usuarios"
 import { Boton } from "@/components/ui/Boton"
 import { BotonIcono } from "@/components/ui/BotonIcono"
-import { Etiqueta } from "@/components/ui/Etiqueta"
 import { Pista } from "@/components/ui/Pista"
 import { TarjetaModal } from "@/components/ui/TarjetaModal"
 import { comun } from "@/i18n/es/comun"
@@ -37,10 +36,11 @@ export const estadoDe = (u: FilaUsuario) =>
 type Detalle = { para: string; estado: "cargando" | "listo" | "error"; datos: DetalleUsuario | null }
 
 /**
- * La ficha de una cuenta (D-034): una tarjeta al centro que crece desde la fila (D-030), nunca un panel
- * lateral (D-029). Arriba la persona con su estado y sus fechas; abajo dos columnas: «Acceso» (contraseña y
- * segundo factor, como WorkOS · User Security) y las sesiones abiertas con su dispositivo y el botón para
- * cerrarlas (WorkOS · User Sessions); al pie, los últimos cinco movimientos. Las sesiones y los movimientos
+ * La ficha de una cuenta (D-034, rehecha en D-042 con la forma de la ficha de Servicios, D-037): una
+ * tarjeta al centro que crece desde la fila (D-030), nunca un panel lateral (D-029). Arriba la banda azul
+ * con la persona, su estado y sus fechas en vidrio; abajo los datos en recuadros, cada uno con su acción
+ * adentro: contraseña, segundo factor, las sesiones abiertas («Cerrar todas» en su cabecera) y los últimos
+ * cinco movimientos. Las sesiones y los movimientos
  * se piden al abrir (verDetalleUsuario). ↑ ↓ pasan a la cuenta anterior o siguiente; el contenido se cruza
  * 16 px en 0,3 s. Una sesión cerrada sale de la lista en 0,3 s antes de que llegue la lista nueva.
  */
@@ -48,6 +48,7 @@ export function FichaUsuario({ filas, id, origen, alCambiar, alCerrar, alEditar,
   const idTitulo = useId()
   const router = useRouter()
   const cuerpo = useRef<HTMLDivElement>(null)
+  const cabeza = useRef<HTMLDivElement>(null)
   const listaSesiones = useRef<HTMLUListElement>(null)
   const sentido = useRef(0)
   const [ultimo, setUltimo] = useState<FilaUsuario | null>(null)
@@ -101,7 +102,8 @@ export function FichaUsuario({ filas, id, origen, alCambiar, alCerrar, alEditar,
     const lado = sentido.current
     sentido.current = 0
     if (!c || !lado || quieto()) return
-    gsap.fromTo(c.children, { opacity: 0, y: 16 * lado }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.03, ease: "power3.out", clearProps: "opacity,transform", overwrite: "auto" })
+    const piezas = [...(cabeza.current?.children ?? []), ...c.querySelectorAll(".pr-recuadro")]
+    gsap.fromTo(piezas, { opacity: 0, y: 16 * lado }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.03, ease: "power3.out", clearProps: "opacity,transform", overwrite: "auto" })
   }, [id])
 
   /** Antes de pedir el cierre, las sesiones salen de la lista: 0,3 s hacia la derecha, de a una. */
@@ -116,168 +118,193 @@ export function FichaUsuario({ filas, id, origen, alCambiar, alCerrar, alEditar,
 
   const e = estadoDe(u)
   const sesiones = d.datos?.sesiones ?? []
+  const cuantas = d.estado === "listo" ? sesiones.length : u.sesiones
 
   return (
-    <TarjetaModal abierto={id !== null && i >= 0} alPedirCierre={alCerrar} idTitulo={idTitulo} ancho="54rem" origen={origen}>
-      <div className="ui-dialogo__cabecera pr-ficha__cabecera gr-ficha__cabecera">
-        <div>
-          <p className="pr-ficha__sobre">
-            {pegar(t.fichaTitulo)}
-            {i >= 0 && (
-              <span className="pr-ficha__cuenta">
-                <span className="gr-ficha__punto"> · </span>
-                {t.fichaDe(i + 1, filas.length)}
-              </span>
-            )}
-          </p>
-          <p className="pr-ficha__ayuda">{t.fichaAyuda}</p>
-        </div>
-        <div className="pr-ficha__mandos">
-          <Pista texto={t.anterior}>
-            <Button className="ui-boton-icono" aria-label={t.anterior} isDisabled={filas.length < 2} onPress={() => mover(-1)}>
-              <ChevronUp size={20} strokeWidth={1.75} aria-hidden="true" />
-            </Button>
-          </Pista>
-          <Pista texto={t.siguiente}>
-            <Button className="ui-boton-icono" aria-label={t.siguiente} isDisabled={filas.length < 2} onPress={() => mover(1)}>
-              <ChevronDown size={20} strokeWidth={1.75} aria-hidden="true" />
-            </Button>
-          </Pista>
-          <BotonIcono icono="cerrar" etiqueta={comun.cerrar} onPress={alCerrar} />
-        </div>
-      </div>
-      <div ref={cuerpo} className="pr-ficha__cuerpo cf-cuerpo">
-        <div className="us-titular" data-cascada="">
-          <span className="cf-iniciales us-titular__iniciales" aria-hidden="true" data-apagada={!u.activo || undefined}>
-            {iniciales(u.nombre)}
-          </span>
-          <div className="us-titular__textos">
-            <h2 id={idTitulo} className="cf-nombre">
-              {pegar(u.nombre)}
-              {u.esYo && <span className="us-vos">{t.vos}</span>}
-            </h2>
-            <p className="us-titular__mail">{u.email}</p>
-            <div className="cf-meta">
-              <Etiqueta tono={e.tono}>{e.texto}</Etiqueta>
-              <span className="cf-fechas">
-                <span className="cf-fecha">{t.cuentaDesde(formatDia(u.creadoEn))}</span>
-                <span className="cf-fecha">
-                  <span aria-hidden="true">· </span>
-                  {u.ultimoIngreso ? t.ultimoIngreso(haceCuanto(u.ultimoIngreso)) : t.nuncaEntro}
+    <TarjetaModal abierto={id !== null && i >= 0} alPedirCierre={alCerrar} idTitulo={idTitulo} ancho="62rem" origen={origen}>
+      {/* Arriba, la banda azul de las pantallas (D-036), como la ficha de Servicios (D-037). */}
+      <div className="pr-ficha2__banda us-ficha2__banda">
+        <div className="pr-ficha2__barra" data-cascada="">
+          <div>
+            <p className="pr-ficha2__sobre">
+              {pegar(t.fichaTitulo)}
+              {i >= 0 && (
+                <span className="pr-ficha2__cuenta">
+                  <span className="us-ficha2__punto"> · </span>
+                  {t.fichaDe(i + 1, filas.length)}
                 </span>
-              </span>
-            </div>
+              )}
+            </p>
+            <p className="pr-ficha2__ayuda">{t.fichaAyuda}</p>
+          </div>
+          <div className="pr-ficha2__mandos">
+            <Pista texto={t.anterior}>
+              <Button className="ui-boton-icono" aria-label={t.anterior} isDisabled={filas.length < 2} onPress={() => mover(-1)}>
+                <ChevronUp size={20} strokeWidth={1.75} aria-hidden="true" />
+              </Button>
+            </Pista>
+            <Pista texto={t.siguiente}>
+              <Button className="ui-boton-icono" aria-label={t.siguiente} isDisabled={filas.length < 2} onPress={() => mover(1)}>
+                <ChevronDown size={20} strokeWidth={1.75} aria-hidden="true" />
+              </Button>
+            </Pista>
+            <BotonIcono icono="cerrar" etiqueta={comun.cerrar} onPress={alCerrar} />
           </div>
         </div>
+        <div ref={cabeza} className="pr-ficha2__cabeza">
+          <div className="us-ficha2__persona" data-cascada="">
+            <span className="us-ficha2__iniciales" aria-hidden="true" data-apagada={!u.activo || undefined}>
+              {iniciales(u.nombre)}
+            </span>
+            <div className="us-ficha2__textos">
+              <h2 id={idTitulo} className="pr-ficha2__nombre">
+                {pegar(u.nombre)}
+              </h2>
+              <p className="us-ficha2__mail">{u.email}</p>
+            </div>
+          </div>
+          <div className="pr-ficha2__pastillas" data-cascada="">
+            <span className="pr-pastilla" data-tono={e.tono}>
+              <span className="pr-pastilla__punto" aria-hidden="true" />
+              {e.texto}
+            </span>
+            {u.esYo && <span className="pr-pastilla">{t.tuCuenta}</span>}
+            <span className="pr-pastilla">
+              <CalendarDays size={16} strokeWidth={1.75} aria-hidden="true" />
+              {t.cuentaDesde(formatDia(u.creadoEn))}
+            </span>
+            <span className="pr-pastilla">
+              <LogIn size={16} strokeWidth={1.75} aria-hidden="true" />
+              {u.ultimoIngreso ? t.ultimoIngreso(haceCuanto(u.ultimoIngreso)) : t.nuncaEntro}
+            </span>
+          </div>
+        </div>
+      </div>
 
-        <div className="cf-columnas" data-cascada="">
-          <section className="cf-columna" aria-labelledby={`${idTitulo}-acceso`}>
-            <h3 id={`${idTitulo}-acceso`} className="gr-ficha__subtitulo">
-              {t.acceso}
-            </h3>
-            <ul className="us-filas">
-              <li className="us-fila">
-                <span className="cf-dato__icono">
-                  <KeyRound size={18} strokeWidth={1.75} aria-hidden="true" />
-                </span>
-                <span className="us-fila__textos">
-                  <span className="us-fila__titulo">{t.contrasena}</span>
-                  <span className="us-fila__texto">{pegar(u.debeCambiarClave ? t.contrasenaInicial : t.contrasenaPropia)}</span>
-                </span>
-                {!u.esYo && (
-                  <Boton variante="secundaria" icono="llave" onPress={() => alClave(u)}>
-                    {t.claveNueva}
-                  </Boton>
-                )}
-              </li>
-              <li className="us-fila">
-                <span className="cf-dato__icono">
-                  <ShieldCheck size={18} strokeWidth={1.75} aria-hidden="true" />
-                </span>
-                <span className="us-fila__textos">
-                  <span className="us-fila__titulo">{t.segundoFactor}</span>
-                  <span className="us-fila__texto">{pegar(u.segundoFactor ? t.factorActivoTexto : t.factorNoTexto)}</span>
-                </span>
-                <Etiqueta tono={u.segundoFactor ? "ok" : "neutro"}>{u.segundoFactor ? t.factorActivo : t.factorNo}</Etiqueta>
-              </li>
-            </ul>
+      <div ref={cuerpo} className="pr-ficha2__cuerpo">
+        <div className="pr-ficha2__grilla">
+          <section className="pr-recuadro us-recuadro" data-cascada="" aria-label={t.contrasena}>
+            <span className="pr-recuadro__icono" aria-hidden="true">
+              <KeyRound size={22} strokeWidth={1.75} />
+            </span>
+            <div className="pr-recuadro__textos">
+              <span className="pr-recuadro__rotulo">{t.contrasena}</span>
+              <span className="pr-recuadro__valor">{u.debeCambiarClave ? t.claveInicialCorto : t.clavePropiaCorto}</span>
+              <span className="pr-recuadro__nota">{pegar(u.debeCambiarClave ? t.contrasenaInicial : t.clavePropiaNota)}</span>
+            </div>
+            {!u.esYo && (
+              <div className="us-recuadro__accion">
+                <Boton variante="secundaria" icono="llave" onPress={() => alClave(u)}>
+                  {t.claveNueva}
+                </Boton>
+              </div>
+            )}
           </section>
 
-          <section className="cf-columna" aria-labelledby={`${idTitulo}-sesiones`} aria-busy={d.estado === "cargando" || undefined}>
-            <h3 id={`${idTitulo}-sesiones`} className="gr-ficha__subtitulo">
-              {d.estado === "listo" ? t.sesionesTitulo(sesiones.length) : t.sesionesTitulo(u.sesiones)}
-            </h3>
-            {d.estado === "cargando" ? (
-              <div className="us-esqueleto" aria-hidden="true">
-                <span className="ui-skeleton" />
-                <span className="ui-skeleton" />
+          <section className="pr-recuadro us-recuadro" data-cascada="" aria-label={t.segundoFactor}>
+            <span className="pr-recuadro__icono" aria-hidden="true">
+              <ShieldCheck size={22} strokeWidth={1.75} />
+            </span>
+            <div className="pr-recuadro__textos">
+              <span className="pr-recuadro__rotulo">{t.segundoFactor}</span>
+              <span className="pr-recuadro__valor" data-vacio={u.segundoFactor ? undefined : ""}>
+                {u.segundoFactor ? t.factorActivo : t.factorNoCorto}
+              </span>
+              <span className="pr-recuadro__nota">{pegar(u.segundoFactor ? t.factorActivoTexto : t.factorNoNota)}</span>
+            </div>
+          </section>
+
+          <section className="pr-recuadro us-recuadro us-recuadro--lista" data-cascada="" aria-labelledby={`${idTitulo}-sesiones`} aria-busy={d.estado === "cargando" || undefined}>
+            <span className="pr-recuadro__icono" aria-hidden="true">
+              <MonitorSmartphone size={22} strokeWidth={1.75} />
+            </span>
+            <div className="pr-recuadro__textos">
+              <span className="pr-recuadro__rotulo">{t.sesionesRotulo}</span>
+              <h3 id={`${idTitulo}-sesiones`} className="pr-recuadro__valor us-recuadro__titulo">
+                {t.sesionesTitulo(cuantas)}
+              </h3>
+            </div>
+            {!u.esYo && d.estado === "listo" && sesiones.length > 0 && (
+              <div className="us-recuadro__accion">
+                <Boton
+                  variante="secundaria"
+                  icono="salir"
+                  onPress={async () => {
+                    if (await alCerrarSesiones(u, sacarSesiones)) setVersion((v) => v + 1)
+                    else gsap.set(listaSesiones.current?.querySelectorAll("li") ?? [], { clearProps: "opacity,transform" })
+                  }}
+                >
+                  {t.cerrarTodasCorto}
+                </Boton>
               </div>
-            ) : d.estado === "error" ? (
-              <p className="gr-ficha__vacio">{pegar(t.detalleError)}</p>
-            ) : sesiones.length === 0 ? (
-              <p className="gr-ficha__vacio">{t.sesionesVacio}</p>
-            ) : (
-              <>
-                <ul ref={listaSesiones} className="us-filas">
+            )}
+            <div className="us-recuadro__cuerpo">
+              {d.estado === "cargando" ? (
+                <div className="us-esqueleto" aria-hidden="true">
+                  <span className="ui-skeleton" />
+                  <span className="ui-skeleton" />
+                </div>
+              ) : d.estado === "error" ? (
+                <p className="us-recuadro__vacio">{pegar(t.detalleError)}</p>
+              ) : sesiones.length === 0 ? (
+                <p className="us-recuadro__vacio">{t.sesionesVacio}</p>
+              ) : (
+                <ul ref={listaSesiones} className="us-lista">
                   {sesiones.map((s) => (
-                    <li key={s.id} className="us-fila">
-                      <span className="cf-dato__icono">{s.movil ? <Smartphone size={18} strokeWidth={1.75} aria-hidden="true" /> : <Monitor size={18} strokeWidth={1.75} aria-hidden="true" />}</span>
-                      <span className="us-fila__textos">
-                        <span className="us-fila__titulo">
-                          {s.dispositivo}
-                          {s.esEsta && <span className="us-vos">{t.esta}</span>}
-                        </span>
-                        <span className="us-fila__texto">{t.abierta(haceCuanto(s.abierta))}</span>
+                    <li key={s.id} className="us-lista__fila">
+                      <span className="us-lista__icono" aria-hidden="true">
+                        {s.movil ? <Smartphone size={18} strokeWidth={1.75} /> : <Monitor size={18} strokeWidth={1.75} />}
                       </span>
+                      <span className="us-lista__texto">
+                        {s.dispositivo}
+                        {s.esEsta && <span className="us-vos">{t.esta}</span>}
+                      </span>
+                      <span className="us-lista__cuando">{t.abierta(haceCuanto(s.abierta))}</span>
                     </li>
                   ))}
                 </ul>
-                {!u.esYo && (
-                  <div className="us-fila__pie">
-                    <Boton
-                      variante="secundaria"
-                      icono="salir"
-                      onPress={async () => {
-                        if (await alCerrarSesiones(u, sacarSesiones)) setVersion((v) => v + 1)
-                        else gsap.set(listaSesiones.current?.querySelectorAll("li") ?? [], { clearProps: "opacity,transform" })
-                      }}
-                    >
-                      {t.cerrarTodas}
-                    </Boton>
-                  </div>
-                )}
-              </>
-            )}
+              )}
+            </div>
+          </section>
+
+          <section className="pr-recuadro us-recuadro us-recuadro--lista" data-cascada="" aria-labelledby={`${idTitulo}-mov`}>
+            <span className="pr-recuadro__icono" aria-hidden="true">
+              <History size={22} strokeWidth={1.75} />
+            </span>
+            <div className="pr-recuadro__textos">
+              <span className="pr-recuadro__rotulo">{t.movimientosRotulo}</span>
+              <h3 id={`${idTitulo}-mov`} className="pr-recuadro__valor us-recuadro__titulo">
+                {t.movimientos}
+              </h3>
+            </div>
+            <div className="us-recuadro__cuerpo">
+              {d.estado === "listo" && d.datos!.movimientos.length === 0 ? (
+                <p className="us-recuadro__vacio">{t.movimientosVacio}</p>
+              ) : d.estado === "listo" ? (
+                <ol className="us-lista">
+                  {d.datos!.movimientos.map((m) => (
+                    <li key={m.id} className="us-lista__fila">
+                      <span className="us-lista__punto" aria-hidden="true" />
+                      <span className="us-lista__texto">
+                        {t.movimiento[m.accion] ?? t.movimientoOtro}
+                        {m.quien && <span className="us-lista__quien"> {t.por(m.quien)}</span>}
+                      </span>
+                      <time className="us-lista__cuando" dateTime={new Date(m.cuando).toISOString()}>
+                        {haceCuanto(m.cuando)}
+                      </time>
+                    </li>
+                  ))}
+                </ol>
+              ) : d.estado === "cargando" ? (
+                <div className="us-esqueleto" aria-hidden="true">
+                  <span className="ui-skeleton" />
+                </div>
+              ) : (
+                <p className="us-recuadro__vacio">{pegar(t.detalleError)}</p>
+              )}
+            </div>
           </section>
         </div>
-
-        <section className="us-movimientos" data-cascada="" aria-labelledby={`${idTitulo}-mov`}>
-          <h3 id={`${idTitulo}-mov`} className="gr-ficha__subtitulo">
-            {t.movimientos}
-          </h3>
-          {d.estado === "listo" && d.datos!.movimientos.length === 0 ? (
-            <p className="gr-ficha__vacio">{t.movimientosVacio}</p>
-          ) : d.estado === "listo" ? (
-            <ol className="us-movimientos__lista">
-              {d.datos!.movimientos.map((m) => (
-                <li key={m.id} className="us-movimiento">
-                  <span className="us-movimiento__punto" aria-hidden="true" />
-                  <span className="us-movimiento__texto">
-                    {t.movimiento[m.accion] ?? t.movimientoOtro}
-                    {m.quien && <span className="us-movimiento__quien"> {t.por(m.quien)}</span>}
-                  </span>
-                  <time className="us-movimiento__cuando" dateTime={new Date(m.cuando).toISOString()}>
-                    {haceCuanto(m.cuando)}
-                  </time>
-                </li>
-              ))}
-            </ol>
-          ) : d.estado === "cargando" ? (
-            <div className="us-esqueleto" aria-hidden="true">
-              <span className="ui-skeleton" />
-            </div>
-          ) : null}
-        </section>
       </div>
       <div className="ui-dialogo__acciones pr-ficha__acciones">
         {u.esYo ? (
