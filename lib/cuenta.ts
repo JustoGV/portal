@@ -98,3 +98,30 @@ export type MovimientoCuenta = { id: string; accion: string; cuando: string; qui
 export type DetalleUsuario = { sesiones: SesionAbierta[]; movimientos: MovimientoCuenta[] }
 /** Lo que muestra Mi cuenta (D-035): la persona, su acceso, sus sesiones y sus movimientos. */
 export type MiCuenta = { id: string; nombre: string; email: string; segundoFactor: boolean; creadoEn: string } & DetalleUsuario
+
+// ---------- El segundo factor desde Mi cuenta (D-044) ----------
+
+/** 5 equivocaciones (contraseña o código) cada 15 minutos por cuenta: el mismo tope que el ingreso. */
+export const FACTOR_INTENTOS = 5
+/** La clave con la que se cuentan en `intentos_ingreso`: no choca con un mail porque no tiene «@». */
+export const claveIntentosFactor = (usuarioId: string) => `factor:${usuarioId}`
+
+export const codigoFactorValido = (v: string) => /^\d{6}$/.test(v)
+
+export const esquemaClaveFactor = z.object({ clave: z.string().min(1, "Escribí tu contraseña").max(CONTRASENA_MAX) })
+export const esquemaCodigoFactor = z.object({ codigo: z.string().trim().refine(codigoFactorValido, "Son los 6 números que muestra la app") })
+
+/** La clave de la app, sacada de la dirección otpauth://, en grupos de 4 para copiarla a mano. */
+export const secretoDeUri = (uri: string): string | null => {
+  try {
+    const s = new URL(uri).searchParams.get("secret")
+    return s && /^[A-Z2-7]+=*$/i.test(s) ? s.toUpperCase().replace(/=+$/, "") : null
+  } catch {
+    return null
+  }
+}
+export const agruparSecreto = (s: string) => s.match(/.{1,4}/g)?.join(" ") ?? s
+
+/** El archivo que se descarga con los códigos de respaldo. */
+export const textoCodigos = (codigos: readonly string[], email: string, fecha: string) =>
+  [`Códigos de respaldo del portal CESS - GVG`, `Cuenta: ${email}`, `Generados el ${fecha}`, "", "Cada código sirve una sola vez.", "", ...codigos, ""].join("\n")
