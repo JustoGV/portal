@@ -103,6 +103,16 @@ export const usuarios = {
   usada: (h: string) => `usada ${h}`,
   esta: "Esta",
   cerrarTodas: "Cerrar todas sus sesiones",
+  // Ficha con recuadros (D-042)
+  tuCuenta: "Tu cuenta",
+  claveInicialCorto: "Inicial",
+  clavePropiaCorto: "La eligió",
+  clavePropiaNota: "Ya cambió la contraseña inicial por la suya",
+  factorNoCorto: "Sin activar",
+  factorNoNota: "Entra solo con la contraseña",
+  sesionesRotulo: "Sesiones",
+  cerrarTodasCorto: "Cerrar todas",
+  movimientosRotulo: "Historial",
   movimientos: "Últimos movimientos",
   movimientosVacio: "Todavía no hay movimientos anotados.",
   movimiento: {
