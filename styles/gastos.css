@@ -1,0 +1,183 @@
+/* La pantalla Gastos (D-043): reusa la banda, las cifras, la tabla y la ficha de Servicios
+   (styles/proyectos.css); acá va solo lo propio de la plata y de las fechas de pago. */
+@layer modulos {
+  /* La plata en la banda: el monto es más largo que un número, así que va debajo del título, a lo ancho
+     (al lado pisaba «Por mes en pesos»). */
+  .ga-cifras .pr-cifra[data-plata] {
+    grid-template-columns: auto minmax(0, 1fr);
+    row-gap: var(--sys-esp-1);
+  }
+  .ga-cifras .pr-cifra[data-plata] .pr-cifra__numero {
+    grid-column: 2;
+    font-size: var(--sys-tipo-2xl);
+    white-space: nowrap;
+  }
+
+  /* La tabla: gasto, quién paga, monto, próximo pago, con qué y acciones. */
+  .ga-tabla th:nth-child(1) { width: 27%; }
+  .ga-tabla th:nth-child(2) { width: 15%; }
+  .ga-tabla th:nth-child(3) { width: 15%; }
+  .ga-tabla th:nth-child(4) { width: 10rem; }
+  .ga-tabla th:nth-child(5) { width: auto; }
+  .ga-tabla th:nth-child(6) { width: 9.5rem; }
+  .ga-tabla .pr-nombre {
+    overflow-wrap: break-word;
+  }
+  .ga-ficha-banda .pr-ficha2__sobre {
+    white-space: nowrap;
+  }
+  .ga-paga {
+    font-weight: 600;
+    overflow-wrap: break-word;
+  }
+  /* En el teléfono el monto y el vencimiento van debajo del nombre (las columnas se esconden). */
+  .ga-movil {
+    display: none;
+  }
+  .ga-tabla th.ga-th-monto,
+  .ga-tabla td.ga-td-monto {
+    text-align: right;
+  }
+  .ga-td-monto {
+    white-space: nowrap;
+  }
+  .ga-monto {
+    display: block;
+    color: var(--sys-texto-1);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .ga-monto__cada {
+    display: block;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+  .ga-td-proximo {
+    white-space: nowrap;
+  }
+  .ga-fecha {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    font-variant-numeric: tabular-nums;
+  }
+  .ga-medio {
+    overflow-wrap: break-word;
+  }
+
+  /* La ficha: el monto grande en el recuadro principal. */
+  .ga-cifra {
+    font-variant-numeric: tabular-nums;
+  }
+  .ga-cifra__cada {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+    font-weight: 600;
+  }
+
+  /* El formulario. */
+  .ga-form__par {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--sys-esp-3);
+    align-items: start;
+  }
+  .ga-form__nota {
+    margin: calc(-1 * var(--sys-esp-2)) 0 0;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+  .ga-form__error {
+    margin: 0;
+    color: var(--sys-danger);
+    font-size: var(--sys-tipo-s);
+  }
+  .ga-previa {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sys-esp-3);
+    margin-bottom: var(--sys-esp-3);
+    padding: var(--sys-esp-3) var(--sys-esp-4);
+    border: 1px solid var(--sys-marca-borde);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-marca-suave);
+  }
+  .ga-previa > div {
+    min-width: 0;
+  }
+  .ga-previa__nombre {
+    margin: 0;
+    font-weight: 700;
+    overflow-wrap: break-word;
+  }
+  .ga-previa__cuando {
+    margin: 0;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+  .ga-previa__monto {
+    flex: none;
+    margin: 0;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  .ga-previa__monto span {
+    display: block;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    font-weight: 400;
+  }
+
+  /* Tabla angosta: quedan el gasto (con su monto y su vencimiento debajo) y la ficha, a un toque. */
+  @container (max-width: 38rem) {
+    .ga-tabla th:nth-child(1) { width: auto; }
+    /* Queda un solo botón (la ficha): la columna se angosta y su título queda para el lector de pantalla. */
+    .ga-tabla th:nth-child(6) {
+      width: 3.5rem;
+      font-size: 0;
+    }
+    .ga-tabla .ga-col-ancha {
+      display: none;
+    }
+    .ga-movil {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--sys-esp-1) var(--sys-esp-2);
+      margin-top: var(--sys-esp-2);
+    }
+    .ga-movil .ga-monto {
+      display: inline;
+    }
+  }
+  /* La ficha en el teléfono: «Ficha del gasto» entera y «1 de 5» abajo, como en Usuarios (D-042). */
+  @container (max-width: 40rem) {
+    .ga-ficha-banda .pr-ficha2__cuenta {
+      display: block;
+      margin-top: var(--sys-esp-1);
+    }
+    .ga-ficha-punto {
+      display: none;
+    }
+  }
+  /* En el teléfono cada cifra de plata ocupa el ancho entero: así el monto entra en un renglón. */
+  @container (max-width: 30rem) {
+    .ga-cifras .pr-cifra[data-plata] {
+      grid-column: 1 / -1;
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .ga-cifras .pr-cifra[data-plata] .pr-cifra__numero {
+      grid-column: 2;
+      grid-row: 1;
+      font-size: var(--sys-tipo-xl);
+    }
+  }
+  @media (max-width: 30rem) {
+    .ga-form__par {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}
