@@ -108,6 +108,25 @@ Postgres (Neon) con Drizzle. Convenciones de `docs/reglas/11`: `snake_case`, cla
 - La app tiene `SELECT` e `INSERT`: no se editan ni se borran. Índice `(tarjeta_id, creado_en, id)`.
 - **Riesgo aceptado (D-040):** es texto libre. No es el lugar para datos de pacientes de un cliente (eso es el registro de casos, `WU-08`).
 
+### `gastos` (lo que paga la consultora: D-043)
+
+| Columna | Tipo | Regla |
+|---|---|---|
+| `id` | uuid | |
+| `nombre` | text | 1 a 80, sin espacios en los bordes |
+| `descripcion` | text, null | 1 a 200 |
+| `monto` | numeric(12,2) | Mayor a cero. En el código viaja como texto, nunca como number |
+| `moneda` | text | `ARS` o `USD` |
+| `frecuencia` | text | `mensual` o `anual` |
+| `dia_pago` | smallint | 1 a 31. En un mes más corto, el último día |
+| `mes_pago` | smallint, null | 1 a 12; obligatorio si es anual y vacío si es mensual |
+| `medio_pago` | text | 1 a 60. **Nunca un número de tarjeta ni de cuenta:** sacando espacios y guiones, no puede tener cinco cifras seguidas |
+| `paga_id` | uuid | FK a `usuarios`: quién lo paga (la acción exige que esté activa) |
+| `archivado_en`, `archivado_por` | timestamptz, uuid | Los dos o ninguno. No se borra: se archiva (sin DELETE para la app) |
+| `creado_por`, `creado_en`, `actualizado_en` | | `actualizado_en` con el trigger `tocar_actualizado_en` |
+
+**El próximo pago lo calcula la base:** `proximo_pago(dia, mes, hoy)` y `dia_de_pago(anio, mes, dia)` (migración `0009`), con `hoy` en Buenos Aires. La lista se ordena por ahí. `lib/gasto.ts` tiene la misma cuenta para la vista previa del formulario, y `tests/gastos.test.ts` compara las dos.
+
 ### `auditoria` (solo inserciones)
 
 | Campo | Tipo |
@@ -142,6 +161,8 @@ Límite de intentos por cuenta (5 cada 15 minutos): `email_clave`, `creado_en`, 
 | `0005_tablero.sql` | Generada y revisada: `tarjetas` y `comentarios` con sus checks, FK e índices (D-040) |
 | `0006_tablero_permisos.sql` | Permisos de la app sobre esas dos tablas, `actualizado_en` de `tarjetas` y el trigger de las respuestas |
 | `0007_respuestas_libres.sql` | El trigger de las respuestas deja responder a cualquier mensaje de la misma tarjeta (D-041) |
+| `0008_gastos.sql` | La tabla `gastos` con sus reglas (D-043) |
+| `0009_gastos_permisos.sql` | Permisos de la app sobre `gastos` (sin DELETE), `actualizado_en` y las funciones `dia_de_pago` y `proximo_pago` |
 
 ## 3. Consultas principales
 
