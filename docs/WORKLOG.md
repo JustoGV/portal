@@ -494,3 +494,10 @@ Dos secciones. **§1 ESTADO** se sobrescribe completa cada vez que se cierra una
 - **Resuelto en el camino:** con «Contraseña nueva» a la derecha, la nota se partía en tres renglones: en los recuadros de media columna la acción va debajo. Con Sesiones e Historial a todo el ancho la ficha medía 946 px: pasaron a ir lado a lado. A 375, «Ficha de la cuenta · 2 de 3» se partía: el «2 de 3» va abajo.
 - **OK de Mateo:** «Queda así» (2026-11-20).
 - **Sigue:** commit y PR a `main` con su pedido.
+
+### 2026-11-20 · El tablero en la barra lateral · Mateo
+- **Pedido:** «¿por qué el tablero no está en el sistema?» (con captura de Servicios en producción); a la propuesta: «Dale, sumalo».
+- **Hecho:** «Tablero» en la sección Portal de la barra, debajo de Servicios, y en `Ctrl+K` con su ficha. Ícono propio de dos colores `tablero` (tres listas con tarjetas que caen al animar); no se usó `panel` porque ya es el botón que achica la barra. Rama `diseno/tablero-en-barra`.
+- **Archivos:** `components/ui/BarraLateral.tsx`, `components/ui/BusquedaRapida.tsx`, `components/iconos/IconoDuo.tsx`, `i18n/es/navegacion.ts`, este archivo.
+- **Verificado:** Playwright a 1440: tocar «Tablero» lleva a `/tablero` con la fila marcada; `Ctrl+K` lo muestra. A 375: el menú lo muestra y tocarlo lleva a `/tablero`. Consola limpia. Los íconos de Acciones de Servicios, medidos a los 3 s, están todos enteros: lo de la captura de Mateo era la animación de entrada a mitad de camino. `typecheck`, `lint` y `test` en verde.
+- **Sigue:** PR a `main` y publicar.
