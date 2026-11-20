@@ -1,0 +1,148 @@
+/* La banda de la cabecera de cada pantalla (D-036). En `modulos` porque adentro recolorea las cifras de
+   Servicios, Clientes y Usuarios (.pr-cifra, proyectos.css), que viven en esa capa. */
+@layer modulos {
+  .ui-banda {
+    position: relative;
+    display: grid;
+    gap: var(--sys-esp-6);
+    margin-bottom: var(--sys-esp-6);
+    padding: var(--sys-esp-7) var(--sys-esp-7) var(--sys-esp-6);
+    border-radius: var(--sys-radio-xl);
+    color: var(--sys-barra-texto-1);
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .ui-banda__fondo {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(60rem 22rem at 100% 0%, color-mix(in oklab, var(--sys-marca) 55%, transparent), transparent 70%),
+      var(--sys-barra-fondo);
+    transform-origin: left center;
+  }
+  .ui-banda__cabeza {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sys-esp-4) var(--sys-esp-6);
+  }
+  .ui-banda__textos {
+    display: grid;
+    flex: 1 1 18rem;
+    gap: var(--sys-esp-1);
+    min-width: 0;
+  }
+  .ui-banda__sobre {
+    margin: 0;
+    color: var(--sys-barra-acento);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .ui-banda__titulo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    margin: 0;
+    font-size: var(--sys-tipo-3xl);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    overflow-wrap: break-word;
+  }
+  .ui-banda__bajada {
+    margin: 0;
+    color: var(--sys-barra-texto-2);
+    font-size: var(--sys-tipo-l);
+    overflow-wrap: break-word;
+  }
+  /* El contador del título, en vidrio claro sobre el azul. */
+  .ui-banda .pr-titulo__cuenta {
+    border-color: color-mix(in oklab, #fff 22%, transparent);
+    background: color-mix(in oklab, #fff 10%, transparent);
+    color: #fff;
+  }
+  /* El botón principal va blanco: sobre el azul, el de siempre se perdía. */
+  .ui-banda__accion .ui-boton {
+    --fondo: #fff;
+    --borde: #fff;
+    --txt: var(--sys-barra-fondo);
+    --txt-lleno: #fff;
+    --relleno: var(--sys-marca);
+    --linea: var(--sys-marca);
+  }
+  .ui-banda__accion .ui-boton--primaria[data-lleno] .ui-boton__contenido {
+    color: #fff;
+  }
+  .ui-banda__pie {
+    padding-top: var(--sys-esp-5);
+    border-top: 1px solid color-mix(in oklab, #fff 14%, transparent);
+  }
+  .ui-banda .ui-skeleton {
+    background: color-mix(in oklab, #fff 10%, transparent);
+  }
+
+  /* ---------- Las cifras que filtran, adentro de la banda: tarjetas de vidrio ---------- */
+  .ui-banda .pr-cifras {
+    margin-bottom: 0;
+  }
+  .ui-banda .pr-cifra {
+    border-color: color-mix(in oklab, #fff 14%, transparent);
+    background: color-mix(in oklab, #fff 6%, transparent);
+    color: var(--sys-barra-texto-1);
+  }
+  .ui-banda .pr-cifra__pista {
+    color: var(--sys-barra-texto-2);
+  }
+  .ui-banda .pr-cifra__icono {
+    border-color: color-mix(in oklab, #fff 14%, transparent);
+    background: color-mix(in oklab, #fff 8%, transparent);
+    --duo-1: #fff;
+    --duo-2: var(--sys-barra-acento);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .ui-banda .pr-cifra:hover {
+      border-color: color-mix(in oklab, #fff 32%, transparent);
+      background: color-mix(in oklab, #fff 12%, transparent);
+    }
+  }
+  /* La cifra elegida se prende: blanca, con el texto azul noche. */
+  .ui-banda .pr-cifra[data-actual] {
+    border-color: #fff;
+    background: #fff;
+    color: var(--sys-barra-fondo);
+  }
+  .ui-banda .pr-cifra[data-actual] .pr-cifra__pista {
+    color: var(--sys-texto-2);
+  }
+  .ui-banda .pr-cifra[data-actual] .pr-cifra__icono {
+    border-color: var(--sys-marca-borde);
+    background: var(--sys-marca-suave);
+    --duo-1: var(--sys-barra-fondo);
+    --duo-2: var(--sys-marca);
+  }
+  .ui-banda .pr-cifra:focus-visible {
+    outline-color: #fff;
+  }
+
+  @media (max-width: 47.99rem) {
+    .ui-banda {
+      gap: var(--sys-esp-5);
+      padding: var(--sys-esp-6) var(--sys-esp-5) var(--sys-esp-5);
+      border-radius: var(--sys-radio-l);
+    }
+    .ui-banda__titulo {
+      font-size: var(--sys-tipo-2xl);
+    }
+    .ui-banda__bajada {
+      font-size: var(--sys-tipo-m);
+    }
+    .ui-banda__accion,
+    .ui-banda__accion .ui-boton {
+      width: 100%;
+    }
+  }
+}

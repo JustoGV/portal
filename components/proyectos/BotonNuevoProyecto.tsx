@@ -6,7 +6,7 @@ import { useEditorProyecto } from "./EditorProyecto"
 export function BotonNuevoProyecto() {
   const { abrirNuevo } = useEditorProyecto()
   return (
-    <Boton variante="primaria" icono="agregar" onPress={abrirNuevo}>
+    <Boton variante="primaria" icono="agregar" onPress={(e) => abrirNuevo(e.target)}>
       {t.nuevo}
     </Boton>
   )

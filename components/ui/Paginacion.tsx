@@ -11,15 +11,17 @@ type Props = {
   /** Arma la dirección de otra página o de otro tamaño de página. */
   href: (cambios: { pagina?: number; por?: number }) => string
   etiquetaFilas: string
+  /** false: la cantidad por página es fija (Clientes, de a 12) y no se ofrece cambiarla. */
+  conTamanos?: boolean
 }
 
 /** El pie de toda tabla larga (docs/reglas/07 §3): filas por página, "1–10 de 243" y las páginas. */
-export function Paginacion({ total, pagina, porPagina, href, etiquetaFilas }: Props) {
+export function Paginacion({ total, pagina, porPagina, href, etiquetaFilas, conTamanos = true }: Props) {
   const { navegar } = useNavegacionLista()
   const paginas = Math.max(1, Math.ceil(total / porPagina))
   const desde = total === 0 ? 0 : (pagina - 1) * porPagina + 1
   const hasta = Math.min(total, pagina * porPagina)
-  if (total <= POR_PAGINA[0] && pagina === 1) return null
+  if (total <= (conTamanos ? POR_PAGINA[0] : porPagina) && pagina === 1) return null
 
   const numeros = rango(pagina, paginas)
   const ir = (n: number) => (e: React.MouseEvent) => {
@@ -30,11 +32,17 @@ export function Paginacion({ total, pagina, porPagina, href, etiquetaFilas }: Pr
 
   return (
     <nav className="ui-paginacion" aria-label="Paginación">
-      <Segmentos
-        etiqueta={etiquetaFilas}
-        actual={String(porPagina)}
-        opciones={POR_PAGINA.map((n) => ({ valor: String(n), texto: `${n} por página`, href: href({ por: n, pagina: 1 }) }))}
-      />
+      {conTamanos && (
+        <Segmentos
+          etiqueta={etiquetaFilas}
+          actual={String(porPagina)}
+          opciones={POR_PAGINA.map((n) => ({
+            valor: String(n),
+            texto: `${n} por página`,
+            href: href({ por: n, pagina: 1 }),
+          }))}
+        />
+      )}
       <span aria-live="polite">
         {desde}–{hasta} de {total}
       </span>
@@ -53,7 +61,13 @@ export function Paginacion({ total, pagina, porPagina, href, etiquetaFilas }: Pr
             </a>
           ),
         )}
-        <a className="ui-paginacion__pagina" href={href({ pagina: pagina + 1 })} onClick={ir(pagina + 1)} aria-disabled={pagina >= paginas || undefined} aria-label="Página siguiente">
+        <a
+          className="ui-paginacion__pagina"
+          href={href({ pagina: pagina + 1 })}
+          onClick={ir(pagina + 1)}
+          aria-disabled={pagina >= paginas || undefined}
+          aria-label="Página siguiente"
+        >
           <ChevronRight size={20} strokeWidth={1.75} aria-hidden="true" />
         </a>
       </div>

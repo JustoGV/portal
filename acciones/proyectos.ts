@@ -51,9 +51,9 @@ export async function guardarProyecto(_: EstadoFormulario<{ id: string; nombre: 
       await tx.insert(auditoria).values({ usuarioId, accion: "proyecto.crear", tabla: "proyectos", filaId: p!.id, detalle: valores })
       return p!
     })
-    if (!fila) return { ok: false, mensaje: "Ese proyecto ya no existe. Cerrá el formulario y volvé a buscarlo." }
+    if (!fila) return { ok: false, mensaje: "Ese servicio ya no existe. Cerrá el formulario y volvé a buscarlo." }
     revalidatePath("/")
-    revalidatePath("/grupos")
+    revalidatePath("/clientes")
     return { ok: true, datos: fila }
   } catch (e) {
     if (codigoPg(e) === "23505") {
@@ -76,7 +76,7 @@ export async function verificarDuplicado(campo: "nombre" | "url", valor: string,
     return rechazo(e)
   }
   if (campo !== "nombre" && campo !== "url") return { ok: false, mensaje: "Campo inválido" }
-  if (excluir !== null && !esUuid(String(excluir))) return { ok: false, mensaje: "Proyecto inválido" }
+  if (excluir !== null && !esUuid(String(excluir))) return { ok: false, mensaje: "Servicio inválido" }
   let clave: string
   if (campo === "nombre") {
     clave = limpiarTexto(String(valor)).slice(0, 80)
@@ -96,7 +96,7 @@ async function cambiarArchivo(id: string, archivar: boolean): Promise<Resultado<
   } catch (e) {
     return rechazo(e)
   }
-  if (!esUuid(String(id))) return { ok: false, mensaje: "Proyecto inválido" }
+  if (!esUuid(String(id))) return { ok: false, mensaje: "Servicio inválido" }
   const fila = await db.transaction(async (tx) => {
     const [p] = await tx
       .update(proyectos)
@@ -106,9 +106,9 @@ async function cambiarArchivo(id: string, archivar: boolean): Promise<Resultado<
     if (p) await tx.insert(auditoria).values({ usuarioId, accion: archivar ? "proyecto.archivar" : "proyecto.restaurar", tabla: "proyectos", filaId: p.id })
     return p
   })
-  if (!fila) return { ok: false, mensaje: archivar ? "Ese proyecto ya estaba archivado." : "Ese proyecto ya estaba activo." }
+  if (!fila) return { ok: false, mensaje: archivar ? "Ese servicio ya estaba archivado." : "Ese servicio ya estaba activo." }
   revalidatePath("/")
-  revalidatePath("/grupos")
+  revalidatePath("/clientes")
   return { ok: true, datos: { nombre: fila.nombre } }
 }
 
@@ -120,7 +120,7 @@ export async function restaurarProyecto(id: string) {
   return cambiarArchivo(id, false)
 }
 
-export type ResultadoRapido = { id: string; nombre: string; url: string; grupo: string | null }
+export type ResultadoRapido = { id: string; nombre: string; url: string; grupo: string | null; descripcion: string | null; actualizadoEn: Date }
 
 /** Ctrl+K. */
 export async function buscarProyectosRapido(texto: string): Promise<Resultado<ResultadoRapido[]>> {

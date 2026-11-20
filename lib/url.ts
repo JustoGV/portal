@@ -29,7 +29,7 @@ export const normalizarUrl = (entrada: string): ResultadoUrl => {
 }
 
 export const MENSAJE_URL: Record<Exclude<ResultadoUrl, { ok: true }>["error"], string> = {
-  vacio: "Pegá el link del proyecto",
+  vacio: "Pegá el link del servicio",
   formato: "Revisá el link: tiene que ser una dirección web, por ejemplo https://misitio.com",
   https: "El link tiene que empezar con https://",
   largo: "El link es demasiado largo",

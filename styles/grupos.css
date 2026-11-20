@@ -1,0 +1,1056 @@
+@layer modulos {
+  /* ---------- Pantalla Grupos (WU-06 pantalla 4) ---------- */
+  /* Las cifras, el título con contador y la ficha usan las piezas de Servicios (styles/proyectos.css). */
+
+  /* ---------- La carpeta (React Bits · Folder, con los colores de la marca) ---------- */
+  /* Se mide en em: cambia de tamaño con font-size. El frente y las hojas los mueve GSAP: sin transition acá. */
+  .gr-carpeta {
+    position: relative;
+    display: block;
+    flex: none;
+    width: 4.5em;
+    height: 3.5em;
+    font-size: 1rem;
+    perspective: 14em;
+  }
+  .gr-carpeta__fondo {
+    position: absolute;
+    inset: 0.5em 0 0;
+    border-radius: 0 0.5em 0.5em 0.5em;
+    background: var(--sys-marca-activo);
+  }
+  .gr-carpeta__fondo::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 100%;
+    width: 44%;
+    height: 0.5em;
+    border-radius: 0.4em 0.4em 0 0;
+    background: inherit;
+  }
+  .gr-carpeta__hoja {
+    position: absolute;
+    top: 0.75em;
+    height: 2.25em;
+    border: 1px solid var(--sys-borde-2);
+    border-radius: 0.25em;
+    background: var(--sys-capa);
+    transform-origin: 50% 100%;
+  }
+  .gr-carpeta__hoja::after {
+    content: "";
+    position: absolute;
+    inset: 0.3em 0.3em auto;
+    height: 0.45em;
+    border-block: 1px solid var(--sys-borde-2);
+  }
+  .gr-carpeta__hoja[data-hoja="0"] { left: 8%; right: 34%; }
+  .gr-carpeta__hoja[data-hoja="1"] { left: 21%; right: 21%; }
+  .gr-carpeta__hoja[data-hoja="2"] { left: 34%; right: 8%; }
+  .gr-carpeta__frente {
+    position: absolute;
+    inset: auto 0 0;
+    height: 66%;
+    border-radius: 0.5em;
+    background: var(--sys-marca);
+    transform-origin: 50% 100%;
+  }
+  /* Vacía o archivada: la misma carpeta, sin color. Lo dice además la palabra de la tarjeta. */
+  .gr-carpeta[data-vacia] .gr-carpeta__fondo,
+  [data-archivado] .gr-carpeta__fondo {
+    background: var(--sys-borde-control);
+  }
+  .gr-carpeta[data-vacia] .gr-carpeta__frente,
+  [data-archivado] .gr-carpeta__frente {
+    background: var(--sys-borde-2);
+  }
+  .gr-carpeta--grande {
+    font-size: 1.25rem;
+  }
+
+  /* ---------- La grilla de carpetas (Square UI · Files) ---------- */
+  .gr-grilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+    gap: var(--sys-esp-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    transition: opacity var(--sys-dur-1) var(--sys-ease);
+  }
+  .gr-grilla[data-pendiente] {
+    opacity: 0.8;
+  }
+  .gr-tarjeta {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: var(--sys-esp-4);
+    min-width: 0;
+    padding: var(--sys-esp-5);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-l);
+    background: var(--sys-capa);
+    isolation: isolate;
+  }
+  /* El paso de nivel al pasar el mouse va en una capa aparte: el fondo de la tarjeta lo anima GSAP al crearla. */
+  .gr-tarjeta::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    border: 1px solid var(--sys-marca-borde);
+    border-radius: inherit;
+    background: var(--sys-capa-2);
+    opacity: 0;
+    transition: opacity var(--sys-dur-1) var(--sys-ease);
+    pointer-events: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .gr-tarjeta:hover::before {
+      opacity: 1;
+    }
+    .gr-tarjeta:hover .gr-tarjeta__abrir {
+      color: var(--sys-marca-tinta);
+    }
+  }
+  .gr-tarjeta:has(.gr-tarjeta__abrir:active)::before {
+    opacity: 1;
+  }
+  .gr-tarjeta:has(.gr-tarjeta__abrir:focus-visible) {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+  }
+  .llega .gr-tarjeta {
+    animation: ui-fila-entra 500ms var(--sys-ease) backwards;
+    animation-delay: calc(var(--i, 0) * 40ms);
+  }
+  .gr-tarjeta__arriba {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-4);
+    min-width: 0;
+  }
+  .gr-tarjeta__titular {
+    display: grid;
+    gap: 0.125rem;
+    min-width: 0;
+    flex: 1;
+  }
+  .gr-tarjeta__nombre {
+    min-width: 0;
+    font-size: var(--sys-tipo-xl);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+  .gr-tarjeta__abrir {
+    display: -webkit-box;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--sys-texto-1);
+    font: inherit;
+    letter-spacing: inherit;
+    text-align: left;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    cursor: pointer;
+    outline: 0 solid transparent;
+  }
+  /* Toda la tarjeta abre la ficha: el botón del nombre se estira encima; las acciones quedan arriba de eso. */
+  .gr-tarjeta__abrir::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--sys-radio-l);
+  }
+  /* El responsable bajo el nombre (D-032): un renglón, cortado con puntos si no entra. */
+  .gr-tarjeta__responsable {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .gr-tarjeta__responsable[data-vacio] {
+    color: var(--sys-texto-3);
+    font-style: italic;
+  }
+  .gr-tarjeta__cuenta {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .gr-tarjeta__cuenta[data-vacio] {
+    color: var(--sys-texto-3);
+    font-weight: 500;
+  }
+  .gr-tarjeta__pico {
+    display: none;
+    flex: none;
+    color: var(--sys-texto-3);
+  }
+  .gr-tarjeta__servicios {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: var(--sys-esp-2);
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    pointer-events: none;
+  }
+  .gr-pastilla {
+    max-width: 100%;
+    padding: 0.1875rem 0.625rem;
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-capa-2);
+    color: var(--sys-texto-1);
+    font-size: var(--sys-tipo-s);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .gr-pastilla--mas {
+    border-color: var(--sys-marca-borde);
+    background: var(--sys-marca-suave);
+    color: var(--sys-marca-tinta);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    position: relative;
+    z-index: 1;
+    pointer-events: auto;
+  }
+  .gr-pastilla--mas > span {
+    outline: 0 solid transparent;
+  }
+  .gr-tarjeta__pie {
+    grid-row: 3; /* siempre al pie, también en una carpeta sin servicios */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sys-esp-3);
+    margin: 0 calc(var(--sys-esp-2) * -1) calc(var(--sys-esp-2) * -1) 0;
+    padding-top: var(--sys-esp-3);
+    border-top: 1px solid var(--sys-borde);
+    pointer-events: none;
+  }
+  .gr-tarjeta__estado {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    font-weight: 600;
+  }
+  .gr-tarjeta__acciones {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    gap: var(--sys-esp-1);
+    pointer-events: auto;
+  }
+  .gr-tarjeta-esqueleto {
+    height: 12.5rem;
+    border-radius: var(--sys-radio-l);
+  }
+
+  /* Teléfono: cada carpeta es una fila grande, como en una app; editar y archivar están en la ficha. */
+  @container (max-width: 38rem) {
+    .gr-grilla {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--sys-esp-2);
+    }
+    .gr-tarjeta {
+      grid-template-rows: auto;
+      min-height: 4.75rem;
+      padding: var(--sys-esp-3) var(--sys-esp-4);
+      align-content: center;
+    }
+    .gr-tarjeta .gr-carpeta {
+      font-size: 0.75rem;
+    }
+    .gr-tarjeta__nombre {
+      font-size: var(--sys-tipo-l);
+    }
+    .gr-tarjeta__abrir {
+      -webkit-line-clamp: 1;
+    }
+    .gr-tarjeta__servicios,
+    .gr-tarjeta__pie {
+      display: none;
+    }
+    .gr-tarjeta__pico {
+      display: block;
+    }
+    .gr-tarjeta-esqueleto {
+      height: 4.75rem;
+    }
+    /* El orden ocupa el ancho entero, debajo del buscador. */
+    .ui-herramientas__filtros,
+    .ui-herramientas__filtros .ui-filtro {
+      width: 100%;
+    }
+    .ui-herramientas__filtros .ui-filtro__boton {
+      flex: 1;
+      min-width: 0;
+      max-width: none;
+    }
+  }
+
+  /* ---------- La ficha del grupo ---------- */
+  .gr-ficha__titular {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-5);
+    min-width: 0;
+  }
+  .gr-ficha__titular > .pr-ficha__titular {
+    min-width: 0;
+  }
+  .gr-ficha__fechas {
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--sys-esp-5);
+  }
+  .gr-ficha__fechas .ui-resumen__fila + .ui-resumen__fila {
+    padding-top: 0;
+    border-top: 0;
+  }
+  .gr-ficha__fechas .ui-resumen__fila {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .gr-ficha__fechas dd {
+    font-variant-numeric: tabular-nums;
+  }
+  .gr-ficha__servicios {
+    display: grid;
+    gap: var(--sys-esp-2);
+    min-width: 0;
+  }
+  .gr-ficha__subtitulo {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .gr-ficha__lista {
+    max-height: 14.5rem;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-m);
+    list-style: none;
+  }
+  .gr-ficha__lista:focus-visible {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+  }
+  .gr-ficha__servicio {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, auto) auto;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    min-height: 3rem;
+    padding: 0 var(--sys-esp-1) 0 var(--sys-esp-4);
+  }
+  .gr-ficha__servicio + .gr-ficha__servicio {
+    border-top: 1px solid var(--sys-borde);
+  }
+  .gr-ficha__servicio-nombre {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .gr-ficha__servicio-sitio {
+    max-width: 14rem;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* El responsable en la ficha (D-032): quién es y, debajo, mail y teléfono para copiar o abrir. */
+  .gr-responsable {
+    display: grid;
+    min-width: 0;
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-m);
+  }
+  .gr-responsable__quien {
+    display: grid;
+    gap: 0.125rem;
+    min-width: 0;
+    padding: var(--sys-esp-3) var(--sys-esp-4);
+  }
+  .gr-responsable__nombre {
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+  .gr-responsable__cargo {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    overflow-wrap: anywhere;
+  }
+  .gr-responsable__dato {
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    min-height: 3rem;
+    padding: 0 var(--sys-esp-1) 0 var(--sys-esp-4);
+  }
+  .gr-responsable > * + * {
+    border-top: 1px solid var(--sys-borde);
+  }
+  .gr-responsable__etiqueta {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+  .gr-responsable__valor {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .gr-responsable__acciones {
+    display: flex;
+  }
+  .gr-ficha__vacio,
+  .gr-ficha__nota {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+  }
+  .gr-ficha__vacio {
+    padding: var(--sys-esp-4);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa-2);
+  }
+  @container (max-width: 30rem) {
+    /* "1 de 4" baja entero a su renglón: no queda "1" arriba y "de 4" abajo. */
+    .gr-ficha__cabecera .pr-ficha__cuenta {
+      display: block;
+    }
+    .gr-ficha__punto {
+      display: none;
+    }
+    .gr-ficha__titular {
+      gap: var(--sys-esp-4);
+    }
+    .gr-ficha__titular .gr-carpeta--grande {
+      font-size: 1rem;
+    }
+    .gr-ficha__servicio-sitio {
+      display: none;
+    }
+    .gr-ficha__servicio {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .gr-ficha__fechas {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: var(--sys-esp-2);
+    }
+    /* En el celular la etiqueta sube arriba del valor: el mail entero tiene más lugar. */
+    .gr-responsable__dato {
+      grid-template-columns: minmax(0, 1fr) auto;
+      row-gap: 0;
+      padding-block: var(--sys-esp-2);
+    }
+    .gr-responsable__etiqueta {
+      grid-column: 1;
+      grid-row: 1;
+    }
+    .gr-responsable__valor {
+      grid-column: 1;
+      grid-row: 2;
+    }
+    .gr-responsable__acciones {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+    }
+  }
+
+  /* ---------- El paso «Servicios» del formulario ---------- */
+  .gr-elegir {
+    display: grid;
+    gap: var(--sys-esp-3);
+    align-content: start;
+    min-width: 0;
+  }
+  .gr-elegir__barra {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-3);
+  }
+  .gr-elegir__barra > .ui-campo {
+    flex: 1;
+    min-width: 0;
+  }
+  .gr-elegir__barra .ui-campo__pie {
+    display: none;
+  }
+  .gr-elegir__cuenta {
+    flex: none;
+    padding: 0.1875rem 0.75rem;
+    border: 1px solid var(--sys-marca-borde);
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-marca-suave);
+    color: var(--sys-marca-tinta);
+    font-size: var(--sys-tipo-s);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .gr-elegir__lista {
+    height: 11rem;
+    padding: var(--sys-esp-1);
+    overflow-y: auto;
+    border: 1px solid var(--sys-borde-2);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa);
+    outline: 0 solid transparent;
+  }
+  .gr-elegir__lista[data-focus-visible] {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+  }
+  .gr-elegir__opcion {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    min-height: var(--sys-toque);
+    padding: 0 var(--sys-esp-3);
+    border-radius: var(--sys-radio-s);
+    color: var(--sys-texto-1);
+    cursor: pointer;
+    outline: 0 solid transparent;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .gr-elegir__opcion[data-hovered] {
+      background: var(--sys-capa-2);
+    }
+  }
+  .gr-elegir__opcion[data-pressed] {
+    background: var(--sys-capa-3);
+  }
+  .gr-elegir__opcion[data-focus-visible] {
+    background: var(--sys-marca-suave);
+    outline: 2px solid var(--sys-foco);
+    outline-offset: -2px;
+  }
+  .gr-elegir__caja {
+    display: grid;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 1.5px solid var(--sys-borde-control);
+    border-radius: 0.3125rem;
+    background: var(--sys-capa);
+    color: transparent;
+    transition:
+      background-color var(--sys-dur-1) var(--sys-ease),
+      border-color var(--sys-dur-1) var(--sys-ease),
+      color var(--sys-dur-1) var(--sys-ease);
+  }
+  .gr-elegir__opcion[data-selected] .gr-elegir__caja {
+    border-color: var(--sys-marca);
+    background: var(--sys-marca);
+    color: var(--sys-marca-texto);
+  }
+  .gr-elegir__opcion[data-selected] .gr-elegir__nombre {
+    font-weight: 600;
+  }
+  .gr-elegir__nombre {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .gr-elegir__hoy {
+    max-width: 11rem;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .gr-elegir__hoy[data-otro] {
+    color: var(--sys-info);
+    font-weight: 600;
+  }
+  .gr-elegir__vacio {
+    padding: var(--sys-esp-4);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa-2);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+  }
+  @container (max-width: 30rem) {
+    .gr-elegir__barra {
+      flex-wrap: wrap;
+    }
+    .gr-elegir__barra > .ui-campo {
+      flex-basis: 100%;
+    }
+    .gr-elegir__lista {
+      height: 9rem;
+    }
+    .gr-elegir__hoy {
+      max-width: 6.5rem;
+    }
+  }
+
+  /* La carpeta como va a quedar, en el último paso. */
+  .gr-previa {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-4);
+    margin-bottom: var(--sys-esp-3);
+    padding: var(--sys-esp-3) var(--sys-esp-4);
+    border: 1px solid var(--sys-marca-borde);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-marca-suave);
+  }
+  .gr-previa .gr-carpeta {
+    font-size: 0.75rem;
+  }
+  .gr-previa__texto {
+    min-width: 0;
+  }
+  .gr-previa__nombre {
+    font-size: var(--sys-tipo-l);
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .gr-previa__responsable {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .gr-previa__responsable[data-vacio] {
+    color: var(--sys-texto-3);
+    font-style: italic;
+  }
+  /* En el paso «Responsable», un mail largo no pasa por debajo del tilde verde. */
+  .gr-responsable-campos .ui-campo[data-ok] .ui-campo__entrada {
+    padding-right: 2.75rem;
+  }
+  /* En «Revisar»: un dato por renglón; el mail largo se parte donde haga falta. */
+  .gr-resumen-responsable {
+    display: grid;
+    gap: 0.125rem;
+  }
+  /* Un dato por renglón: el nombre y el cargo no se mezclan en una misma línea que se parte. */
+  .gr-resumen-responsable > span {
+    display: block;
+  }
+  .gr-resumen-responsable__nombre {
+    font-weight: 600;
+  }
+  .gr-resumen-responsable__cargo {
+    color: var(--sys-texto-2);
+  }
+  .gr-dato-largo {
+    overflow-wrap: anywhere;
+  }
+  .gr-previa__cuenta {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- La barra de filtros de Clientes (D-033) ---------- */
+  /* Una tarjeta: el buscador y tres botones del mismo alto que un campo (3,625 rem), con su rótulo arriba y
+     lo elegido abajo. Debajo, lo que filtra en pastillas y cuántos clientes se ven. */
+  .cl-barra {
+    display: grid;
+    gap: var(--sys-esp-3);
+    margin-bottom: var(--sys-esp-4);
+    padding: var(--sys-esp-3);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-l);
+    background: var(--sys-capa);
+  }
+  .cl-barra__fila {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-3);
+  }
+  .cl-barra__busqueda {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .cl-barra .ui-campo__pie,
+  .cf-buscar .ui-campo__pie {
+    display: none;
+  }
+  .cl-barra__filtros {
+    display: flex;
+    flex: none;
+    gap: var(--sys-esp-2);
+  }
+  .cl-menu {
+    display: flex;
+  }
+  .cl-menu__boton {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-2);
+    width: 100%;
+    min-width: 10.5rem;
+    min-height: 3.625rem;
+    padding: 0 var(--sys-esp-3);
+    border: 1px solid var(--sys-borde-control);
+    border-radius: var(--sys-radio-s);
+    background: var(--sys-capa-2);
+    color: var(--sys-texto-1);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      border-color var(--sys-dur-1) var(--sys-ease),
+      background-color var(--sys-dur-1) var(--sys-ease);
+  }
+  .cl-menu__boton[data-hovered] {
+    border-color: var(--sys-marca-borde);
+  }
+  .cl-menu__boton[data-focus-visible] {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+  }
+  .cl-menu__textos {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+    line-height: 1.25;
+  }
+  .cl-menu__etiqueta {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 600;
+  }
+  .cl-menu__valor {
+    overflow: hidden;
+    font-size: var(--sys-tipo-m);
+    font-weight: 600;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .cl-menu__icono,
+  .cl-menu__flecha {
+    flex: none;
+    color: var(--sys-texto-2);
+  }
+  /* Un filtro puesto se ve: borde y fondo de la marca. */
+  .cl-menu[data-filtra] .cl-menu__boton {
+    border-color: var(--sys-marca);
+    background: var(--sys-marca-suave);
+  }
+  .cl-menu[data-filtra] .cl-menu__etiqueta {
+    color: var(--sys-marca-tinta);
+  }
+  .cl-barra__estado {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sys-esp-2) var(--sys-esp-4);
+    min-height: 2rem;
+    padding: 0 var(--sys-esp-1);
+  }
+  .cl-barra__activos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sys-esp-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .cl-pastilla {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sys-esp-1);
+    max-width: 18rem;
+    min-height: 2rem;
+    padding: 0 var(--sys-esp-2) 0 var(--sys-esp-3);
+    border: 1px solid var(--sys-marca-borde);
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-marca-suave);
+    color: var(--sys-marca-tinta);
+    font-size: var(--sys-tipo-s);
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color var(--sys-dur-1) var(--sys-ease);
+  }
+  .cl-pastilla:hover {
+    background: var(--sys-marca-suave-2);
+  }
+  .cl-pastilla:focus-visible,
+  .cl-barra__limpiar:focus-visible {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+  }
+  .cl-pastilla__texto {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .cl-barra__limpiar {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    font-weight: 600;
+    text-underline-offset: 3px;
+  }
+  .cl-barra__cuenta {
+    margin-left: auto;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .cl-paginas {
+    margin-top: var(--sys-esp-5);
+  }
+  @media (max-width: 64rem) {
+    .cl-barra__fila {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .cl-barra__filtros {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .cl-menu__boton {
+      min-width: 0;
+    }
+  }
+  @media (max-width: 30rem) {
+    /* En el teléfono: Responsable y Servicios lado a lado, Ordenar debajo a lo ancho. */
+    .cl-barra {
+      padding: var(--sys-esp-2);
+    }
+    .cl-barra__filtros {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .cl-barra__filtros > :last-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* ---------- La ficha del cliente, rehecha (D-033) ---------- */
+  .cf-cuerpo {
+    gap: var(--sys-esp-5);
+  }
+  .cf-titular {
+    display: grid;
+    gap: var(--sys-esp-2);
+    min-width: 0;
+  }
+  .cf-nombre {
+    font-size: var(--sys-tipo-2xl);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+  .cf-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sys-esp-2) var(--sys-esp-3);
+  }
+  .cf-fechas {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0 0.3em;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    font-variant-numeric: tabular-nums;
+  }
+  .cf-fecha {
+    white-space: nowrap;
+  }
+  .cf-columnas {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--sys-esp-5);
+    align-items: start;
+  }
+  .cf-columna {
+    display: grid;
+    gap: var(--sys-esp-2);
+    align-content: start;
+    min-width: 0;
+  }
+  .cf-contacto {
+    min-width: 0;
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-m);
+    overflow: hidden;
+  }
+  .cf-persona {
+    display: flex;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    padding: var(--sys-esp-4);
+    background: var(--sys-capa-2);
+  }
+  .cf-iniciales {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-marca-suave);
+    color: var(--sys-marca-tinta);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .cf-persona__textos {
+    display: grid;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+  .cf-persona__nombre {
+    font-size: var(--sys-tipo-l);
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+  .cf-persona__cargo {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    overflow-wrap: anywhere;
+  }
+  .cf-datos {
+    margin: 0;
+  }
+  .cf-dato {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    min-height: 3.5rem;
+    padding: var(--sys-esp-2) var(--sys-esp-1) var(--sys-esp-2) var(--sys-esp-4);
+  }
+  .cf-persona + .cf-datos .cf-dato:first-child,
+  .cf-dato + .cf-dato {
+    border-top: 1px solid var(--sys-borde);
+  }
+  .cf-dato__icono {
+    display: grid;
+    color: var(--sys-texto-2);
+  }
+  .cf-dato__textos {
+    display: grid;
+    min-width: 0;
+    line-height: 1.3;
+  }
+  .cf-dato__etiqueta {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 600;
+  }
+  .cf-dato__valor {
+    margin: 0;
+    overflow: hidden;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .cf-dato__acciones {
+    display: flex;
+  }
+  .cf-vacio {
+    display: grid;
+    justify-items: start;
+    gap: var(--sys-esp-3);
+    padding: var(--sys-esp-4);
+    border: 1px dashed var(--sys-borde-control);
+    border-radius: var(--sys-radio-m);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+  }
+  .cf-lista {
+    max-height: 19rem;
+  }
+  .cf-servicio {
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 3.5rem;
+  }
+  .cf-servicio__textos {
+    display: grid;
+    min-width: 0;
+    line-height: 1.3;
+  }
+  .cf-servicio__sitio {
+    overflow: hidden;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  @container (max-width: 40rem) {
+    .cf-columnas {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @container (max-width: 30rem) {
+    /* Cada fecha en su renglón, sin el punto que quedaría colgando al principio. */
+    .cf-fechas {
+      flex-direction: column;
+    }
+    .cf-fecha [aria-hidden] {
+      display: none;
+    }
+    .cf-fecha + .cf-fecha::first-letter {
+      text-transform: uppercase;
+    }
+    /* El mail entero, partido donde haga falta, en vez de cortado con puntos. */
+    .cf-dato__valor[data-partir] {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  /* «¿Quisiste decir ana@gmail.com?» bajo el mail (D-033). */
+  .gr-sugerencia {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sys-esp-3);
+    margin-top: calc(var(--sys-esp-2) * -1);
+    padding: var(--sys-esp-2) var(--sys-esp-2) var(--sys-esp-2) var(--sys-esp-3);
+    border-radius: var(--sys-radio-s);
+    background: var(--sys-marca-suave);
+    color: var(--sys-marca-tinta);
+    font-size: var(--sys-tipo-s);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .llega .gr-tarjeta {
+      animation: none;
+    }
+  }
+}

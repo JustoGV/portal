@@ -6,13 +6,13 @@ import { limpiarTexto } from "./texto"
 import { MENSAJE_URL, normalizarUrl } from "./url"
 
 export const MENSAJES_PROYECTO = {
-  nombreFalta: "Escribí el nombre del proyecto",
+  nombreFalta: "Escribí el nombre del servicio",
   nombreLargo: `El nombre tiene hasta ${NOMBRE_PROYECTO_MAX} letras`,
   descripcionLarga: `La descripción tiene hasta ${DESCRIPCION_MAX} letras`,
-  grupoLargo: `El nombre del grupo tiene hasta ${NOMBRE_GRUPO_MAX} letras`,
-  grupoInvalido: "Elegí un grupo de la lista",
-  nombreRepetido: "Ya existe un proyecto con ese nombre",
-  urlRepetida: "Ya existe un proyecto con ese link",
+  grupoLargo: `El nombre del cliente tiene hasta ${NOMBRE_GRUPO_MAX} letras`,
+  grupoInvalido: "Elegí un cliente de la lista",
+  nombreRepetido: "Ya existe un servicio con ese nombre",
+  urlRepetida: "Ya existe un servicio con ese link",
 } as const
 
 export const validarNombreProyecto = (nombre: string): string | null => {
@@ -34,7 +34,7 @@ export const esquemaProyecto = z.object({
   id: z
     .string()
     .optional()
-    .refine((v) => !v || esUuid(v), "Proyecto inválido")
+    .refine((v) => !v || esUuid(v), "Servicio inválido")
     .transform((v) => v || null),
   nombre: z
     .string()

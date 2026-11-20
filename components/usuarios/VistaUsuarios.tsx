@@ -1,55 +1,63 @@
 "use client"
 import { useRouter } from "next/navigation"
-import { useActionState, useEffect, useState, type FormEvent } from "react"
-import { cambiarActivo, crearCuenta, nuevaClaveInicial } from "@/acciones/usuarios"
+import { useLayoutEffect, useRef, useState } from "react"
+import { cambiarActivo, cerrarSesiones, nuevaClaveInicial } from "@/acciones/usuarios"
 import { Boton } from "@/components/ui/Boton"
 import { BotonIcono } from "@/components/ui/BotonIcono"
 import { CajaTabla } from "@/components/ui/CajaTabla"
-import { Campo } from "@/components/ui/Campo"
 import { useConfirmar } from "@/components/ui/Confirmar"
-import { Dialogo } from "@/components/ui/Dialogo"
 import { Etiqueta } from "@/components/ui/Etiqueta"
 import { useResultado } from "@/components/ui/Resultado"
-import { enterAvanza } from "@/components/ui/use-enter-avanza"
+import { Vacio } from "@/components/ui/Vacio"
 import { comun } from "@/i18n/es/comun"
 import { usuarios as t } from "@/i18n/es/usuarios"
-import { MENSAJES_CUENTA, normalizarEmail, type FilaUsuario } from "@/lib/cuenta"
-import { formatDia } from "@/lib/fecha"
-import { NOMBRE_PERSONA_MAX } from "@/lib/nombre"
-import { limpiarTexto } from "@/lib/texto"
+import type { FilaUsuario } from "@/lib/cuenta"
+import { formatDia, haceCuanto } from "@/lib/fecha"
+import { escribirIconos, gsap, quieto } from "@/lib/gsap"
+import { iniciales } from "@/lib/nombre"
+import type { VistaUsuarios as Vista } from "@/lib/parametros"
+import { pegar } from "@/lib/texto"
+import { estadoDe, FichaUsuario } from "./FichaUsuario"
+import { useEditorUsuario } from "./FormUsuario"
 
-type Clave = { nombre: string; email: string; clave: string } | null
+type Props = { filas: FilaUsuario[]; vista: Vista; filtrando: boolean; hrefLimpiar: string }
 
-export function BotonNuevaCuenta() {
-  return (
-    <Boton variante="primaria" icono="agregar" onPress={() => window.dispatchEvent(new CustomEvent("usuarios:nueva"))}>
-      {t.nueva}
-    </Boton>
-  )
-}
-
-export function VistaUsuarios({ filas }: { filas: FilaUsuario[] }) {
+/**
+ * La tabla de Usuarios (WU-06 pantalla 5, D-034): la persona en una celda con sus iniciales, su nombre y su
+ * mail (WorkOS · Users Management), estado, segundo factor, último ingreso y alta (Circle · Members), y las
+ * acciones a la vista con su nombre (EDV). Tocar la fila abre la ficha en una tarjeta que crece desde la fila
+ * (D-030). Al filtrar u ordenar, las filas que siguen se deslizan a su lugar y las nuevas entran: solo cuando
+ * la persona cambia algo, nunca en un refresco (docs/reglas/07 §4, 08 §2.1). Sobre la cuenta propia, las
+ * acciones quedan apagadas y dicen por qué.
+ */
+export function VistaUsuarios({ filas, vista, filtrando, hrefLimpiar }: Props) {
+  const editor = useEditorUsuario()
   const router = useRouter()
   const confirmar = useConfirmar()
   const mostrar = useResultado()
-  const [alta, setAlta] = useState({ abierta: false, apertura: 0 })
-  const [cambios, setCambios] = useState(false)
-  const [clave, setClave] = useState<Clave>(null)
+  const cuerpo = useRef<HTMLTableSectionElement>(null)
+  const lugares = useRef<Map<string, number> | null>(null)
+  const [fichaId, setFichaId] = useState<string | null>(null)
+  const origen = useRef<Element | null>(null)
 
-  useEffect(() => {
-    const nueva = () => {
-      setCambios(false)
-      setAlta((a) => ({ abierta: true, apertura: a.apertura + 1 }))
+  // Reacomodo a mano, como la tabla de Servicios (G-010): offsetTop no depende del scroll.
+  const firma = filas.map((f) => f.id).join(",")
+  useLayoutEffect(() => {
+    const trs = cuerpo.current ? Array.from(cuerpo.current.querySelectorAll<HTMLElement>("tr[data-flip-id]")) : []
+    const antes = lugares.current
+    lugares.current = new Map(trs.map((el) => [el.dataset.flipId!, el.offsetTop]))
+    if (!antes) return
+    if (quieto()) return
+    const nuevas: HTMLElement[] = []
+    for (const el of trs) {
+      const viejo = antes.get(el.dataset.flipId!)
+      if (viejo === undefined) nuevas.push(el)
+      else if (viejo !== el.offsetTop) gsap.fromTo(el, { y: viejo - el.offsetTop }, { y: 0, duration: 0.45, ease: "power2.inOut", overwrite: "auto", clearProps: "transform" })
     }
-    window.addEventListener("usuarios:nueva", nueva)
-    return () => window.removeEventListener("usuarios:nueva", nueva)
-  }, [])
+    if (nuevas.length) gsap.fromTo(nuevas, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.35, stagger: 0.02, ease: "power2.out", overwrite: "auto", clearProps: "opacity,transform" })
+  }, [firma])
 
-  const cerrarAlta = () => setAlta((a) => ({ ...a, abierta: false }))
-  const cancelarAlta = async () => {
-    if (cambios && !(await confirmar({ titulo: comun.descartarTitulo, texto: comun.descartarTexto, accion: comun.descartar, cancelar: comun.seguirEditando, peligro: true }))) return
-    cerrarAlta()
-  }
+  const filaDe = (id: string) => cuerpo.current?.querySelector(`tr[data-flip-id="${id}"]`) ?? null
 
   const tratar = (r: { ok: false; mensaje: string; sesion?: "vencida" }) => {
     if (r.sesion === "vencida") router.replace("/ingresar?motivo=expirado")
@@ -63,158 +71,153 @@ export function VistaUsuarios({ filas }: { filas: FilaUsuario[] }) {
     else tratar(r)
   }
 
-  const restablecer = async (u: FilaUsuario) => {
+  const claveNueva = async (u: FilaUsuario) => {
     if (!(await confirmar({ titulo: t.claveTitulo(u.nombre), texto: t.claveTexto, accion: t.claveAccion, peligro: true }))) return
     const r = await nuevaClaveInicial(u.id)
-    if (r.ok) setClave({ nombre: r.datos.nombre, email: u.email, clave: r.datos.clave })
+    if (r.ok) {
+      setFichaId(null)
+      editor.mostrarClave({ nombre: r.datos.nombre, email: u.email, clave: r.datos.clave }, filaDe(u.id))
+    } else tratar(r)
+  }
+
+  /** `antes`: lo que hace la ficha entre la confirmación y el pedido (sacar las sesiones de la vista). */
+  const cerrar = async (u: FilaUsuario, antes?: () => Promise<void>) => {
+    if (!(await confirmar({ titulo: t.cerrarTitulo(u.nombre), texto: t.cerrarTexto, accion: t.cerrarAccion, peligro: true }))) return false
+    await antes?.()
+    const r = await cerrarSesiones(u.id)
+    if (r.ok) mostrar({ tipo: "guardado", titulo: t.cerradas(r.datos.cerradas), texto: r.datos.nombre })
     else tratar(r)
+    return r.ok
+  }
+
+  if (filas.length === 0) {
+    if (filtrando)
+      return (
+        <Vacio
+          icono="buscar"
+          titulo={t.sinResultados}
+          texto={t.sinResultadosTexto}
+          accion={
+            <Boton variante="secundaria" onPress={() => router.replace(hrefLimpiar)}>
+              {t.limpiarFiltros}
+            </Boton>
+          }
+        />
+      )
+    const vacio = vista === "desactivadas" ? t.sinDesactivadas : vista === "primer-ingreso" ? t.sinPrimerIngreso : vista === "sin-factor" ? t.sinSinFactor : t.sinResultados
+    return <Vacio icono="usuarios" titulo={vacio} />
+  }
+
+  const abrirFicha = (u: FilaUsuario, fila: Element | null) => {
+    origen.current = fila
+    setFichaId(u.id)
   }
 
   return (
     <>
       <CajaTabla etiqueta={t.tabla} filas={filas.length}>
-        <table className="ui-tabla">
+        <table className="ui-tabla us-tabla">
           <caption className="sr-solo">{t.tabla}</caption>
           <thead>
             <tr>
-              <th scope="col">{t.colNombre}</th>
-              <th scope="col" data-prioridad="2">
-                {t.colEmail}
-              </th>
+              <th scope="col">{t.colPersona}</th>
               <th scope="col">{t.colEstado}</th>
-              <th scope="col" data-prioridad="3">
+              <th scope="col" data-prioridad={3}>
+                {t.colFactor}
+              </th>
+              <th scope="col" data-prioridad={2}>
+                {t.colIngreso}
+              </th>
+              <th scope="col" data-prioridad={3}>
                 {t.colAlta}
               </th>
-              <th scope="col">
-                <span className="sr-solo">{t.colAcciones}</span>
-              </th>
+              <th scope="col">{t.colAcciones}</th>
             </tr>
           </thead>
-          <tbody>
-            {filas.map((u, i) => (
-              <tr key={u.id} style={{ "--i": i } as React.CSSProperties}>
-                <td className="gr-nombre">
-                  {u.nombre} {u.esYo && <span className="ui-tabla__secundario">{t.vos}</span>}
-                </td>
-                <td data-prioridad="2" className="ui-tabla__secundario">
-                  {u.email}
-                </td>
-                <td>
-                  <Etiqueta tono={u.activo ? "ok" : "neutro"}>{u.activo ? t.activa : t.desactivada}</Etiqueta>
-                </td>
-                <td data-prioridad="3" className="ui-tabla__secundario">
-                  {formatDia(u.creadoEn)}
-                </td>
-                <td className="ui-tabla__acciones">
-                  {!u.esYo && (
+          <tbody ref={cuerpo}>
+            {filas.map((u, i) => {
+              const e = estadoDe(u)
+              return (
+                <tr
+                  key={u.id}
+                  data-flip-id={u.id}
+                  className="pr-tr us-tr"
+                  style={{ "--i": i } as React.CSSProperties}
+                  onClick={(ev) => {
+                    if ((ev.target as Element).closest("button, a")) return
+                    abrirFicha(u, ev.currentTarget)
+                  }}
+                  onPointerEnter={(ev) => ev.pointerType === "mouse" && escribirIconos(ev.currentTarget, { paso: 0.04 })}
+                >
+                  <td className="us-td-persona">
+                    <span className="us-persona">
+                      <span className="cf-iniciales us-iniciales" aria-hidden="true" data-apagada={!u.activo || undefined}>
+                        {iniciales(u.nombre)}
+                      </span>
+                      <span className="us-persona__textos">
+                        <button type="button" className="pr-nombre us-persona__nombre" onClick={(ev) => abrirFicha(u, ev.currentTarget.closest("tr"))} aria-label={`${t.verFicha}: ${u.nombre}`}>
+                          {pegar(u.nombre)}
+                        </button>
+                        {u.esYo && <span className="us-vos">{t.vos}</span>}
+                        <span className="us-persona__mail">{u.email}</span>
+                      </span>
+                    </span>
+                  </td>
+                  <td>
+                    <Etiqueta tono={e.tono}>{e.texto}</Etiqueta>
+                  </td>
+                  <td data-prioridad={3}>
+                    <Etiqueta tono={u.segundoFactor ? "ok" : "neutro"}>{u.segundoFactor ? t.factorActivo : t.factorNo}</Etiqueta>
+                  </td>
+                  <td data-prioridad={2} className="ui-tabla__secundario us-fecha">
+                    {u.ultimoIngreso ? <time dateTime={new Date(u.ultimoIngreso).toISOString()}>{haceCuanto(u.ultimoIngreso)}</time> : t.nuncaEntro}
+                  </td>
+                  <td data-prioridad={3} className="ui-tabla__secundario us-fecha">
+                    <time dateTime={new Date(u.creadoEn).toISOString()}>{formatDia(u.creadoEn)}</time>
+                  </td>
+                  <td className="ui-tabla__acciones">
                     <span className="ui-tabla__fila-acciones">
-                      <BotonIcono icono="llave" etiqueta={`${t.claveNueva}: ${u.nombre}`} pista={t.claveNueva} onPress={() => restablecer(u)} />
+                      <BotonIcono icono="llave" etiqueta={`${t.claveNueva}: ${u.nombre}`} pista={u.esYo ? t.propia : t.claveNueva} isDisabled={u.esYo} onPress={() => claveNueva(u)} />
+                      <BotonIcono
+                        icono="salir"
+                        etiqueta={`${t.cerrarSesiones}: ${u.nombre}`}
+                        pista={u.esYo ? t.propia : u.sesiones === 0 ? t.sinSesiones : t.cerrarSesiones}
+                        isDisabled={u.esYo || u.sesiones === 0}
+                        onPress={() => cerrar(u)}
+                      />
                       <BotonIcono
                         icono={u.activo ? "desactivar" : "activar"}
                         etiqueta={`${u.activo ? t.desactivar : t.activar} ${u.nombre}`}
-                        pista={u.activo ? t.desactivar : t.activar}
+                        pista={u.esYo ? t.propia : u.activo ? t.desactivar : t.activar}
                         peligro={u.activo}
+                        isDisabled={u.esYo}
                         onPress={() => alternar(u)}
                       />
                     </span>
-                  )}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </CajaTabla>
-
-      <Dialogo abierto={alta.abierta} alCerrar={cerrarAlta} titulo={t.tituloNueva} bajada={t.bajadaNueva} hayCambios={cambios} ancho="30rem">
-        <FormCuenta
-          key={alta.apertura}
-          alCambiar={setCambios}
-          alCancelar={cancelarAlta}
-          alCrear={(c) => {
-            setCambios(false)
-            cerrarAlta()
-            setClave(c)
-          }}
-        />
-      </Dialogo>
-
-      <Dialogo abierto={clave !== null} alCerrar={() => setClave(null)} titulo={t.claveListaTitulo} ancho="30rem">
-        {clave && <ClaveUnaVez dato={clave} alCerrar={() => setClave(null)} />}
-      </Dialogo>
-    </>
-  )
-}
-
-function FormCuenta({ alCambiar, alCancelar, alCrear }: { alCambiar: (c: boolean) => void; alCancelar: () => void; alCrear: (c: NonNullable<Clave>) => void }) {
-  const router = useRouter()
-  const mostrar = useResultado()
-  const [nombre, setNombre] = useState("")
-  const [email, setEmail] = useState("")
-  const [errores, setErrores] = useState<Record<string, string>>({})
-  const [, accion, enviando] = useActionState(async (anterior: Awaited<ReturnType<typeof crearCuenta>> | null, datos: FormData) => {
-    const estado = await crearCuenta(anterior, datos)
-    if (estado.ok) alCrear(estado.datos)
-    else if (estado.sesion === "vencida") router.replace("/ingresar?motivo=expirado")
-    else if (estado.errores) {
-      setErrores(estado.errores)
-      mostrar({ tipo: "dato-mal", titulo: comun.datoMalTitulo, texto: estado.mensaje })
-    } else mostrar({ tipo: "error", titulo: comun.noGuardadoTitulo, texto: estado.mensaje })
-    return estado
-  }, null)
-  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizarEmail(email))
-
-  useEffect(() => alCambiar(nombre !== "" || email !== ""), [nombre, email, alCambiar])
-
-  const validar = (e: FormEvent<HTMLFormElement>) => {
-    const err: Record<string, string> = {}
-    if (!limpiarTexto(nombre)) err.nombre = MENSAJES_CUENTA.nombreFalta
-    if (!emailOk) err.email = MENSAJES_CUENTA.emailMal
-    setErrores(err)
-    if (Object.keys(err).length) {
-      e.preventDefault()
-      e.currentTarget.querySelector<HTMLInputElement>(`[name="${Object.keys(err)[0]}"]`)?.focus()
-    }
-  }
-
-  return (
-    <form action={accion} onSubmit={validar} onKeyDown={enterAvanza} noValidate>
-      <div className="ui-dialogo__campos">
-        <Campo etiqueta={t.nombre} name="nombre" valor={nombre} alCambiar={setNombre} icono="persona" max={NOMBRE_PERSONA_MAX} contador="cerca" obligatorio autoFocus error={errores.nombre} />
-        <Campo etiqueta={t.email} name="email" tipo="email" valor={email} alCambiar={setEmail} icono="sobre" max={254} obligatorio ok={emailOk} error={errores.email} />
-      </div>
-      <div className="ui-dialogo__acciones">
-        <Boton variante="secundaria" onPress={alCancelar}>
-          {comun.cancelar}
-        </Boton>
-        <Boton type="submit" variante="primaria" icono="agregar" cargando={enviando} textoCargando={t.creando}>
-          {t.crear}
-        </Boton>
-      </div>
-    </form>
-  )
-}
-
-function ClaveUnaVez({ dato, alCerrar }: { dato: NonNullable<Clave>; alCerrar: () => void }) {
-  const [copiada, setCopiada] = useState(false)
-  return (
-    <>
-      <p className="ui-dialogo__bajada">{t.claveListaTexto(dato.nombre, dato.email)}</p>
-      <p className="us-clave ui-mono">{dato.clave}</p>
-      <div className="ui-dialogo__acciones">
-        <Boton
-          variante="secundaria"
-          icono="copiar"
-          onPress={async () => {
-            await navigator.clipboard.writeText(dato.clave)
-            setCopiada(true)
-          }}
-        >
-          {copiada ? t.copiada : t.copiar}
-        </Boton>
-        <Boton variante="primaria" onPress={alCerrar}>
-          {t.listo}
-        </Boton>
-      </div>
+      <FichaUsuario
+        filas={filas}
+        id={fichaId}
+        origen={() => {
+          const fila = (fichaId && filaDe(fichaId)) || origen.current
+          return fila?.isConnected ? fila.getBoundingClientRect() : null
+        }}
+        alCambiar={setFichaId}
+        alCerrar={() => setFichaId(null)}
+        alEditar={(u) => {
+          setFichaId(null)
+          editor.abrirEdicion(u, filaDe(u.id))
+        }}
+        alClave={claveNueva}
+        alCerrarSesiones={cerrar}
+        alActivo={alternar}
+      />
     </>
   )
 }

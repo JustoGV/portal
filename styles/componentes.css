@@ -235,10 +235,16 @@
   .ui-campo[data-con-icono] .ui-campo__etiqueta {
     padding-left: 2.75rem;
   }
+  /* En un texto largo, el lugar de la etiqueta es del control y no del textarea: lo escrito se desplaza por
+     debajo de la etiqueta en vez de pasarle por atrás. */
+  .ui-campo__control:has(> textarea) {
+    align-items: stretch;
+    padding-top: 1.75rem;
+  }
   textarea.ui-campo__entrada {
     resize: vertical;
-    min-height: 6rem;
-    padding-top: 1.6rem;
+    min-height: 4.5rem;
+    padding-top: 0.1rem;
     line-height: 1.5;
   }
   .ui-campo__etiqueta {
@@ -493,6 +499,9 @@
     margin: 0 auto var(--sys-esp-4);
     border-radius: var(--sys-radio-full);
     border: 2px solid currentColor;
+    /* El dibujo va a dos colores (D-018): el aro en el color del resultado y su marca en el del texto. */
+    --duo-1: currentColor;
+    --duo-2: var(--sys-texto-1);
   }
   .ui-resultado[data-tipo="guardado"] .ui-resultado__icono {
     color: var(--sys-ok);
@@ -650,10 +659,12 @@
   }
 
   /* ---------- Barra de herramientas sobre la tabla ---------- */
+  /* Todo lo de la barra va centrado sobre el mismo eje y con el mismo alto de control (3,625 rem): el
+     buscador no reserva acá su línea de error, que lo dejaba más alto que lo que tiene al lado. */
   .ui-herramientas {
     display: flex;
     flex-wrap: wrap;
-    align-items: flex-start;
+    align-items: center;
     gap: var(--sys-esp-3) var(--sys-esp-4);
     margin-bottom: var(--sys-esp-4);
   }
@@ -665,7 +676,9 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--sys-esp-3);
-    padding-top: 0.375rem;
+  }
+  .ui-herramientas .ui-campo__pie {
+    display: none;
   }
 
   /* ---------- Segmentos (filtros, 05 §11, 07 §4) ---------- */
@@ -719,6 +732,329 @@
     font-size: var(--sys-tipo-xs);
     line-height: 1.35;
     text-align: center;
+  }
+
+  /* ---------- Título de columna que ordena (D-030) ---------- */
+  .ui-tabla__orden {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sys-esp-1);
+    min-height: 2rem;
+    padding: 0 var(--sys-esp-2);
+    border: 0;
+    border-radius: var(--sys-radio-s);
+    background: none;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+    transition: color var(--sys-dur-1) var(--sys-ease), background-color var(--sys-dur-1) var(--sys-ease);
+  }
+  .ui-tabla__orden[data-hovered] {
+    background: var(--sys-capa-3);
+    color: var(--sys-texto-1);
+  }
+  .ui-tabla__orden[data-focus-visible] {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+  }
+  .ui-tabla__orden[data-activa] {
+    color: var(--sys-texto-1);
+  }
+  .ui-tabla__orden[data-activa] svg {
+    color: var(--sys-marca-tinta);
+  }
+  .ui-tabla th:first-child .ui-tabla__orden {
+    margin-left: calc(var(--sys-esp-2) * -1);
+  }
+
+  /* ---------- Filtro como desplegable propio en la barra de herramientas (D-030) ---------- */
+  .ui-filtro {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sys-esp-2);
+  }
+  .ui-filtro__etiqueta {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+    font-weight: 600;
+  }
+  .ui-filtro__boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sys-esp-3);
+    min-width: 13rem;
+    max-width: 20rem;
+    min-height: 3.625rem; /* el mismo alto que un campo con su borde */
+    padding: 0 var(--sys-esp-3);
+    border: 1px solid var(--sys-borde-control);
+    border-radius: var(--sys-radio-s);
+    background: var(--sys-capa-2);
+    color: var(--sys-texto-1);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color var(--sys-dur-1) var(--sys-ease), background-color var(--sys-dur-1) var(--sys-ease);
+  }
+  .ui-filtro__boton > :first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ui-filtro__boton[data-hovered],
+  .ui-filtro__boton[data-pressed] {
+    border-color: var(--sys-marca-borde);
+    background: var(--sys-capa);
+  }
+  .ui-filtro__boton[data-focus-visible] {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+  }
+  .ui-filtro__boton .ui-filtro__cuenta,
+  .ui-filtro__boton .ui-lista__tilde {
+    display: none;
+  }
+  .ui-filtro__lista {
+    max-height: 20rem;
+  }
+  .ui-filtro__texto {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ui-filtro__cuenta {
+    min-width: 1.75rem;
+    padding: 0 0.375rem;
+    border: 1px solid var(--sys-borde-2);
+    border-radius: var(--sys-radio-full);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-xs);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.5;
+    text-align: center;
+  }
+  .ui-lista__opcion .ui-filtro__cuenta + .ui-lista__tilde {
+    margin-left: 0;
+  }
+  .ui-lista__opcion .ui-filtro__cuenta {
+    margin-left: auto;
+  }
+
+  /* ---------- Formulario en pasos (D-026; referencia React Bits · Stepper) ---------- */
+  .ui-pasos {
+    position: relative;
+    display: flex;
+    gap: 2px;
+    margin: 0 0 var(--sys-esp-5);
+    padding: 2px;
+    border-radius: calc(var(--sys-radio-m) + 2px);
+    background: var(--sys-capa-3);
+    list-style: none;
+  }
+  .ui-pasos__pastilla {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 1px solid var(--sys-marca-borde);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .ui-pasos__item {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .ui-pasos__paso {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sys-esp-2);
+    width: 100%;
+    min-height: var(--sys-toque);
+    padding: 0 var(--sys-esp-3);
+    border: 0;
+    border-radius: var(--sys-radio-m);
+    background: none;
+    color: var(--sys-texto-2);
+    font: inherit;
+    font-size: var(--sys-tipo-s);
+    font-weight: 600;
+    cursor: pointer;
+    transition: color var(--sys-dur-1) var(--sys-ease);
+  }
+  .ui-pasos__paso:focus-visible {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+  }
+  .ui-pasos__paso:disabled {
+    cursor: not-allowed;
+  }
+  .ui-pasos__paso[data-estado="actual"] {
+    color: var(--sys-texto-1);
+    cursor: default;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .ui-pasos__paso[data-estado="hecho"]:hover,
+    .ui-pasos__paso[data-estado="pendiente"]:not(:disabled):hover {
+      color: var(--sys-texto-1);
+    }
+  }
+  .ui-pasos__num {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 1px solid var(--sys-borde-control);
+    border-radius: var(--sys-radio-full);
+    font-size: var(--sys-tipo-xs);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    transition:
+      background-color var(--sys-dur-1) var(--sys-ease),
+      border-color var(--sys-dur-1) var(--sys-ease),
+      color var(--sys-dur-1) var(--sys-ease);
+  }
+  .ui-pasos__paso[data-estado="actual"] .ui-pasos__num {
+    border-color: var(--sys-marca);
+    background: var(--sys-marca);
+    color: var(--sys-marca-texto);
+  }
+  .ui-pasos__paso[data-estado="hecho"] .ui-pasos__num {
+    border-color: var(--sys-ok-borde);
+    background: var(--sys-ok-bg);
+    color: var(--sys-ok);
+  }
+  .ui-pasos__nombre {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* Tarjeta angosta (teléfono): solo el paso actual muestra su nombre; los demás, el número. */
+  @container (max-width: 26rem) {
+    .ui-pasos__item {
+      flex: 0 0 auto;
+    }
+    .ui-pasos__item[data-actual] {
+      flex: 1 1 0;
+    }
+    .ui-pasos__paso {
+      padding: 0 var(--sys-esp-2);
+    }
+    .ui-pasos__paso:not([data-estado="actual"]) {
+      min-width: var(--sys-toque);
+    }
+    .ui-pasos__paso:not([data-estado="actual"]) .ui-pasos__nombre {
+      display: none;
+    }
+    /* Botones a todo el ancho, el principal arriba: no se parten en dos renglones ni cambian el alto. */
+    .ui-dialogo__acciones--pasos {
+      flex-direction: column-reverse;
+      flex-wrap: nowrap;
+    }
+    .ui-dialogo__acciones--pasos > .ui-boton {
+      width: 100%;
+    }
+    .ui-resumen__fila {
+      grid-template-columns: 5.25rem minmax(0, 1fr);
+    }
+  }
+  /* Qué paso es y qué se carga en él: cambia con el paso, sin moverse (08 §7). */
+  .ui-pasos__encabezado {
+    margin-bottom: var(--sys-esp-4);
+  }
+  .ui-pasos__paso-de {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .ui-pasos__paso-de strong {
+    color: var(--sys-marca-tinta);
+  }
+  .ui-pasos__encabezado .ui-pasos__ayuda {
+    margin: var(--sys-esp-1) 0 0;
+    min-height: 2.75em;
+  }
+  .ui-pasos__paneles {
+    display: grid;
+    min-height: 15.5rem;
+  }
+  .ui-pasos__panel {
+    grid-area: 1 / 1;
+    min-width: 0;
+    visibility: hidden;
+  }
+  .ui-pasos__panel[data-activo] {
+    visibility: visible;
+  }
+  .ui-pasos__panel > .ui-dialogo__campos {
+    align-content: start;
+  }
+  /* El resumen no suma alto a la tarjeta: ocupa el de los pasos con campos y se desplaza adentro si no entra.
+     Así la tarjeta no crece mientras se escribe en otro paso. */
+  .ui-pasos__panel:has(> .ui-pasos__revision) {
+    position: relative;
+  }
+  .ui-pasos__revision {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+  }
+
+  /* El resumen del último paso: todo lo cargado, antes de guardar. */
+  .ui-resumen {
+    display: grid;
+    gap: var(--sys-esp-2);
+    margin: 0;
+    padding: var(--sys-esp-3) var(--sys-esp-4);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-l);
+    background: var(--sys-capa-2);
+  }
+  .ui-resumen__fila {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    column-gap: var(--sys-esp-3);
+    align-items: baseline;
+    min-width: 0;
+  }
+  .ui-resumen__fila + .ui-resumen__fila {
+    padding-top: var(--sys-esp-2);
+    border-top: 1px solid var(--sys-borde);
+  }
+  .ui-resumen dt {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .ui-resumen dd {
+    margin: 0;
+    color: var(--sys-texto-1);
+    font-size: var(--sys-tipo-m);
+    overflow-wrap: anywhere;
+  }
+  .ui-resumen dd[data-vacio] {
+    color: var(--sys-texto-2);
+  }
+  .ui-resumen__nota {
+    grid-column: 2;
+    margin-top: var(--sys-esp-1);
+    color: var(--sys-info);
+    font-size: var(--sys-tipo-s);
+  }
+  .ui-pasos__ayuda {
+    margin: 0 0 var(--sys-esp-2);
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
   }
 
   /* ---------- Tabla (07 §1) ---------- */

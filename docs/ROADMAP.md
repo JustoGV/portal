@@ -97,3 +97,46 @@ Unidades en orden. Cada una termina con `typecheck`, `lint` y `test` en verde, l
 **Archivos:** configuración de Sentry (`instrumentation.ts`, `sentry.*.config.ts` con `beforeSend`), Speed Insights, ajustes que salgan de medir.
 
 **Terminado cuando:** la lista de `docs/reglas/10` §8 completa (incluida una restauración de prueba del backup, con fecha); LCP, INP y CLS medidos en el preview dentro de las metas; datos de muestra borrados con el ok del dueño.
+
+## WU-06 · Rediseño pantalla por pantalla (Mateo, 2026-11-12)
+
+**Objetivo:** cada pantalla rediseñada entera (sus tarjetas, etiquetas, botones, íconos propios animados, formularios en pasos, avisos y movimiento) con el método de `docs/trabajo/MATEO.md` §5 y las reglas del §10. **Una por vez, en este orden; no se pasa a la siguiente sin su OK.**
+
+| # | Pantalla | Qué entra | Estado |
+|---|---|---|---|
+| 1 | **Ingreso** (`/ingresar`, `/configurar`, `/primer-ingreso`) | Las tres comparten diseño. Fuente candidata: el login del sistema de discapacidad (`servicios/sistema-front`, `/login`), aprobado por el socio para los sistemas de CESS - GVG. **Hecho el 2026-11-12: variante "Escenario" (D-019)** | ✅ OK de Mateo ("Queda, seguimos") |
+| 2 | **Barra lateral y `Ctrl+K`** | El marco de todas las pantallas: logo, búsqueda, navegación, usuario | ✅ Cerrada el 2026-11-14 con OK de Mateo: barra (D-022 + D-024, "Queda, seguí") y `Ctrl+K` con ficha (D-025, "queda así") |
+| 3 | **Proyectos** | La lista (hecha el 2026-11-12, D-017, **espera su OK**), el formulario de nuevo/editar en pasos, las tarjetas de resultado, los avisos y sus íconos | ✅ **Cerrada el 2026-11-15 con OK de Mateo ("Queda").** Rehecha entera (D-030). La lista de D-017 fue rechazada (D-028). Cifras que filtran, buscador y filtro de grupo, tabla con orden por columna, ficha en tarjeta que crece desde la fila, formulario en pasos (D-026) completado, siempre en claro. Sin hacer: íconos a dos colores en la tarjeta de resultado |
+| 4 | **Clientes** (antes «Grupos», D-032) | Lista, formulario, avisos, íconos, y los datos del responsable de cada cliente | **Grupos construida el 2026-11-15 (D-031), sin commitear.** El 2026-11-17 Mateo pidió que se llame «Clientes» y que guarde al responsable (nombre y apellido, cargo, mail, teléfono): **construida el 2026-11-17 con su "Go"; el mismo día Mateo pidió DNI, validación de verdad, barra de filtros, páginas de 12 y ficha rehecha (D-033): construido. ✅ **OK de Mateo el 2026-11-17 ("Queda").**** Base: grilla de carpetas con sus servicios a la vista, cifras que filtran, buscador y orden, ficha en tarjeta, formulario en pasos que también asigna servicios |
+| 5 | **Usuarios** | Lista, formulario con validación de email, contraseña inicial, inactividad, íconos | ✅ **Cerrada el 2026-11-17 con OK de Mateo («Queda»).** Construida con su «GO-AHEAD» (D-034). Cifras que filtran, barra de filtros de Clientes, tabla con la persona en una celda y acciones a la vista, ficha con acceso, sesiones abiertas y movimientos, alta en tres pasos que termina en «Pasale los datos». Desactivar cierra sus sesiones. TD-008 pagada |
+| 6 | **Cuenta y configuración** (pedido de Mateo 2026-11-12) | El pie de la barra (círculo con persona + nombre + "Salir") no le gusta: *"esto no me gusta, no hay una sección de configuración"*. Hacer una sección de configuración (la cuenta propia, cambiar la contraseña, cerrar sesión, lo que hoy está suelto) y rediseñar ese pie como entrada a ella. Con su ronda de referencias, como las demás | ✅ **Cerrada el 2026-11-18 con OK de Mateo («excelente queda»).** «Mi cuenta» en `/cuenta` con la banda azul y la tarjeta con secciones (D-035, D-036); el pie de la barra como entrada, con «Salir»; la banda pasó también a Servicios, Clientes y Usuarios, y la ficha de Servicios se rehízo (D-037) |
+
+**Reglas:** `02` B8, `04` (con D-018), `05`, `06`, `07`, `08`, `12`; `docs/trabajo/MATEO.md` §4, §5 y §10.
+
+**Terminado cuando:** las seis pantallas con su OK, cada una mirada a 375, 1440 y 1920 en claro y oscuro, chequeo de saltos en 0, peor caso probado, consola limpia.
+
+**Orden confirmado (Mateo, 2026-11-14):** las seis pantallas se terminan antes de empezar `WU-07`: *"haría el rediseño del portal, y en base al rediseño luego armamos el tablero"*. Claude propuso meter el tablero después de la pantalla 3 y Mateo lo rechazó; no se vuelve a proponer. En el celular, cada pantalla tiene que usarse como una app, no como una web achicada.
+
+## WU-07 · Tablero de trabajo (Mateo, 2026-11-14)
+
+**Objetivo:** que los tres socios vean en el portal qué hay que hacer y qué espera a quién, y que Claudio conteste sus dudas ahí. Mateo: *"podríamos poner un CRM en el portal… un lugar donde diga dudas Claudio, entonces él entra al portal y ve todas esas dudas y las puede responder desde ahí"*.
+
+**Qué entra en la primera versión:** cuatro listas (`Dudas para Claudio`, `Servicios`, `Tareas`, `Correcciones`), tarjetas, comentarios y etiquetas por servicio. Una forma de que el chat de Claude lea el tablero. **Queda para después:** documentos y formularios dentro de la tarjeta.
+
+**No empieza hasta que `WU-06` tenga el OK en sus seis pantallas.**
+
+**Antes del plan:** ronda de 5 a 7 referencias de tableros (`docs/trabajo/MATEO.md` §5); leer `docs/reglas/10-SEGURIDAD.md` y `11-DATOS.md`, porque suma tablas y permisos; un `D-` nuevo que amplíe el alcance del BRIEF (hoy el portal es un lanzador de links); acordarlo con el socio.
+
+**Archivos:** se declaran en el plan, con su GO-AHEAD.
+
+**Terminado cuando:** los tres entran, ven sus tarjetas y comentan; Claudio contestó una duda desde el portal; el chat responde "¿qué sigo?" leyendo el tablero.
+
+**Estado (2026-11-19):** diseño con OK de Mateo (D-038). **Guardado en la base** (D-040): tablas `tarjetas` y `comentarios` (migraciones `0005` y `0006`), permisos `tablero.ver` y `tablero.editar`, lecturas en `dal/tablero.ts` y acciones en `acciones/tablero.ts`; el tablero, la ficha y el alta leen y escriben ahí. Probado en local. **Falta:** sumarlo a la barra lateral; que el chat lo lea (`T-05`); mudar la cola del cerebro (`T-06`); que Claudio conteste una duda (`T-07`, necesita el portal publicado: `WU-05`).
+
+## WU-08 · Registro de casos (Mateo, 2026-11-14)
+
+**Objetivo:** guardar cada problema que trae un cliente con las preguntas que se le mandaron, lo que contestó y cómo se resolvió. Hoy ese trabajo no queda en ningún lado.
+
+**Va después de** `WU-07` y de los formularios por chat (cerebro, `_proceso/plan-de-trabajo.md`, paso 3). **Antes de cargar un caso real** hay que resolver qué datos son de salud y cómo se disocian (`OQ-` nueva al planearla).
+
+**Terminado cuando:** un caso real está cargado de punta a punta.

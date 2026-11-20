@@ -1,34 +1,619 @@
 @layer modulos {
-  .pr-abrir {
-    display: inline-flex;
+  /* ---------- Pantalla Servicios (WU-06 pantalla 3, D-030) ---------- */
+
+  /* Título con su contador al lado (Untitled UI, Shadcn Admin). */
+  .pr-titulo {
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: var(--sys-esp-2);
-    min-height: var(--sys-toque);
-    color: var(--sys-texto-1);
-    font-weight: 700;
-    text-decoration: none;
+    gap: var(--sys-esp-3);
   }
-  .pr-abrir .ui-icono {
-    color: var(--sys-texto-2);
+  .pr-titulo__cuenta {
+    padding: 0.125rem 0.75rem;
+    border: 1px solid var(--sys-marca-borde);
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-marca-suave);
+    color: var(--sys-marca-tinta);
+    font-size: var(--sys-tipo-s);
+    font-weight: 700;
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Las cuatro cifras que filtran (EDV, Square UI Bookmarks) ---------- */
+  .pr-cifras {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--sys-esp-4);
+    margin-bottom: var(--sys-esp-5);
+  }
+  .pr-cifra {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--sys-esp-3);
+    min-height: 5rem;
+    padding: var(--sys-esp-3) var(--sys-esp-4);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-l);
+    background: var(--sys-capa);
+    color: var(--sys-texto-1);
+    text-decoration: none;
+    transition:
+      border-color var(--sys-dur-1) var(--sys-ease),
+      background-color var(--sys-dur-1) var(--sys-ease),
+      transform var(--sys-dur-1) var(--sys-ease);
+  }
+  .pr-cifra:focus-visible {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
   }
   @media (hover: hover) and (pointer: fine) {
-    .pr-abrir:hover .pr-abrir__nombre {
-      text-decoration: underline;
-      text-underline-offset: 3px;
+    .pr-cifra:hover {
+      border-color: var(--sys-marca-borde);
+      background: var(--sys-capa-2);
     }
-    .pr-abrir:hover,
-    .pr-abrir:hover .ui-icono {
+  }
+  .pr-cifra:active {
+    transform: scale(0.98);
+  }
+  .pr-cifra[data-actual] {
+    border-color: var(--sys-marca);
+    background: var(--sys-marca-suave);
+  }
+  .pr-cifra__icono {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-capa-2);
+    --duo-1: var(--sys-texto-1);
+    --duo-2: var(--sys-marca-tinta);
+  }
+  .pr-cifra[data-actual] .pr-cifra__icono {
+    border-color: var(--sys-marca-borde);
+    background: var(--sys-capa);
+  }
+  .pr-cifra__texto {
+    display: grid;
+    min-width: 0;
+  }
+  .pr-cifra__titulo {
+    font-size: var(--sys-tipo-m);
+    font-weight: 700;
+  }
+  .pr-cifra__pista {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pr-cifra__numero {
+    font-size: var(--sys-tipo-3xl);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .pr-cifra-esqueleto {
+    height: 5rem;
+    border-radius: var(--sys-radio-l);
+  }
+  @container (max-width: 64rem) {
+    .pr-cifras {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @container (max-width: 30rem) {
+    .pr-cifras {
+      gap: var(--sys-esp-2);
+    }
+    .pr-cifra {
+      grid-template-columns: minmax(0, 1fr) auto;
+      min-height: 4rem;
+      padding: var(--sys-esp-2) var(--sys-esp-3);
+    }
+    .pr-cifra__icono,
+    .pr-cifra__pista {
+      display: none;
+    }
+    .pr-cifra__numero {
+      font-size: var(--sys-tipo-2xl);
+    }
+  }
+
+  /* ---------- La tabla ---------- */
+  /* Anchos fijos por columna: el nombre manda y ninguna columna le roba lugar a otra según el dato. */
+  .pr-tabla {
+    table-layout: fixed;
+  }
+  .pr-tabla th:nth-child(1) { width: 32%; }
+  .pr-tabla th:nth-child(2) { width: 19%; }
+  .pr-tabla th:nth-child(3) { width: 19%; }
+  .pr-tabla th:nth-child(4) { width: 9rem; }
+  .pr-tabla th:nth-child(5) { width: 9.5rem; }
+  .pr-tabla th:nth-child(6) { width: 13.5rem; }
+  .pr-tabla th:first-child,
+  .pr-tabla td:first-child {
+    text-align: left;
+  }
+  .pr-tr {
+    cursor: pointer;
+  }
+  .pr-td-servicio {
+    overflow: hidden;
+  }
+  .pr-nombre {
+    display: block;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--sys-texto-1);
+    font: inherit;
+    font-size: var(--sys-tipo-l);
+    font-weight: 700;
+    text-align: left;
+    /* Entero, en las líneas que haga falta: cortado con «…» no se leía (Mateo, 2026-11-18). El tope del
+       nombre es de 80 caracteres (lib/nombre.ts), así que no pasa de tres líneas en escritorio. */
+    overflow-wrap: break-word;
+    line-height: 1.3;
+    text-wrap: pretty;
+    cursor: pointer;
+  }
+  .pr-nombre:focus-visible {
+    outline: 2px solid var(--sys-foco);
+    outline-offset: 2px;
+    border-radius: var(--sys-radio-s);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .pr-tr:hover .pr-nombre {
       color: var(--sys-marca-tinta);
     }
   }
-  .pr-celda-corta {
-    max-width: 18rem;
+  .pr-descripcion {
+    margin-top: 0.125rem;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  .pr-sitio {
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pr-fecha {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .pr-grupo {
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: middle;
+    padding: 0.1875rem 0.75rem;
+    border: 1px solid var(--sys-marca-borde);
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-marca-suave);
+    color: var(--sys-marca-tinta);
+    font-size: var(--sys-tipo-s);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pr-grupo--sin {
+    border-color: transparent;
+    background: none;
+    padding-inline: 0;
+    color: var(--sys-texto-3);
+    font-weight: 500;
+  }
+  .pr-acciones-extra {
+    display: inline-flex;
+    gap: var(--sys-esp-1);
+  }
+  /* Tabla angosta (teléfono): queda "Abrir" en la fila; lo demás está en la ficha, a un toque. */
+  @container (max-width: 38rem) {
+    .pr-acciones-extra {
+      display: none;
+    }
+    .pr-tabla th:nth-child(1) { width: auto; }
+    .pr-tabla th:nth-child(6) { width: 6.25rem; }
+  }
+
+  /* Pantalla angosta: el filtro ocupa el ancho entero, debajo del buscador. */
+  @container (max-width: 38rem) {
+    .ui-herramientas__filtros,
+    .ui-herramientas__filtros .ui-filtro {
+      width: 100%;
+    }
+    .ui-herramientas__filtros .ui-filtro__boton {
+      flex: 1;
+      max-width: none;
+    }
+  }
+
+  /* El pie de la tabla: cuántos se ven y la paginación. */
+  .pr-pie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sys-esp-3);
+    padding: var(--sys-esp-3) var(--sys-esp-4);
+    border-top: 1px solid var(--sys-borde-2);
+    background: var(--sys-capa-2);
+  }
+  .pr-pie__cuenta {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-m);
+    font-variant-numeric: tabular-nums;
+  }
+  .pr-pie .ui-paginacion {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .pr-pie .ui-paginacion > [aria-live] {
+    display: none; /* la cuenta ya está a la izquierda: un dato, una sola vez */
+  }
+
+  /* ---------- La ficha del servicio ---------- */
+  .pr-ficha__cabecera {
+    align-items: center;
+    padding-bottom: var(--sys-esp-4);
+    border-bottom: 1px solid var(--sys-borde);
+  }
+  .pr-ficha__sobre {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .pr-ficha__cuenta {
+    color: var(--sys-marca-tinta);
+    font-variant-numeric: tabular-nums;
+  }
+  .pr-ficha__ayuda {
+    margin-top: 0.125rem;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+  .pr-ficha__mandos {
+    display: flex;
+    gap: var(--sys-esp-1);
+  }
+  .pr-ficha__cuerpo {
+    display: grid;
+    gap: var(--sys-esp-4);
+  }
+  .pr-ficha__titular {
+    display: grid;
+    gap: var(--sys-esp-3);
+  }
+  .pr-ficha__nombre {
+    font-size: var(--sys-tipo-2xl);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+  .pr-ficha__etiquetas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sys-esp-2);
+  }
+  .pr-ficha__descripcion {
+    color: var(--sys-texto-1);
+    font-size: var(--sys-tipo-l);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  .pr-ficha__descripcion[data-vacio] {
+    color: var(--sys-texto-2);
+  }
+  .pr-ficha__acciones {
+    justify-content: space-between;
+  }
+  .pr-ficha__resto {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--sys-esp-3);
+  }
+  @container (max-width: 30rem) {
+    .pr-ficha__ayuda {
+      display: none;
+    }
+    .pr-ficha__acciones,
+    .pr-ficha__resto {
+      flex-direction: column-reverse;
+      align-items: stretch;
+    }
+    .pr-ficha__acciones .ui-boton {
+      width: 100%;
+    }
+  }
+
+  /* La vista previa de la fila en el último paso del formulario. */
+  .pr-previa-fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sys-esp-3);
+    margin-bottom: var(--sys-esp-3);
+    padding: var(--sys-esp-3) var(--sys-esp-4);
+    border: 1px solid var(--sys-marca-borde);
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-marca-suave);
+  }
+  .pr-previa-fila > div {
+    min-width: 0;
+  }
+  .pr-previa-fila .pr-nombre {
+    cursor: default;
+  }
+  .pr-previa-fila .pr-grupo {
+    flex: none;
+    max-width: 40%;
+    background: var(--sys-capa);
+  }
+
+  /* ---------- Esqueleto de la tabla: filas quietas, del alto final ---------- */
+  .pr-esqueleto {
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-l);
+    background: var(--sys-capa);
+    overflow: hidden;
+  }
+  .pr-esqueleto__fila {
+    display: grid;
+    gap: var(--sys-esp-2);
+    min-height: 3.75rem;
+    align-content: center;
+    padding: var(--sys-esp-2) var(--sys-esp-4);
+    border-bottom: 1px solid var(--sys-borde);
+  }
+  .pr-esqueleto__fila:last-child {
+    border-bottom: 0;
   }
   .pr-filtros-esqueleto {
     display: flex;
     gap: var(--sys-esp-3);
+  }
+}
+
+/* ---------- La ficha del servicio, rehecha (D-037): banda arriba, datos en recuadros ----------
+   Mateo, 2026-11-18: «quedó chico, quedó todo muy compacto… no me gustan las etiquetas… no me gusta nada
+   cómo se ven los links, el sitio». */
+@layer modulos {
+  .pr-ficha2__banda {
+    position: relative;
+    display: grid;
+    gap: var(--sys-esp-5);
+    margin: calc(-1 * var(--sys-esp-6)) calc(-1 * var(--sys-esp-6)) var(--sys-esp-6);
+    padding: var(--sys-esp-5) var(--sys-esp-6) var(--sys-esp-6);
+    background:
+      radial-gradient(40rem 16rem at 100% 0%, color-mix(in oklab, var(--sys-marca) 55%, transparent), transparent 70%),
+      var(--sys-barra-fondo);
+    color: var(--sys-barra-texto-1);
+  }
+  .pr-ficha2__barra {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--sys-esp-4);
+  }
+  .pr-ficha2__sobre {
+    margin: 0;
+    color: var(--sys-barra-acento);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .pr-ficha2__cuenta {
+    color: #fff;
+    white-space: nowrap;
+  }
+  .pr-ficha2__ayuda {
+    margin: var(--sys-esp-1) 0 0;
+    color: var(--sys-barra-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+  .pr-ficha2__mandos {
+    display: flex;
+    gap: var(--sys-esp-1);
+  }
+  .pr-ficha2__mandos .ui-boton-icono {
+    color: var(--sys-barra-texto-1);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .pr-ficha2__mandos .ui-boton-icono:hover {
+      background: color-mix(in oklab, #fff 12%, transparent);
+      color: #fff;
+    }
+  }
+  .pr-ficha2__cabeza {
+    display: grid;
+    gap: var(--sys-esp-4);
+  }
+  .pr-ficha2__nombre {
+    margin: 0;
+    font-size: var(--sys-tipo-3xl);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    overflow-wrap: break-word;
+    text-wrap: balance;
+  }
+  .pr-ficha2__pastillas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sys-esp-2);
+  }
+  /* El estado y el cliente en vidrio, como las cifras de la banda. */
+  .pr-pastilla {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sys-esp-2);
+    min-height: 2.25rem;
+    padding: 0 var(--sys-esp-4);
+    border: 1px solid color-mix(in oklab, #fff 18%, transparent);
+    border-radius: var(--sys-radio-full);
+    background: color-mix(in oklab, #fff 8%, transparent);
+    color: #fff;
+    font-weight: 600;
+  }
+  .pr-pastilla__punto {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: var(--sys-radio-full);
+    background: var(--sys-barra-texto-2);
+  }
+  .pr-pastilla[data-tono="ok"] .pr-pastilla__punto {
+    background: #4ade80;
+    box-shadow: 0 0 0 3px color-mix(in oklab, #4ade80 30%, transparent);
+  }
+
+  .pr-ficha2__cuerpo {
+    display: grid;
+    gap: var(--sys-esp-5);
+  }
+  .pr-ficha2__descripcion {
+    margin: 0;
+    color: var(--sys-texto-1);
+    font-size: var(--sys-tipo-l);
+    line-height: 1.55;
+    overflow-wrap: break-word;
+  }
+  .pr-ficha2__descripcion[data-vacio] {
+    color: var(--sys-texto-2);
+  }
+  .pr-ficha2__grilla {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sys-esp-4);
+  }
+  .pr-recuadro {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-content: start;
+    gap: var(--sys-esp-3) var(--sys-esp-4);
+    padding: var(--sys-esp-5);
+    border: 1px solid var(--sys-borde);
+    border-radius: var(--sys-radio-l);
+    background: var(--sys-capa);
+  }
+  .pr-recuadro--link {
+    grid-column: 1 / -1;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    border-color: var(--sys-marca-borde);
+    background:
+      radial-gradient(30rem 10rem at 0% 50%, var(--sys-marca-suave), transparent 70%),
+      var(--sys-capa);
+  }
+  .pr-recuadro__icono {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--sys-radio-m);
+    background: var(--sys-marca-suave);
+    color: var(--sys-marca-tinta);
+  }
+  .pr-recuadro--link .pr-recuadro__icono {
+    width: 3.5rem;
+    height: 3.5rem;
+    background: var(--sys-marca);
+    color: #fff;
+  }
+  .pr-recuadro__textos {
+    display: grid;
+    gap: var(--sys-esp-1);
+    min-width: 0;
+  }
+  .pr-recuadro__rotulo {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .pr-recuadro__sitio {
+    font-size: var(--sys-tipo-xl);
+    font-weight: 700;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+  /* El resto de la dirección: en chico, hasta dos líneas; la dirección entera va en el cartel. */
+  .pr-recuadro__ruta {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+    word-break: break-all;
+  }
+  .pr-recuadro__valor {
+    font-size: var(--sys-tipo-l);
+    font-weight: 700;
+    overflow-wrap: break-word;
+  }
+  .pr-recuadro__valor[data-vacio] {
+    color: var(--sys-texto-2);
+    font-weight: 600;
+  }
+  .pr-recuadro__nota {
+    color: var(--sys-texto-2);
+    font-size: var(--sys-tipo-s);
+  }
+
+  @container (max-width: 40rem) {
+    .pr-ficha2__banda {
+      padding: var(--sys-esp-4) var(--sys-esp-5) var(--sys-esp-5);
+    }
+    .pr-ficha2__ayuda {
+      display: none;
+    }
+    .pr-ficha2__nombre {
+      font-size: var(--sys-tipo-2xl);
+    }
+    .pr-ficha2__grilla {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .pr-recuadro {
+      padding: var(--sys-esp-4);
+    }
+    .pr-recuadro--link {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+    /* En el teléfono el sitio va debajo del ícono, a todo el ancho: así no se parte en el guion. */
+    .pr-recuadro--link .pr-recuadro__textos,
+    .pr-recuadro--link .pr-recuadro__acciones {
+      grid-column: 1 / -1;
+    }
+    .pr-recuadro__sitio {
+      font-size: var(--sys-tipo-l);
+      overflow-wrap: normal;
+      word-break: normal;
+    }
+    .pr-ficha2__sobre {
+      letter-spacing: 0.08em;
+    }
+    .pr-recuadro--link .pr-recuadro__acciones .ui-boton {
+      width: 100%;
+    }
   }
 }

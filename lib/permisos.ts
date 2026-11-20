@@ -9,6 +9,8 @@ export const PERMISOS = [
   "grupos.gestionar",
   "usuarios.gestionar",
   "configuracion.editar",
+  "tablero.ver",
+  "tablero.editar",
 ] as const
 export type Permiso = (typeof PERMISOS)[number]
 

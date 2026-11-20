@@ -12,7 +12,7 @@ export const leerPagina = (p: ParametrosLista) => {
 }
 export const leerPorPagina = (p: ParametrosLista): PorPagina => {
   const n = Number(uno(p.por))
-  return (POR_PAGINA as readonly number[]).includes(n) ? (n as PorPagina) : 25
+  return (POR_PAGINA as readonly number[]).includes(n) ? (n as PorPagina) : 10
 }
 export const leerBusqueda = (p: ParametrosLista) => (uno(p.q) ?? "").replace(/\s+/gu, " ").trim().slice(0, 80)
 export const leerEstado = (p: ParametrosLista): "activos" | "archivados" => (uno(p.estado) === "archivados" ? "archivados" : "activos")
@@ -22,6 +22,20 @@ export const leerUuid = (v: string | string[] | undefined) => {
   return s && UUID.test(s) ? s.toLowerCase() : null
 }
 export const esUuid = (s: string) => UUID.test(s)
+
+/** El filtro de grupo: un grupo, "ninguno" (los que no tienen grupo) o todos (null). */
+export const SIN_GRUPO = "ninguno"
+export const leerGrupo = (v: string | string[] | undefined) => (uno(v) === SIN_GRUPO ? SIN_GRUPO : leerUuid(v))
+/** En la URL de Servicios el filtro se llama `cliente` (D-032). `grupo` se sigue leyendo: los links viejos no se rompen. */
+export const leerCliente = (p: ParametrosLista) => leerGrupo(p.cliente ?? p.grupo)
+
+/** Por qué columna se ordena la tabla y hacia dónde. Por defecto, por nombre de la A a la Z. */
+export const ORDENES = ["nombre", "grupo", "actualizado"] as const
+export type Orden = (typeof ORDENES)[number]
+export const leerOrden = (p: ParametrosLista): { orden: Orden; dir: "asc" | "desc" } => {
+  const o = uno(p.orden)
+  return { orden: (ORDENES as readonly string[]).includes(o ?? "") ? (o as Orden) : "nombre", dir: uno(p.dir) === "desc" ? "desc" : "asc" }
+}
 
 /** La misma dirección con algunos parámetros cambiados. `null` saca el parámetro. */
 export const conParametros = (ruta: string, actuales: Record<string, string | null | undefined>, cambios: Record<string, string | number | null>) => {
@@ -33,4 +47,42 @@ export const conParametros = (ruta: string, actuales: Record<string, string | nu
   }
   const s = q.toString()
   return s ? `${ruta}?${s}` : ruta
+}
+
+/** La pantalla Clientes (WU-06 pantalla 4; por dentro, grupos: D-032): qué se ve y en qué orden. Listas cerradas; lo inválido vuelve al valor por defecto. */
+export const VISTAS_GRUPOS = ["activos", "vacios", "archivados"] as const
+export type VistaGrupos = (typeof VISTAS_GRUPOS)[number]
+export const leerVistaGrupos = (p: ParametrosLista): VistaGrupos => {
+  const v = uno(p.ver)
+  return (VISTAS_GRUPOS as readonly string[]).includes(v ?? "") ? (v as VistaGrupos) : "activos"
+}
+/** Clientes (D-033): con o sin responsable, con o sin servicios. null es «todos». */
+export type SiNo = "con" | "sin"
+export const leerSiNo = (v: string | string[] | undefined): SiNo | null => {
+  const s = uno(v)
+  return s === "con" || s === "sin" ? s : null
+}
+/** Usuarios (D-034): qué cuentas se ven y en qué orden. Activas al entrar. */
+export const VISTAS_USUARIOS = ["activas", "primer-ingreso", "sin-factor", "desactivadas", "todas"] as const
+export type VistaUsuarios = (typeof VISTAS_USUARIOS)[number]
+export const leerVistaUsuarios = (p: ParametrosLista): VistaUsuarios => {
+  const v = uno(p.ver)
+  return (VISTAS_USUARIOS as readonly string[]).includes(v ?? "") ? (v as VistaUsuarios) : "activas"
+}
+export const ORDENES_USUARIOS = ["nombre", "ingreso", "nuevas"] as const
+export type OrdenUsuarios = (typeof ORDENES_USUARIOS)[number]
+export const leerOrdenUsuarios = (p: ParametrosLista): OrdenUsuarios => {
+  const o = uno(p.orden)
+  return (ORDENES_USUARIOS as readonly string[]).includes(o ?? "") ? (o as OrdenUsuarios) : "nombre"
+}
+/** Las cuentas van de a 12, como los clientes; con menos, no hay páginas. */
+export const POR_PAGINA_USUARIOS = 12
+
+/** Los clientes van de a 12: entran justo en filas de 4, 3, 2 y 1. */
+export const POR_PAGINA_CLIENTES = 12
+export const ORDENES_GRUPOS = ["nombre", "servicios", "nuevos"] as const
+export type OrdenGrupos = (typeof ORDENES_GRUPOS)[number]
+export const leerOrdenGrupos = (p: ParametrosLista): OrdenGrupos => {
+  const o = uno(p.orden)
+  return (ORDENES_GRUPOS as readonly string[]).includes(o ?? "") ? (o as OrdenGrupos) : "nombre"
 }

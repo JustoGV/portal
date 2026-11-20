@@ -1,12 +1,10 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
-import { Icono } from "@/components/iconos/Icono"
-import { Llegada } from "@/components/ui/Llegada"
+import { AvisoEscenario, Escenario } from "@/components/ingreso/Escenario"
 import { hayCuentas } from "@/dal/cuentas"
 import { sesion, usuarioPorAuthId } from "@/dal/sesion"
 import { ingreso as t } from "@/i18n/es/ingreso"
 import { destinoSeguro } from "@/lib/destino"
-import { NOMBRE_VISIBLE } from "@/lib/marca"
 import { FormIngreso } from "./FormIngreso"
 import "@/styles/ingreso.css"
 
@@ -27,46 +25,24 @@ export default async function PaginaIngresar({ searchParams }: { searchParams: P
     if (u?.activo) redirect(u.debeCambiarClave ? "/primer-ingreso" : volver)
   }
 
+  const aviso =
+    motivo === "inactiva" ? (
+      <AvisoEscenario tono="warn" icono="alerta">
+        {t.inactiva}
+      </AvisoEscenario>
+    ) : motivo === "creada" ? (
+      <AvisoEscenario tono="ok" icono="tilde">
+        {t.creada}
+      </AvisoEscenario>
+    ) : motivo === "expirado" ? (
+      <AvisoEscenario tono="info" icono="reloj">
+        {t.expirado}
+      </AvisoEscenario>
+    ) : null
+
   return (
-    <main className="in-pagina in-pagina--partida">
-      <div className="in-partida">
-        <section className="in-lado" aria-label={NOMBRE_VISIBLE}>
-          <div className="in-lado__marca">
-            <span className="in-marca__logo" aria-hidden="true">
-              <Icono nombre="carpeta" />
-            </span>
-            {NOMBRE_VISIBLE}
-          </div>
-          <p className="in-lado__lema">{t.lema}</p>
-          <ul className="in-lado__ventajas">
-            {t.ventajas.map((v) => (
-              <li key={v.icono}>
-                <span className="in-lado__icono" aria-hidden="true">
-                  <Icono nombre={v.icono} />
-                </span>
-                {v.texto}
-              </li>
-            ))}
-          </ul>
-        </section>
-        <div className="in-partida__form">
-          <Llegada className="in-tarjeta">
-            <div className="in-marca" data-llega="" style={{ "--llega-i": 0 } as React.CSSProperties}>
-              <span className="in-marca__logo" aria-hidden="true">
-                <Icono nombre="carpeta" />
-              </span>
-              {NOMBRE_VISIBLE}
-            </div>
-            {motivo && (
-              <div className="ui-aviso in-aviso" data-tono={motivo === "inactiva" ? "warn" : "info"} role="status">
-                <Icono nombre={motivo === "inactiva" ? "alerta" : motivo === "creada" ? "tilde" : "reloj"} />
-                {motivo === "inactiva" ? t.inactiva : motivo === "creada" ? t.creada : t.expirado}
-              </div>
-            )}
-            <FormIngreso volver={volver} />
-          </Llegada>
-        </div>
-      </div>
-    </main>
+    <Escenario titulo={t.titulo} aviso={aviso}>
+      <FormIngreso volver={volver} />
+    </Escenario>
   )
 }

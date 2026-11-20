@@ -10,7 +10,7 @@ export default function NoEncontrada() {
         <p>Puede que el link esté mal copiado.</p>
         <div className="ui-vacio__accion">
           <Link href="/" className="ui-boton ui-boton--secundaria">
-            <span className="ui-boton__contenido">Ir a Proyectos</span>
+            <span className="ui-boton__contenido">Ir a Servicios</span>
           </Link>
         </div>
       </div>

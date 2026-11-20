@@ -11,6 +11,16 @@ export function Busqueda({ etiqueta, valorInicial, href, autoFocus }: { etiqueta
   const { navegar } = useNavegacionLista()
   const [valor, setValor] = useState(valorInicial)
   const ultimo = useRef(valorInicial)
+  const caja = useRef<HTMLDivElement>(null)
+
+  // Si la búsqueda cambia desde afuera (el botón "Limpiar" de un vacío, o atrás y adelante), el campo la sigue.
+  // Lo que cambia por escribir acá no entra (para entonces `ultimo` ya vale lo mismo), y con el foco en el
+  // campo tampoco: una respuesta que llega tarde no pisa lo que se está escribiendo.
+  useEffect(() => {
+    if (valorInicial === ultimo.current || caja.current?.contains(document.activeElement)) return
+    ultimo.current = valorInicial
+    setValor(valorInicial)
+  }, [valorInicial])
 
   useEffect(() => {
     const limpio = valor.replace(/\s+/gu, " ").trim()
@@ -24,6 +34,7 @@ export function Busqueda({ etiqueta, valorInicial, href, autoFocus }: { etiqueta
 
   return (
     <div
+      ref={caja}
       onKeyDown={(e) => {
         if (e.key === "Escape" && valor) {
           e.stopPropagation()

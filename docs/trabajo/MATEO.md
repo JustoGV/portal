@@ -92,3 +92,16 @@ Ronda de referencias ≤ 15 minutos. Verificación proporcional al cambio. Antes
 > - Decir **en qué momento** de una animación cambiaste algo y **con qué valores**, para que te puedan desmentir mirando.
 > - Máximo tres preguntas, numeradas, que se respondan con una palabra, y **con una recomendación**.
 > - Nada de datos inventados. Lo que falta va marcado como que falta, y se dice quién lo tiene que pasar.
+
+## 10. El rediseño del portal: lo que pidió el 2026-11-12 (vale para cada pantalla)
+
+Sus palabras: *"todo siempre sea lo más profesional posible, acá no hay apuro, acá debe haber profesionalidad"*. Y cuando nos fuimos de pieza en pieza sin orden: *"estamos dando una banda de vueltas, y debemos ser organizados"*. Por eso: **el orden de `docs/ROADMAP.md` WU-06 manda**, una pantalla entera por vez (§4), y no se salta a otra sin su OK.
+
+1. **Siempre con todas las habilidades cargadas**, antes de diseñar nada: `/dashboard:diseno`, `/dashboard:datos`, `/dashboard:seguridad`, `/diseno`, `/seccion-premium`, `/web-distintiva`, `motion-web-senior` (GSAP, animaciones, scroll), `ui-ideas` (componentes), y de la biblioteca `animate`, `gsap-scrolltrigger`, `prototype` y `break-ui`. Más las reglas de `docs/reglas/` que toca la pantalla (`04` íconos, `05` componentes, `06` formularios, `07` tablas). Si una no carga, se para y se dice.
+2. **Íconos propios, nunca Lordicon** (D-018): se miran las referencias de cómo anima Lordicon y se dibujan en SVG propio, profesionales, que se entienda para qué sirve cada uno, **con combinación de colores** (no de un solo color) y animados con GSAP.
+3. **Etiquetas claras en todo**: cada ícono con su nombre y su tooltip, cada estado con su palabra, cada campo con su etiqueta. Que se entienda qué es cada cosa sin adivinar.
+4. **Formularios, alertas y resultados en tarjetas que aparecen en el medio**, con todos sus datos completos.
+5. **Formularios en pasos**, no todos los campos juntos: *"que los formularios no pongas todo junto porque satura, dividilo en pasos"*.
+6. **Validaciones en cada campo** que lo tenga (DNI, teléfono, email…) con las reglas de `docs/reglas/06`: contador, línea que se llena, tilde, no deja escribir de más, mensaje que dice qué hacer.
+7. **Sin saltos de línea feos**: `pegar()` (`lib/texto.ts`) en todo texto que se muestra, `text-wrap` en la base, y el chequeo a 360, 375, 390, 768, 1440 y 1920 en 0 antes de mostrarle nada.
+8. **Ningún dato inventado** y las pruebas con datos de peor caso (nombre de 80, descripción de 200, cero filas) antes de mostrarle.

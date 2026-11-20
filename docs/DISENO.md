@@ -9,7 +9,8 @@ Lo que sale de ahí:
 - **Encontrar sin leer todo**: búsqueda mientras se escribe, filtros por grupo que muestran solo los grupos que existen.
 - **Abrir es la acción principal** de cada fila: un click en el nombre abre el link en otra pestaña. Editar y archivar son íconos secundarios.
 - **Se usa todo el día**: nada parpadea ni se re-anima solo. `Ctrl+K` abre al instante, sin animación.
-- **Los dos temas son de primera**, y siguen la preferencia del sistema (hasta que `OQ-007` diga otra cosa).
+- **El portal abre siempre en claro** (D-030; Mateo: "no quiero que sea negro porque no se ve nada"). El tema oscuro quedó detrás de un atributo que hoy nadie pone.
+- **Tocar una fila abre su ficha** en una tarjeta al centro (D-030); el link se abre con el botón "Abrir".
 
 ## 2. Marca
 
@@ -46,14 +47,14 @@ Prohibido por medición: nada (todos los pares de texto de estado sobre todos lo
 
 ## 4. Navegación
 
-Barra lateral izquierda (`docs/reglas/02` B2), sin cabecera arriba: logo, botón de búsqueda (`Ctrl+K`) y usuario dentro de la barra.
+Barra lateral izquierda (`docs/reglas/02` B2), sin cabecera arriba (D-022, referencia #3 Animate UI Sidebar): arriba "CESS - GVG" + "PORTAL" y el botón de achicar, después la búsqueda (`Ctrl+K`), las secciones y, al pie, la cuenta y "Salir".
 
-| Grupo | Página | Ícono |
+| Sección | Página | Ícono (a dos colores, D-018) |
 |---|---|---|
-| (sin grupo, primera) | Proyectos | carpeta con un más (trazo propio, `D-008`) |
+| Portal | Servicios (D-023; la ruta y el código siguen como `proyectos`, D-027) | carpeta |
 | Administración | Grupos | cuatro casillas con un más |
 | Administración | Usuarios | dos personas |
 
-El grupo Administración se despliega al pasar el mouse (120 ms) o al tocar, sin chevron, con los íconos en cascada.
+Cada sección ("Portal", casa; "Administración", escudo) es una fila que se abre y cierra con un pico a la derecha; sus páginas van debajo como sub-enlaces, con sangría y unidas por una línea vertical (D-024). Arrancan abiertas. Un solo resaltado se desliza a la fila bajo el mouse y vuelve a la página actual; la actual enciende su tramo de la línea. Si la sección de la página actual está cerrada, el resaltado y la marca descansan en la fila de la sección. Achicada, queda una columna de íconos y el nombre aparece al lado al pasar el mouse.
 
 Cada pantalla nueva sale de una ronda de 5 a 7 referencias reales de ese componente (`docs/reglas/02` B8) antes de construirla.
