@@ -47,13 +47,13 @@ La validación de la app repite estas reglas para dar el mensaje, pero la base e
 
 ## 6. Tests
 
-- **Nunca contra producción.** Los tests que tocan la base corren en CI sobre una **rama temporal de Neon** creada desde una rama vacía (sin personas, sin plata, sin cuentas) y borrada al terminar. Localmente, sin una base de prueba, las variables apuntan a un lugar que no existe:
+- **Nunca contra producción.** Los tests que tocan la base se corren **a mano antes de cada PR**, contra la base local en Docker (sin personas reales, sin plata, sin cuentas reales). La CI no los corre ni usa Neon (D-048). Localmente, sin una base de prueba, las variables apuntan a un lugar que no existe:
 
 ```bash
 export DATABASE_URL="postgresql://prueba@localhost/nada" DATABASE_URL_DIRECT="postgresql://prueba@localhost/nada"
 ```
 
-- **Sin verdes silenciosos**: un test que se saltea porque falta la base tiene que fallar en CI (un test que verifica que la variable existe cuando `CI=true`). `passWithNoTests` apagado.
+- **Sin verdes silenciosos**: un test que se saltea porque falta la base tiene que fallar si alguna vez se corren en CI (un test que verifica que la variable existe cuando `CI=true`). `passWithNoTests` apagado.
 - Los archivos de test que comparten una base corren uno detrás de otro (`fileParallelism: false`).
 - Cuando se reescribe una consulta, un **test dorado** compara la vieja con la nueva sobre los mismos datos, con empates en los datos (sin empates, el test de orden no prueba nada).
 - **Romper a propósito lo que el test protege** y ver que falle. Un test que nunca falla no protege nada.

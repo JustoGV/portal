@@ -6,8 +6,7 @@ Lo que hay que hacer **una vez** para que el portal corra en internet. Lo hace e
 
 1. Crear el proyecto en Neon, en la región **AWS São Paulo (`aws-sa-east-1`)**, la misma que las funciones de Vercel (`vercel.json` → `gru1`). Si se elige otra región, cambiar las dos.
 2. De la rama principal, copiar la conexión **directa** (sin `-pooler`) del rol dueño. Es `DATABASE_URL_DIRECT`.
-3. Crear una rama vacía llamada `ci-vacia` (la CI copia de ahí y la borra al terminar, OQ-008).
-4. En una terminal, con `DATABASE_URL_DIRECT` cargada solo en esa terminal:
+3. En una terminal, con `DATABASE_URL_DIRECT` cargada solo en esa terminal:
    - `pnpm db:migrate` → crea las tablas, el rol `portal_app` y los permisos.
    - `pnpm clave-rol-app` → habilita `portal_app` y muestra **una vez** su contraseña. Con ella se arma `DATABASE_URL` (usuario `portal_app`, conexión con `-pooler`).
 
@@ -19,7 +18,7 @@ Lo que hay que hacer **una vez** para que el portal corra en internet. Lo hace e
 
 ## 3. GitHub
 
-- Secreto `NEON_API_KEY`; variable `NEON_PROJECT_ID` (y `NEON_RAMA_VACIA` si la rama vacía no se llama `ci-vacia`).
+- Nada que cargar: la CI no usa secretos ni Neon. Los tests contra la base se corren a mano antes de cada PR (D-048).
 
 ## 4. La primera cuenta
 

@@ -17,7 +17,7 @@ El de `CLAUDE.md` §3, sin cambios. Las versiones se eligen el día que se insta
 | Hosting | Vercel, funciones en la **misma región que la base** (`OQ-002`: propuesta São Paulo, `gru1` + `aws-sa-east-1`, a verificar el día que se crean) |
 | Errores | Sentry, solo errores (`docs/reglas/09` §7) |
 | Tests | Vitest; Playwright para mirar pantallas y medir |
-| CI | GitHub Actions con una rama temporal de Neon por corrida |
+| CI | GitHub Actions: auditoría, typecheck y lint en cada PR. Los tests contra la base, a mano antes de cada PR (D-048) |
 
 Sin PDF ni Excel: el producto no exporta nada.
 
@@ -127,8 +127,5 @@ Los valores se cargan en el panel de Vercel (y los de CI en los secretos de GitH
 | `NEXT_PUBLIC_SENTRY_DSN` | Vercel | A dónde manda errores el navegador (no es secreto, pero no se escribe en el repo) |
 | `SENTRY_DSN` | Vercel | A dónde manda errores el servidor |
 | `SENTRY_AUTH_TOKEN` | Vercel | Subir los mapas de código al hacer el build |
-| `NEON_API_KEY` | GitHub Actions | Crear y borrar la rama temporal de la base en cada corrida de CI |
-| `NEON_PROJECT_ID` | GitHub Actions (variable, no secreto) | El proyecto de Neon donde se crean esas ramas |
-| `NEON_RAMA_VACIA` | GitHub Actions (variable, opcional) | La rama vacía de la que copia la CI; por defecto `ci-vacia` (OQ-008) |
 
 Las acciones del servidor responden siempre HTTP 200 (es como funciona Next): un pedido sin sesión devuelve `{ ok: false, sesion: "vencida" }`, que es el 401 de `docs/reglas/10` §3, y la pantalla manda al login. Las páginas sin cookie responden 307 al login.
