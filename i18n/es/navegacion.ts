@@ -1,6 +1,7 @@
 export const navegacion = {
   principal: "Navegación principal",
   seccionPortal: "Portal",
+  inicio: "Inicio",
   proyectos: "Servicios",
   tablero: "Tablero",
   administracion: "Administración",
@@ -40,6 +41,7 @@ export const navegacion = {
   fichaSinDescripcion: "Sin descripción.",
   fichaOtraPestana: "Se abre en otra pestaña.",
   fichaEstaPestana: "Se abre en esta pestaña.",
+  fichaInicio: "Lo urgente de hoy, cuánto se usó el portal, cuánto se paga por mes, los clientes y lo pendiente en el tablero.",
   fichaProyectos: "Todos los servicios del portal: buscarlos, filtrarlos por cliente, sumar uno nuevo o archivarlo.",
   fichaTablero: "Las dudas para Claudio, las tareas, los servicios que quiere y las correcciones, con su conversación.",
   fichaGastos: "Lo que paga la consultora por mes o por año: cuánto, qué día, con qué y quién lo paga.",

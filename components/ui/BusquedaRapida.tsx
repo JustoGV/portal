@@ -13,7 +13,8 @@ type Pagina = { href: string; texto: string; icono: NombreDuo; ficha: string }
 type Opcion = { tipo: "proyecto"; p: ResultadoRapido } | ({ tipo: "pagina" } & Pagina)
 
 const PAGINAS: Pagina[] = [
-  { href: "/", texto: t.proyectos, icono: "carpeta", ficha: t.fichaProyectos },
+  { href: "/", texto: t.inicio, icono: "inicio", ficha: t.fichaInicio },
+  { href: "/servicios", texto: t.proyectos, icono: "carpeta", ficha: t.fichaProyectos },
   { href: "/tablero", texto: t.tablero, icono: "tablero", ficha: t.fichaTablero },
   { href: "/clientes", texto: t.grupos, icono: "grupos", ficha: t.fichaGrupos },
   { href: "/usuarios", texto: t.usuarios, icono: "personas", ficha: t.fichaUsuarios },

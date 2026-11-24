@@ -140,7 +140,7 @@ async function Cifras({ cifras, f, actuales }: { cifras: ReturnType<typeof cifra
           pagina: null,
         }),
       }}
-      hrefSinGrupo={`/?cliente=${SIN_GRUPO}`}
+      hrefSinGrupo={`/servicios?cliente=${SIN_GRUPO}`}
     />
   )
 }

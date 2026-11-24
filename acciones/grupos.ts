@@ -99,6 +99,7 @@ export async function guardarGrupo(_: EstadoFormulario<Guardado>, datos: FormDat
     })
     if (!fila) return { ok: false, mensaje: "Ese cliente ya no existe. Cerrá el formulario y volvé a buscarlo." }
     revalidatePath("/clientes")
+    revalidatePath("/servicios")
     revalidatePath("/")
     return { ok: true, datos: fila }
   } catch (e) {
@@ -141,6 +142,7 @@ async function cambiarArchivo(id: string, archivar: boolean): Promise<Resultado<
   })
   if (!fila) return { ok: false, mensaje: archivar ? "Ese cliente ya estaba archivado." : "Ese cliente ya estaba activo." }
   revalidatePath("/clientes")
+  revalidatePath("/servicios")
   revalidatePath("/")
   return { ok: true, datos: { nombre: fila.nombre } }
 }

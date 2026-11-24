@@ -184,7 +184,7 @@ export function FormProyecto({ proyecto, grupos, alCambiar, alGuardar, alCancela
         className="ui-enlace"
         onClick={() => {
           alCerrar()
-          router.push(`/?q=${encodeURIComponent(d.duplicado!.nombre)}${d.duplicado!.archivado ? "&estado=archivados" : ""}`)
+          router.push(`/servicios?q=${encodeURIComponent(d.duplicado!.nombre)}${d.duplicado!.archivado ? "&estado=archivados" : ""}`)
         }}
       >
         {t.verExistente}

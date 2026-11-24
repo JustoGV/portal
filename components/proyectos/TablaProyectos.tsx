@@ -84,7 +84,7 @@ export function TablaProyectos({ filas, total, pagina, porPagina, actuales, filt
           titulo={t.sinResultados}
           texto={t.sinResultadosTexto}
           accion={
-            <Boton variante="secundaria" onPress={() => router.replace("/")}>
+            <Boton variante="secundaria" onPress={() => router.replace("/servicios")}>
               {t.limpiar}
             </Boton>
           }
@@ -135,7 +135,7 @@ export function TablaProyectos({ filas, total, pagina, porPagina, actuales, filt
           <Button
             className="ui-tabla__orden"
             data-activa={activa || undefined}
-            onPress={() => navegar(conParametros("/", actuales, { orden: col === "nombre" && sigue === "asc" ? null : col, dir: sigue === "desc" ? "desc" : null, pagina: null }))}
+            onPress={() => navegar(conParametros("/servicios", actuales, { orden: col === "nombre" && sigue === "asc" ? null : col, dir: sigue === "desc" ? "desc" : null, pagina: null }))}
           >
             {texto}
             <Flecha size={14} strokeWidth={2} aria-hidden="true" />
@@ -226,7 +226,7 @@ export function TablaProyectos({ filas, total, pagina, porPagina, actuales, filt
             pagina={pagina}
             porPagina={porPagina}
             etiquetaFilas={t.filas}
-            href={({ pagina: n, por }) => conParametros("/", actuales, { pagina: n && n > 1 ? n : null, ...(por ? { por: por === 10 ? null : por } : {}) })}
+            href={({ pagina: n, por }) => conParametros("/servicios", actuales, { pagina: n && n > 1 ? n : null, ...(por ? { por: por === 10 ? null : por } : {}) })}
           />
         </div>
       </CajaTabla>

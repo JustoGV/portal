@@ -224,7 +224,7 @@ export function FichaGrupo({ filas, id, archivados, origen, alCambiar, alCerrar,
                   {t.editar}
                 </Boton>
               )}
-              <Boton variante="primaria" icono="proyectos" onPress={() => router.push(`/?cliente=${g.id}`)}>
+              <Boton variante="primaria" icono="proyectos" onPress={() => router.push(`/servicios?cliente=${g.id}`)}>
                 {t.verEnServicios}
               </Boton>
             </span>

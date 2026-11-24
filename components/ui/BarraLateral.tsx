@@ -16,9 +16,10 @@ const SECCIONES: SeccionDatos[] = [
   {
     id: "portal",
     titulo: t.seccionPortal,
-    icono: "inicio",
+    icono: "panel",
     paginas: [
-      { href: "/", texto: t.proyectos, icono: "carpeta" },
+      { href: "/", texto: t.inicio, icono: "inicio" },
+      { href: "/servicios", texto: t.proyectos, icono: "carpeta" },
       { href: "/tablero", texto: t.tablero, icono: "tablero" },
     ],
   },
