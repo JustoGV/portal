@@ -71,5 +71,5 @@ Es el que funcionó en el proyecto anterior. Se confirma o se cambia en el arran
 
 - Una rama por tarea, PR a `main`. `main` se despliega a producción.
 - Nunca se commitea un secreto, un `.env.local` ni un `.env.example`.
-- Antes de cada PR: `typecheck`, `lint` y `test` en verde, y una revisión de seguridad del diff (`10-SEGURIDAD.md` §10).
+- Antes de cada PR: `typecheck`, `lint` y `test` en verde, y una revisión de seguridad del diff (`10-SEGURIDAD.md` §10). **Los tests los corre el chat, no la CI** (D-048): `pnpm test` contra la base local en Docker, con las variables de `.env.local` cargadas en la terminal (sin ellas se saltean 18 tests y parece verde, G-005), antes de abrir el PR y otra vez al cerrar la sesión si hubo cambios de código. El resultado (cuántos pasan, fallan y se saltean) va en la descripción del PR y en los Gates del WORKLOG. Si la base local no está levantada, se levanta; si no se puede, el PR dice «tests sin correr» y no se mergea.
 - Una migración que ya corrió en producción no se edita nunca: se escribe otra (`11-DATOS.md` §5).
