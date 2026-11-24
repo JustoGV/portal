@@ -1,6 +1,6 @@
 # Cómo trabaja Mateo
 
-> **Aplica solo cuando el que escribe es Mateo**: cuando usa `/retomar`, `/cerrar` o `/seccion-premium`, o dice que es él. **Nunca se le aplica al socio**, que tiene su propia forma de trabajar.
+> **Aplica solo cuando el que escribe es Mateo**: cuando usa `/retomar`, `/cerrar` o `/seccion-premium`, o dice que es él. **Nunca se le aplica a Justo**, que tiene su propia forma de trabajar.
 
 ## 1. El ciclo de un chat largo
 

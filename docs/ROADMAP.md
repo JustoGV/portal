@@ -1,6 +1,6 @@
 # ROADMAP
 
-> **Estado al 2026-10-13:** el socio pidió construir todo de una vez. WU-01 a WU-04 están **construidas y verificadas en local** (Postgres de prueba en Docker, build de producción, Chromium headless). Lo que falta de cada una depende de las cuentas (OQ-002) y está marcado como **Pendiente**. WU-05 está a medias: Sentry y Speed Insights cableados; la medición y la lista de publicación, sin hacer.
+> **Estado al 2026-10-13:** Justo pidió construir todo de una vez. WU-01 a WU-04 están **construidas y verificadas en local** (Postgres de prueba en Docker, build de producción, Chromium headless). Lo que falta de cada una depende de las cuentas (OQ-002) y está marcado como **Pendiente**. WU-05 está a medias: Sentry y Speed Insights cableados; la medición y la lista de publicación, sin hacer.
 
 Unidades en orden. Cada una termina con `typecheck`, `lint` y `test` en verde, la pantalla mirada a 375, 1440 y 1920 con la consola limpia (`docs/reglas/12`), una entrada en `docs/WORKLOG.md` y lo decidido en `docs/MEMORY.md`.
 
@@ -88,7 +88,7 @@ Unidades en orden. Cada una termina con `typecheck`, `lint` y `test` en verde, l
 
 **Archivos:** `dal/usuarios.ts`, `acciones/usuarios.ts`, `app/(app)/usuarios/page.tsx`, `components/usuarios/…`, `lib/inactividad.ts` (el vigilante del cliente), `i18n/es/usuarios.ts`, tests.
 
-**Terminado cuando:** se da de alta la cuenta del otro socio con una contraseña inicial; desactivar corta el acceso en el próximo pedido; no se puede dejar cero cuentas activas; el cierre por inactividad funciona en dos pestañas.
+**Terminado cuando:** se da de alta la cuenta de otro socio con una contraseña inicial; desactivar corta el acceso en el próximo pedido; no se puede dejar cero cuentas activas; el cierre por inactividad funciona en dos pestañas.
 
 **Hecho y mirado en local:** alta de cuenta con la contraseña mostrada una vez, desactivar, contraseña inicial nueva, selector de inactividad. **Pendiente:** probar el cierre por inactividad con dos pestañas abiertas (solo se probó que el código corre sin errores).
 
@@ -104,7 +104,7 @@ Unidades en orden. Cada una termina con `typecheck`, `lint` y `test` en verde, l
 
 | # | Pantalla | Qué entra | Estado |
 |---|---|---|---|
-| 1 | **Ingreso** (`/ingresar`, `/configurar`, `/primer-ingreso`) | Las tres comparten diseño. Fuente candidata: el login del sistema de discapacidad (`servicios/sistema-front`, `/login`), aprobado por el socio para los sistemas de CESS - GVG. **Hecho el 2026-11-12: variante "Escenario" (D-019)** | ✅ OK de Mateo ("Queda, seguimos") |
+| 1 | **Ingreso** (`/ingresar`, `/configurar`, `/primer-ingreso`) | Las tres comparten diseño. Fuente candidata: el login del sistema de discapacidad (`servicios/sistema-front`, `/login`), aprobado por Justo para los sistemas de CESS - GVG. **Hecho el 2026-11-12: variante "Escenario" (D-019)** | ✅ OK de Mateo ("Queda, seguimos") |
 | 2 | **Barra lateral y `Ctrl+K`** | El marco de todas las pantallas: logo, búsqueda, navegación, usuario | ✅ Cerrada el 2026-11-14 con OK de Mateo: barra (D-022 + D-024, "Queda, seguí") y `Ctrl+K` con ficha (D-025, "queda así") |
 | 3 | **Proyectos** | La lista (hecha el 2026-11-12, D-017, **espera su OK**), el formulario de nuevo/editar en pasos, las tarjetas de resultado, los avisos y sus íconos | ✅ **Cerrada el 2026-11-15 con OK de Mateo ("Queda").** Rehecha entera (D-030). La lista de D-017 fue rechazada (D-028). Cifras que filtran, buscador y filtro de grupo, tabla con orden por columna, ficha en tarjeta que crece desde la fila, formulario en pasos (D-026) completado, siempre en claro. Sin hacer: íconos a dos colores en la tarjeta de resultado |
 | 4 | **Clientes** (antes «Grupos», D-032) | Lista, formulario, avisos, íconos, y los datos del responsable de cada cliente | **Grupos construida el 2026-11-15 (D-031), sin commitear.** El 2026-11-17 Mateo pidió que se llame «Clientes» y que guarde al responsable (nombre y apellido, cargo, mail, teléfono): **construida el 2026-11-17 con su "Go"; el mismo día Mateo pidió DNI, validación de verdad, barra de filtros, páginas de 12 y ficha rehecha (D-033): construido. ✅ **OK de Mateo el 2026-11-17 ("Queda").**** Base: grilla de carpetas con sus servicios a la vista, cifras que filtran, buscador y orden, ficha en tarjeta, formulario en pasos que también asigna servicios |
@@ -125,7 +125,7 @@ Unidades en orden. Cada una termina con `typecheck`, `lint` y `test` en verde, l
 
 **No empieza hasta que `WU-06` tenga el OK en sus seis pantallas.**
 
-**Antes del plan:** ronda de 5 a 7 referencias de tableros (`docs/trabajo/MATEO.md` §5); leer `docs/reglas/10-SEGURIDAD.md` y `11-DATOS.md`, porque suma tablas y permisos; un `D-` nuevo que amplíe el alcance del BRIEF (hoy el portal es un lanzador de links); acordarlo con el socio.
+**Antes del plan:** ronda de 5 a 7 referencias de tableros (`docs/trabajo/MATEO.md` §5); leer `docs/reglas/10-SEGURIDAD.md` y `11-DATOS.md`, porque suma tablas y permisos; un `D-` nuevo que amplíe el alcance del BRIEF (hoy el portal es un lanzador de links); acordarlo con Justo.
 
 **Archivos:** se declaran en el plan, con su GO-AHEAD.
 
