@@ -2,7 +2,7 @@
 
 ## 1. Quién mira (docs/reglas/02 A §1)
 
-> Lo abren **los dos socios**, que tienen varios proyectos y necesitan llegar rápido a uno. Entran con **una sola pregunta**: *"¿dónde está el link de X?"*. Lo encuentran, hacen click y se van: el portal es un paso de camino, no un lugar donde quedarse. Lo abren muchas veces al día y con poca atención, así que lo que buscan tiene que estar a la vista o a dos teclas (`Ctrl+K`, Enter). Desde dónde lo abren (escritorio, teléfono o los dos) y con qué luz está en `{{CONFIRMAR}}` (`OQ-007`).
+> Lo abren **los tres socios** (Mateo, Justo y Claudio), que tienen varios proyectos y necesitan llegar rápido a uno. Entran con **una sola pregunta**: *"¿dónde está el link de X?"*. Lo encuentran, hacen click y se van: el portal es un paso de camino, no un lugar donde quedarse. Lo abren muchas veces al día y con poca atención, así que lo que buscan tiene que estar a la vista o a dos teclas (`Ctrl+K`, Enter). Desde dónde lo abren (escritorio, teléfono o los dos) y con qué luz está en `{{CONFIRMAR}}` (`OQ-007`).
 
 Lo que sale de ahí:
 - **Contestar al entrar**: la lista de proyectos es la pantalla de inicio, con la búsqueda arriba y el foco ya puesto en ella.

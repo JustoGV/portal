@@ -1,6 +1,6 @@
 # 01 — Forma de trabajo compartida
 
-Lo mínimo para que dos personas trabajen sobre el mismo repo sin pisarse ni perder lo decidido. El método completo de Mateo (aprobaciones, formato de reportes, ciclo de sesión) está en `docs/trabajo/MATEO.md` y aplica solo cuando él lo pide.
+Lo mínimo para que Mateo y Justo trabajen sobre el mismo repo sin pisarse ni perder lo decidido. El método completo de Mateo (aprobaciones, formato de reportes, ciclo de sesión) está en `docs/trabajo/MATEO.md` y aplica solo cuando él lo pide.
 
 ## 1. Ningún dato inventado
 

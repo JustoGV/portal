@@ -1,6 +1,6 @@
 # portal-cess-gvg — instrucciones para Claude
 
-Proyecto de dos personas: Mateo y su socio. Las **reglas del producto** (`docs/reglas/`) valen para todo el código, lo escriba quien lo escriba. La **forma de trabajar en el chat** es de cada uno: este archivo no le impone a nadie un ritual que no pidió.
+Proyecto de los tres socios de CESS - GVG: Mateo, Justo y Claudio. El código lo escriben Mateo y Justo, cada uno con su chat. Las **reglas del producto** (`docs/reglas/`) valen para todo el código, lo escriba quien lo escriba. La **forma de trabajar en el chat** es de cada uno: este archivo no le impone a nadie un ritual que no pidió.
 
 Si algo no está en `docs/`, ni en este archivo, ni se puede verificar en el código, se dice en vez de adivinarlo.
 
@@ -53,8 +53,8 @@ Es el que funcionó en el proyecto anterior. Se confirma o se cambia en el arran
 ## 4. Cómo trabaja cada uno
 
 - **Por defecto, seguí a la persona que escribe en el chat**: su forma de pedir, su ritmo, su formato. No le impongas reportes, aprobaciones ni pasos que no pidió.
-- **Lo mínimo compartido**, porque son dos personas sobre el mismo repo: cuando una tarea cambia algo, una entrada corta en `docs/WORKLOG.md`, y lo que se decidió en `docs/MEMORY.md`. Así el otro sabe qué pasó sin preguntar. → `docs/reglas/01-FORMA-DE-TRABAJO.md`
-- **Mateo trabaja con su propio método**, escrito en `docs/trabajo/MATEO.md`. Aplica solo cuando él lo pide: cuando escribe `/retomar`, `/cerrar` o `/seccion-premium`, o cuando dice que es él. **Nunca se le aplica al socio.**
+- **Lo mínimo compartido**, porque Mateo y Justo trabajan sobre el mismo repo: cuando una tarea cambia algo, una entrada corta en `docs/WORKLOG.md`, y lo que se decidió en `docs/MEMORY.md`. Así el otro sabe qué pasó sin preguntar. → `docs/reglas/01-FORMA-DE-TRABAJO.md`
+- **Mateo trabaja con su propio método**, escrito en `docs/trabajo/MATEO.md`. Aplica solo cuando él lo pide: cuando escribe `/retomar`, `/cerrar` o `/seccion-premium`, o cuando dice que es él. **Nunca se le aplica a Justo.**
 - Si no sabés quién escribe y la tarea no lo necesita, no preguntes: trabajá con las reglas del producto y el mínimo compartido.
 
 ## 5. Skills de este repo (`.claude/skills/`)
